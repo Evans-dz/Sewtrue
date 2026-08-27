@@ -26,6 +26,27 @@ are all bundled locally. There is no build step and no framework.
 | `assets/fonts/` | Bodoni Moda + Jost, subset to latin |
 | `assets/photos/` | Empty. Real product photography goes here |
 
+## Motion
+
+Three interactions on top of the base scroll grammar:
+
+- **The bow turns** (hero). Tails, loops and knot are three SVG layers on
+  separate Z planes inside one perspective. Rotating the stack parallaxes them
+  against each other, so it reads as turning a real bow rather than skewing a
+  picture. Driven by pointer position and by scroll through the hero.
+- **The door** (`#door-seq`). One sticky stage, five real bows on the same door,
+  crossfaded and pushed into as you scroll, captioned with size and price.
+  *Caveat: her five shots were taken from slightly different camera distances,
+  so this reads as atmosphere, not as a true scale comparison. If she reshoots
+  the five from one fixed tripod position it becomes a real size demo.* The
+  accurate comparison lives in the Sizes section — line drawings at true
+  relative scale, plus the spec table.
+- **The spool** (header). The scroll progress line is thread coming off a spool
+  that rotates as it unwinds and rewinds when you scroll back up.
+
+All three are native CSS/JS — no library beyond the GSAP/Lenis already vendored
+— and all three switch off under `prefers-reduced-motion`.
+
 ## The design
 
 Black, bone and grain — **the only colour on the site is the fabric.** The
@@ -94,18 +115,43 @@ Everything below is invented or estimated. Search the source for `TODO(client)`.
 - Shipping policy, pickup, turnaround times
 - Sales tax note
 
-**THE LOGO — the one blocking item.** The header loads `assets/logo.svg`, then
-falls back to `assets/logo.png`, then to a clearly-marked stand-in drawing. That
-stand-in is NOT the brand mark and must not ship. Drop her real file in as
-`assets/logo.svg` (preferred) or `assets/logo.png` and it appears with no code
-change. `assets/favicon.svg` needs replacing from the same file.
+**The logo is hers.** `assets/logo.png` is her supplied artwork, un-matted from
+the white JPEG background into a transparent PNG and trimmed to the artwork —
+the mark itself is untouched. `logo@2x.png`, `favicon.png`, `favicon.ico` and
+`apple-touch-icon.png` are all generated from that same file.
+
+TODO(client): the favicon uses the sewing-machine portion of the lockup, because
+the full lockup is unreadable at 32px. Confirm that is acceptable, or supply a
+dedicated icon. Also worth asking whether a **horizontal** version of the lockup
+exists — the stacked one works but sets the header height.
 
 There is deliberately no other sewing-machine illustration anywhere on the site
 — the only mark should be hers.
 
-**Photography** — `assets/photos/` is empty because macOS blocks reading
-`~/Library/Messages/Attachments`. Export the originals into a folder and they
-can be wired in.
+**Photography is in.** All 21 of her door photographs are wired to products in
+`js/catalog.js` (`photo: '0731'` → `assets/photos/bow-0731.jpg` plus a 560px
+variant for the grid). Originals were 5712×4284 with EXIF rotation; the web
+copies have the rotation baked in and the tag cleared, so they cannot come out
+sideways in any pipeline.
+
+**SIZES TO CONFIRM.** Sizes came from her own size-labelled collages, and the
+counts match her photos exactly — 4 mini, 4 regular, 6 regular double, 2 mega,
+5 mega double. All eleven doubles are certain, because each fabric pairing
+appears in only one size. Five singles are a judgement call, because the same
+cloth was made in more than one size and the camera distance changes between
+shots. They are marked `CHECK` in the catalog:
+
+| Photo | Assigned | Price |
+|---|---|---|
+| bow-0724 (cider check) | Mini | $25 |
+| bow-0729 (cider check) | Regular | $35 |
+| bow-0727 (patchwork) | Mini | $25 |
+| bow-0732 (patchwork) | Regular | $35 |
+| bow-0728 (patchwork) | Mega | $65 |
+
+Five seconds each to confirm; a wrong call is a wrong price.
+
+**Stock** is set to one of one on every piece. Correct any that were made in a run.
 
 **Measurements** (`js/catalog.js` → `SIZES`) — the widths and drops are read off
 the door photos, not a tape measure. Prices are hers and are correct:

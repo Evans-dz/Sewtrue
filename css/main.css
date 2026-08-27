@@ -480,3 +480,75 @@ body.drawer-open .basket{transform:none}
 .about-block .display{margin-bottom:.5em}
 .about-block .lede{margin-bottom:1em}
 .about-block .btn{margin-top:1.4em}
+
+/* ===================== revision 3: motion ================================ */
+
+/* -- her logo ------------------------------------------------------------- */
+.brand-logo{height:auto;width:90px}
+.foot-logo{width:150px;height:auto;display:block;margin-bottom:.5em}
+
+/* -- Idea 9: the spool unwinds as you scroll ------------------------------ */
+.head-progress{height:1px;overflow:visible}
+.spool{position:absolute;top:50%;left:0;width:26px;height:26px;color:var(--ink);
+  transform:translate(-50%,-50%);opacity:0;transition:opacity .4s}
+.head-progress.live .spool{opacity:1}
+.spool-spin{transform-box:fill-box;transform-origin:center}
+
+/* -- Idea 1: the bow turns ------------------------------------------------ */
+.plate{perspective:1000px}
+.bow3d{position:relative;width:100%;aspect-ratio:400/470;margin:6px 0;
+  transform-style:preserve-3d;will-change:transform}
+.b3{position:absolute;inset:0;width:100%;height:100%}
+.b3-tails{transform:translateZ(-13px)}
+.b3-loops{transform:translateZ(6px)}
+.b3-knot{transform:translateZ(17px)}
+.b3-sheen{position:absolute;inset:0;pointer-events:none;transform:translateZ(22px);
+  background:linear-gradient(105deg,transparent 34%,rgba(255,252,246,.42) 50%,transparent 66%);
+  opacity:0;mix-blend-mode:soft-light}
+
+/* -- Idea 2: the door ----------------------------------------------------- */
+.door-seq{height:440vh;position:relative;background:var(--noir)}
+.door-stage{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
+.door-frame{position:relative;width:min(78vw,calc(72svh * 0.75));aspect-ratio:3/4;
+  will-change:transform;box-shadow:0 40px 90px -50px rgba(0,0,0,.9)}
+.door-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+.door-cap{position:absolute;left:var(--pad);bottom:clamp(26px,6vh,64px);color:var(--bone);
+  text-shadow:0 2px 26px rgba(0,0,0,.7)}
+.door-eyebrow{font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--bone-dim);margin:0 0 .5em}
+.door-size{font-size:clamp(2rem,5vw,3.6rem);margin:0;line-height:1}
+.door-meta{font-size:.92rem;color:#cfc6b7;margin:.4em 0 0;font-variant-numeric:tabular-nums}
+.door-ticks{position:absolute;right:var(--pad);top:50%;transform:translateY(-50%);
+  list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.door-ticks li{width:7px;height:7px;border-radius:50%;background:rgba(236,228,214,.28);
+  transition:background .3s,transform .3s}
+.door-ticks li.on{background:var(--bone);transform:scale(1.5)}
+
+/* photographs in the shop */
+.card-art img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;display:block;
+  transition:transform .5s var(--ease)}
+.card:hover .card-art img{transform:scale(1.03)}
+.card-art{overflow:hidden}
+.qv-art img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
+.line-thumb img{width:64px;height:80px;object-fit:cover}
+
+@media (max-width:760px){
+  .brand-logo{width:70px}
+  .door-seq{height:380vh}
+  .door-frame{width:min(84vw,calc(64svh * 0.75))}
+  .door-ticks{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .door-seq{height:auto}
+  .door-stage{position:static;height:auto;padding:60px 0}
+  .b3-sheen{display:none}
+}
+
+/* the door sequence degrades to a plain stack when motion is reduced */
+@media (prefers-reduced-motion:reduce){
+  .door-frame{aspect-ratio:auto;width:min(88vw,420px);transform:none!important;box-shadow:none}
+  .door-shot{position:static;opacity:1!important;height:auto;margin-bottom:14px}
+  .door-cap,.door-ticks{display:none}
+  .bow3d{transform:none!important}
+}
+.bow3d{transition:transform .34s cubic-bezier(.22,.61,.36,1)}

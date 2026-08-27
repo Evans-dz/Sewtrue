@@ -9,7 +9,8 @@
 <meta property="og:title" content="Sew True — handmade bows">
 <meta property="og:description" content="Handmade fabric door bows, sewn one at a time. Ready to ship, plus seasonal drops.">
 <meta property="og:type" content="website">
-<link rel="icon" href="assets/favicon.svg">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/bodoni-moda-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jost-latin-400-normal.woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css">
@@ -56,6 +57,11 @@
     <rect width="44" height="44" fill="#f7f1e7"/>
     <rect width="22" height="44" fill="#b41d26" fill-opacity=".68"/>
     <rect width="44" height="22" fill="#b41d26" fill-opacity=".68"/>
+  </pattern>
+  <pattern id="buffalo-red" width="86" height="86" patternUnits="userSpaceOnUse">
+    <rect width="86" height="86" fill="#f8f2e8"/>
+    <rect width="43" height="86" fill="#c31f27" fill-opacity=".72"/>
+    <rect width="86" height="43" fill="#c31f27" fill-opacity=".72"/>
   </pattern>
   <pattern id="gingham-tan" width="34" height="34" patternUnits="userSpaceOnUse">
     <rect width="34" height="34" fill="#e6d7b6"/>
@@ -222,12 +228,13 @@
 <div class="grain" aria-hidden="true"></div>
 
 <header class="head" id="head">
-  <!-- The real logo goes in assets/logo.svg (or .png). Until that file exists
-       the stand-in below shows; it is NOT the brand mark and must be replaced. -->
+  <!-- Her own logo, un-matted from the supplied JPEG to a transparent PNG and
+       trimmed to the artwork. Nothing about the mark itself was altered. The
+       stand-in only appears if the file is missing. -->
   <a class="brand" href="#top" aria-label="Sew True — home">
-    <img class="brand-logo" src="assets/logo.svg" alt="Sew True"
-         onerror="if(this.dataset.t!=='png'){this.dataset.t='png';this.src='assets/logo.png';}
-                  else{this.remove();document.getElementById('brand-standin').hidden=false;}">
+    <img class="brand-logo" src="assets/logo.png" srcset="assets/logo.png 373w, assets/logo@2x.png 746w"
+         sizes="90px" alt="Sew True" width="373" height="286"
+         onerror="this.remove();document.getElementById('brand-standin').hidden=false;">
     <span class="brand-standin" id="brand-standin" hidden>
       <svg class="brand-mark" viewBox="0 0 300 190" aria-hidden="true">
         <g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
@@ -260,7 +267,18 @@
     </svg>
     <span class="basket-count is-empty">0</span>
   </button>
-  <div class="head-progress" aria-hidden="true"><i></i></div>
+  <div class="head-progress" aria-hidden="true">
+    <i></i>
+    <svg class="spool" viewBox="0 0 34 34" aria-hidden="true">
+      <g class="spool-spin">
+        <circle cx="17" cy="17" r="12.5" fill="var(--paper)" stroke="currentColor" stroke-width="1.6"/>
+        <circle cx="17" cy="17" r="8.4" fill="currentColor" opacity=".16"/>
+        <circle cx="17" cy="17" r="3.1" fill="var(--paper)" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M17 4.5v4M17 25.5v4M4.5 17h4M25.5 17h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M8.2 8.2l2.8 2.8M23 23l2.8 2.8M25.8 8.2L23 11M11 23l-2.8 2.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".55"/>
+      </g>
+    </svg>
+  </div>
 </header>
 
 <main id="top">
@@ -286,18 +304,37 @@
       <div class="plate">
         <div class="plate-head">
           <span>Sew True</span>
-          <span>Picnic Gingham</span>
+          <span>Picnic Check</span>
         </div>
-        <svg class="plate-bow" viewBox="0 0 400 470" aria-hidden="true"
-             style="--fab-a:url(#gingham-red);--fab-b:url(#gingham-red);--strap:none">
-          <use href="#bow"/>
-        </svg>
+        <!-- Idea 1: the bow turns. Tails, loops and knot live on separate Z
+             planes inside one perspective, so rotating the stack parallaxes
+             exactly like turning a real bow in your hand. -->
+        <div class="bow3d" id="bow3d" aria-hidden="true"
+             style="--fab-a:url(#buffalo-red);--fab-b:url(#buffalo-red)">
+          <svg class="b3 b3-tails" viewBox="0 0 400 470">
+            <use href="#tail-l" class="fab-b"/><use href="#tail-l" fill="url(#foldT)"/><use href="#tail-l" class="seam"/>
+            <use href="#tail-r" class="fab-b"/><use href="#tail-r" fill="url(#foldT)"/><use href="#tail-r" class="seam"/>
+            <use href="#tail-l" class="stitch" transform="translate(170 330) scale(.87) translate(-170 -330)"/>
+            <use href="#tail-r" class="stitch" transform="translate(230 330) scale(.87) translate(-230 -330)"/>
+          </svg>
+          <svg class="b3 b3-loops" viewBox="0 0 400 470">
+            <use href="#loop-l" class="fab-b"/><use href="#loop-l" fill="url(#foldL)"/>
+            <use href="#loop-r" class="fab-b"/><use href="#loop-r" fill="url(#foldL)"/>
+            <use href="#loop-l" class="seam"/><use href="#loop-r" class="seam"/>
+            <use href="#loop-l" class="stitch" transform="translate(110 175) scale(.9) translate(-110 -175)"/>
+            <use href="#loop-r" class="stitch" transform="translate(290 175) scale(.9) translate(-290 -175)"/>
+          </svg>
+          <svg class="b3 b3-knot" viewBox="0 0 400 470">
+            <use href="#knot" class="fab-b"/><use href="#knot" fill="url(#foldK)"/><use href="#knot" class="seam"/>
+          </svg>
+          <span class="b3-sheen"></span>
+        </div>
         <div class="plate-rule" aria-hidden="true"></div>
         <div class="plate-foot">
           <span>Regular</span><span>12&#8243; across</span><span>$35</span>
         </div>
       </div>
-      <figcaption class="plate-cap">Every bow on this site is drawn from its own cloth.</figcaption>
+      <figcaption class="plate-cap">The cover is drawn. Everything below it is photographed.</figcaption>
     </figure>
   </div>
 
@@ -339,6 +376,21 @@
     <path d="M0 100 C240 20, 420 150, 660 70 C880 0, 1000 96, 1200 40" fill="none"
           stroke="currentColor" stroke-width="2" stroke-dasharray="9 7" stroke-linecap="round"/>
   </svg>
+</section>
+
+<!-- ===================== THE DOOR ===================== -->
+<!-- Idea 2: one sticky stage, five real bows on the same door, crossfaded and
+     pushed into as you scroll. -->
+<section class="door-seq" id="door-seq" aria-label="Bows on the door">
+  <div class="door-stage">
+    <div class="door-frame" id="door-frame"></div>
+    <div class="door-cap">
+      <p class="door-eyebrow">On a real door</p>
+      <p class="door-size display" id="door-size">Mini</p>
+      <p class="door-meta" id="door-meta">8&#8243; across · $25</p>
+    </div>
+    <ol class="door-ticks" id="door-ticks" aria-hidden="true"></ol>
+  </div>
 </section>
 
 <!-- ===================== SHOP ===================== -->
@@ -499,7 +551,8 @@
 
   <div class="foot-grid">
     <div>
-      <p class="foot-word">sew true</p>
+      <img class="foot-logo" src="assets/logo.png" srcset="assets/logo.png 373w, assets/logo@2x.png 746w"
+           sizes="150px" alt="Sew True" width="373" height="286">
       <p class="note" data-site="tagline"></p>
     </div>
     <nav aria-label="Footer">

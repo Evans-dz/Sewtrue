@@ -18,23 +18,24 @@
      ====================================================================== */
   window.bowMarkup = function (p, height, opts) {
     const o = opts || {};
-    if (p.photo) {
-      return `<img src="${p.photo}" alt="${p.name}" loading="lazy" decoding="async"
-              onerror="window.bowFallback(this,'${p.sku}')">`;
+    if (p.photo && !o.drawn) {
+      const b = 'assets/photos/bow-' + p.photo;
+      return `<img src="${b}-560.jpg" srcset="${b}-560.jpg 420w, ${b}.jpg 900w"
+        sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}" width="900" height="1200"
+        alt="${p.name} — ${SIZES[p.size].label}" loading="lazy" decoding="async"
+        onerror="window.bowFallback(this,'${p.sku}')">`;
     }
     const size = SIZES[p.size];
     const a = fabric(p.fabrics[0]).pattern;
     const b = fabric(p.fabrics[1] || p.fabrics[0]).pattern;
     const style = `--fab-a:url(#${a});--fab-b:url(#${b});` +
-                  `--back:${size.layers === 2 ? 'block' : 'none'};` +
                   `--strap:${o.strap === false ? 'none' : 'block'}`;
     return `<svg class="bow" viewBox="0 0 400 470"${height ? ' height="' + height + '"' : ''}
             style="${style}" role="img" aria-label="${p.name}"><use href="#${size.layers === 2 ? 'bow2' : 'bow'}"/></svg>`;
   };
   window.bowFallback = function (img, sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
-    const clone = Object.assign({}, p); delete clone.photo;
-    img.outerHTML = window.bowMarkup(clone);
+    img.outerHTML = window.bowMarkup(p, null, { drawn: true });
   };
 
   /* ======================================================================
@@ -70,10 +71,10 @@
     const s = SIZES[p.size];
     const fabs = p.fabrics.slice().reverse().map((f) => fabric(f).name).join(' over ');
     const sold = p.stock < 1;
-    const tag = sold ? 'Sold out' : (p.tag || (p.stock <= 2 ? p.stock + ' left' : ''));
+    const stockNote = sold ? 'Sold' : (p.stock === 1 ? 'One of one' : p.stock + ' made');
     return `<article class="card${sold ? ' sold' : ''}" data-sku="${p.sku}" data-size="${p.size}">
-      ${tag ? `<span class="tag">${tag}</span>` : ''}
-      <div class="card-top"><span>No. ${p.no}</span><span>${s.label}</span></div>
+      ${sold ? '<span class="tag">Sold out</span>' : ''}
+      <div class="card-top"><span>${s.label}</span><span>${stockNote}</span></div>
       <button class="card-open" type="button" data-qv="${p.sku}" aria-label="Look closer at ${p.name}">
         <span class="card-art"><span class="card-door" aria-hidden="true"></span>${window.bowMarkup(p, null, { strap: false })}</span>
         <span class="card-bot">
@@ -107,8 +108,13 @@
     }
   }
 
+  const NUMBER = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight',
+    'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen'];
+
   function renderQuilt() {
     const q = $('#quilt'); if (!q) return;
+    const head = document.querySelector('#fabrics .wipe');
+    if (head) head.textContent = (NUMBER[FABRICS.length] || FABRICS.length) + ' fabrics in rotation.';
     q.innerHTML = FABRICS.map((f) => {
       const n = PRODUCTS.filter((p) => p.fabrics.indexOf(f.id) > -1 && p.stock > 0).length;
       return `<button class="swatch" type="button" data-fab="${f.id}"
@@ -137,6 +143,24 @@
       return `<div class="scale-item"><svg viewBox="0 0 400 470" height="${h}" aria-hidden="true">
         <use href="#bow-line"/></svg><b>${s.label}</b></div>`;
     }).join('');
+  }
+
+  /* ======================================================================
+     THE DOOR — five real bows on one door, crossfaded by scroll
+     ====================================================================== */
+  function buildDoor() {
+    const frame = $('#door-frame'); if (!frame) return null;
+    const shots = Object.keys(SIZES)
+      .sort((a, b) => SIZES[a].order - SIZES[b].order)
+      .map((k) => ({ key: k, size: SIZES[k], photo: SIZE_SHOTS[k] }))
+      .filter((x) => x.photo);
+    frame.innerHTML = shots.map((x, i) =>
+      `<img class="door-shot" data-i="${i}" src="assets/photos/bow-${x.photo}.jpg"
+        alt="A ${x.size.label.toLowerCase()} bow hanging on a front door"
+        ${i ? 'loading="lazy"' : ''} decoding="async">`).join('');
+    const ticks = $('#door-ticks');
+    if (ticks) ticks.innerHTML = shots.map(() => '<li></li>').join('');
+    return shots;
   }
 
   /* ======================================================================
@@ -249,8 +273,8 @@
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
     const s = SIZES[p.size];
     qvLast = document.activeElement;
-    $('#qv-art').innerHTML = window.bowMarkup(p);
-    $('#qv-no').textContent = 'Pattern No. ' + p.no + ' · ' + p.sku;
+    $('#qv-art').innerHTML = window.bowMarkup(p, null, { sizes: '(max-width:1000px) 88vw, 400px' });
+    $('#qv-no').textContent = p.sku + ' · ' + SIZES[p.size].label;
     $('#qv-name').textContent = p.name;
     $('#qv-price').textContent = money(s.price);
     const front = p.fabrics[p.fabrics.length - 1];
@@ -387,12 +411,78 @@
       scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: .8 },
     });
 
-    /* header progress */
+    /* ---- Idea 9: the spool unwinds ------------------------------------ */
     const bar = $('.head-progress i');
+    const rail = $('.head-progress');
+    const spool = $('.spool');
+    const spin = $('.spool-spin');
     if (bar) ScrollTrigger.create({
       start: 0, end: 'max',
-      onUpdate: (self) => { bar.style.width = (self.progress * 100).toFixed(2) + '%'; },
+      onUpdate: (self) => {
+        const pct = (self.progress * 100).toFixed(2);
+        bar.style.width = pct + '%';
+        if (spool) spool.style.left = pct + '%';
+        if (spin) spin.style.transform = 'rotate(' + (self.progress * 1440).toFixed(1) + 'deg)';
+        if (rail) rail.classList.toggle('live', self.progress > 0.004);
+      },
     });
+
+    /* ---- Idea 1: turn the bow ----------------------------------------- */
+    const bow = $('#bow3d');
+    const hero = $('.hero');
+    if (bow && hero) {
+      const sheen = bow.querySelector('.b3-sheen');
+      let mx = 0, my = 0, sy = 0;
+      const set = () => {
+        const ry = mx * 15 + sy * 9;
+        const rx = my * -8;
+        bow.style.transform = `rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg)`;
+        if (sheen) {
+          sheen.style.opacity = Math.min(.85, Math.abs(ry) / 20).toFixed(3);
+          sheen.style.transform = `translateZ(22px) translateX(${(-ry * 1.7).toFixed(1)}%)`;
+        }
+      };
+      hero.addEventListener('pointermove', (e) => {
+        if (e.pointerType === 'touch') return;
+        const r = hero.getBoundingClientRect();
+        mx = ((e.clientX - r.left) / r.width) * 2 - 1;
+        my = ((e.clientY - r.top) / r.height) * 2 - 1;
+        set();
+      });
+      hero.addEventListener('pointerleave', () => { mx = 0; my = 0; set(); });
+      ScrollTrigger.create({
+        trigger: '.hero', start: 'top top', end: 'bottom top', scrub: .5,
+        onUpdate: (self) => { sy = self.progress; set(); },
+      });
+      set();
+    }
+
+    /* ---- Idea 2: the door --------------------------------------------- */
+    const shots = window.__doorShots;
+    if (shots && shots.length) {
+      const imgs = $$('.door-shot');
+      const ticks = $$('#door-ticks li');
+      const frame = $('#door-frame');
+      const n = shots.length;
+      let shown = -1;
+      const apply = (prog) => {
+        const t = prog * (n - 1);
+        imgs.forEach((im, i) => { im.style.opacity = Math.max(0, 1 - Math.abs(t - i)).toFixed(3); });
+        frame.style.transform = 'scale(' + (1 + prog * 0.11).toFixed(4) + ')';
+        const idx = Math.min(n - 1, Math.max(0, Math.round(t)));
+        if (idx === shown) return;
+        shown = idx;
+        ticks.forEach((li, i) => li.classList.toggle('on', i === idx));
+        const sz = shots[idx].size;
+        $('#door-size').textContent = sz.label;
+        $('#door-meta').textContent = sz.w + '\u2033 across · ' + money(sz.price);
+      };
+      apply(0);
+      ScrollTrigger.create({
+        trigger: '#door-seq', start: 'top top', end: 'bottom bottom', scrub: true,
+        onUpdate: (self) => apply(self.progress),
+      });
+    }
   }
 
   /* ======================================================================
@@ -444,6 +534,7 @@
     renderSizes();
     renderDrops();
     wireNotify();
+    window.__doorShots = buildDoor();
     motion();
   });
 })();
