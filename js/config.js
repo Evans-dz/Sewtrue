@@ -8,64 +8,52 @@ const SITE = {
   name: 'Sew True',
   tagline: 'Bows sewn true, one at a time.',
 
-  /* TODO(client): confirm all five of these. */
-  city: 'St. George',              // TODO
-  state: 'Utah',                   // TODO
+  /* No location anywhere on this site by design — these ship everywhere. */
+
+  /* TODO(client): confirm these three. */
   email: 'hello@sewtrue.co',       // TODO
   instagram: 'sewtrue',            // TODO — handle without the @
   instagramUrl: 'https://instagram.com/sewtrue', // TODO
 
   /* TODO(client): confirm fulfilment copy. */
-  shipping: 'Flat $6 shipping in the US. Free local pickup in ' + 'St. George.', // TODO
-  turnaround: 'Ready-to-ship bows post within 2 business days.',                 // TODO
+  shipping: 'Flat $6 shipping anywhere in the US. Local pickup can be arranged.', // TODO
+  turnaround: 'Ready-to-ship bows post within 2 business days.',                  // TODO
 
   credit: { label: 'Digital experience by EZHD', url: 'https://ez-hd.co' },
 };
 
 /* ---------------------------------------------------------------------------
-   DROP CALENDAR
-   The countdown always targets the next drop whose `opens` is in the future,
-   so this list maintains itself — just keep adding rows.
-   Dates are LOCAL time, ISO-ish: 'YYYY-MM-DDTHH:MM'.
-   TODO(client): every date below is a placeholder. Confirm real drop dates.
+   DROPS
+
+   ONLY ONE DROP IS EVER ON THE SITE. This list holds drops that have been
+   announced — the page shows the next one whose `opens` is still in the
+   future and nothing else. No calendar of what is coming later.
+
+   When that date passes and nothing else is announced, the section flips
+   itself to the "new designs in progress" state. To announce the next drop,
+   add a row here. To take the countdown down early, delete the row.
+
+   Dates are LOCAL time: 'YYYY-MM-DDTHH:MM'.
+   TODO(client): the date below is a placeholder. Confirm the real one.
+
+   The cadence, for reference — Spring, Summer and Fall plus Valentine's,
+   Fourth of July, Halloween and Christmas. Do not paste them all in here;
+   add each one only when it is ready to be announced.
 ------------------------------------------------------------------------------ */
 const DROPS = [
   {
     id: 'fall-26', name: 'Fall', year: 2026, opens: '2026-09-18T19:00',
     blurb: 'Rust, wheat and flannel. Warm checks for a cooling porch.',
-    pieces: 24, fabrics: ['check-cider', 'dot-wheat', 'gingham-tan', 'star-plaid'],
-  },
-  {
-    id: 'halloween-26', name: 'Halloween', year: 2026, opens: '2026-10-09T19:00',
-    blurb: 'Black, bone and a little candy stripe. Small batch, one weekend only.',
-    pieces: 16, fabrics: ['bandana-green', 'check-cider', 'star-plaid'],
-  },
-  {
-    id: 'christmas-26', name: 'Christmas', year: 2026, opens: '2026-11-13T19:00',
-    blurb: 'The big one. Red gingham, green paisley, and the mega doubles.',
-    pieces: 40, fabrics: ['gingham-red', 'bandana-green', 'patchwork', 'bandana-red'],
-  },
-  {
-    id: 'valentines-27', name: "Valentine's", year: 2027, opens: '2027-01-15T19:00',
-    blurb: 'Everything sweet and nothing loud.',
-    pieces: 18, fabrics: ['gingham-red', 'pincheck-cream', 'bandana-red'],
-  },
-  {
-    id: 'spring-27', name: 'Spring', year: 2027, opens: '2027-03-05T19:00',
-    blurb: 'Chambray, cream and the first light checks of the year.',
-    pieces: 24, fabrics: ['chambray', 'pincheck-cream', 'gingham-tan'],
-  },
-  {
-    id: 'summer-27', name: 'Summer', year: 2027, opens: '2027-05-14T19:00',
-    blurb: 'Bandana season.',
-    pieces: 24, fabrics: ['bandana-red', 'bandana-navy', 'chambray'],
-  },
-  {
-    id: 'july4-27', name: 'Fourth of July', year: 2027, opens: '2027-06-11T19:00',
-    blurb: 'Stars, stripes, patchwork. Ships before the parade.',
-    pieces: 30, fabrics: ['star-plaid', 'patchwork', 'border-indigo', 'gingham-red'],
+    pieces: 24,
   },
 ];
+
+/* Copy for the between-drops state. */
+const BETWEEN_DROPS = {
+  label: 'On the machine',
+  title: 'New designs in progress',
+  note: 'The next drop is being cut and sewn. It goes up the moment it is finished.',
+};
 
 /* ---------------------------------------------------------------------------
    CHECKOUT
@@ -92,4 +80,4 @@ const NOTIFY = {
   successNote: "You're on the list. We'll email the morning it opens.",
 };
 
-window.SITE = SITE; window.DROPS = DROPS; window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;
+window.SITE = SITE; window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS; window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;

@@ -41,8 +41,7 @@
      SITE FACTS
      ====================================================================== */
   function fillSite() {
-    const cityline = SITE.city + ', ' + SITE.state;
-    $$('[data-site="cityline"]').forEach((el) => { el.textContent = cityline; });
+    $$('[data-site="tagline"]').forEach((el) => { el.textContent = SITE.tagline; });
     $$('[data-site="shipping"]').forEach((el) => { el.textContent = SITE.shipping; });
     $$('[data-site="turnaround"]').forEach((el) => { el.textContent = SITE.turnaround; });
     $$('[data-site="taxnote"]').forEach((el) => { el.textContent = CHECKOUT.taxNote; });
@@ -50,11 +49,6 @@
     $$('[data-site="mail-link"]').forEach((el) => { el.href = 'mailto:' + SITE.email; });
     $$('[data-site="credit"]').forEach((el) => { el.textContent = SITE.credit.label; el.href = SITE.credit.url; });
     const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
-    const sw = $('#sweat-blurb'); if (sw) sw.textContent = SWEATSHIRTS.blurb;
-    const sm = $('#sweat-meta');
-    if (sm) sm.textContent = SWEATSHIRTS.live
-      ? money(SWEATSHIRTS.price) + ' · ' + SWEATSHIRTS.sizes.join(' · ')
-      : 'Sizes ' + SWEATSHIRTS.sizes.join(', ') + ' · ' + money(SWEATSHIRTS.price) + ' · not live yet';
     const note = $('#basket-mode-note');
     if (note) note.textContent = CHECKOUT.mode === 'stripe'
       ? 'Card payment, secured by Stripe.'
@@ -158,30 +152,28 @@
   const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase();
 
   function renderDrops() {
-    const list = $('#drop-list');
     const next = nextDrop();
-    if (list) list.innerHTML = DROPS.map((d) => {
-      const dt = toDate(d.opens);
-      const past = dt.getTime() < Date.now();
-      const isNext = next && next.id === d.id;
-      return `<li class="drop-row${isNext ? ' is-next' : ''}${past ? ' is-past' : ''}">
-        <span class="drop-when">${dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-        <div><h3 class="drop-name">${d.name} ${d.year}</h3><p class="drop-blurb">${d.blurb}</p></div>
-        <span class="drop-pieces">${past ? 'Closed' : d.pieces + ' pieces'}</span>
-      </li>`;
-    }).join('');
+    const card = $('#countdown-card');
 
+    /* Between drops: no date, no clock, just what is actually happening. */
     if (!next) {
-      $('#cd-name').textContent = 'To be announced';
-      $('#cd-when').textContent = 'The calendar is between drops — join the list and you will hear first.';
-      $('#countdown-card').classList.add('no-drop');
-      const chip = $('#hero-drop-chip'); if (chip) chip.textContent = 'coming';
+      card.classList.add('no-drop');
+      $('#cd-label').textContent = BETWEEN_DROPS.label;
+      $('#cd-name').textContent = BETWEEN_DROPS.title;
+      $('#cd-when').textContent = BETWEEN_DROPS.note;
+      const chip = $('#hero-drop-chip');
+      if (chip) chip.textContent = 'in progress';
+      const nl = $('#notify-form label');
+      if (nl) nl.textContent = 'Hear about the next one first';
       return;
     }
+
+    card.classList.remove('no-drop');
     const dt = toDate(next.opens);
+    $('#cd-label').textContent = 'Next drop';
     $('#cd-name').textContent = next.name + ' ' + next.year;
     $('#cd-when').textContent = fmtDate(dt) + ' at ' + fmtTime(dt);
-    $('#cd-blurb').textContent = next.blurb;
+    $('#cd-blurb').textContent = next.blurb + (next.pieces ? '  ' + next.pieces + ' pieces, and that is the whole run.' : '');
     tickClock(dt);
     setInterval(() => tickClock(dt), 1000);
   }

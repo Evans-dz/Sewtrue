@@ -71,10 +71,16 @@ Same pattern for drop signups via `NOTIFY.endpoint`.
 
 ## Drops
 
-`DROPS` in `js/config.js` is a plain list. The countdown always targets the next
-row whose `opens` is in the future, so the calendar maintains itself — just keep
-adding rows. Spring, Summer and Fall plus Valentine's, Fourth of July, Halloween
-and Christmas are all in there.
+**Only one drop is ever on the site.** `DROPS` in `js/config.js` holds drops that
+have been *announced*; the page renders the next one whose `opens` is still in
+the future and nothing else. There is no calendar of what is coming later.
+
+When that date passes and nothing else is announced, the section flips itself to
+the "new designs in progress" state — copy for it lives in `BETWEEN_DROPS`. To
+announce the next drop, add a row. To pull the countdown early, delete the row.
+
+The cadence is Spring, Summer and Fall plus Valentine's, Fourth of July,
+Halloween and Christmas — but they go in one at a time, when they are ready.
 
 ---
 
@@ -88,10 +94,14 @@ Everything below is invented or estimated. Search the source for `TODO(client)`.
 - Shipping policy, pickup, turnaround times
 - Sales tax note
 
-**The logo** — `assets/favicon.svg` and the inline header mark are our own
-line drawing of a sewing machine, in the spirit of hers. Replace with her real
-file (SVG or transparent PNG preferred). The wordmark is set in Jost and is an
-approximation of her lettering.
+**THE LOGO — the one blocking item.** The header loads `assets/logo.svg`, then
+falls back to `assets/logo.png`, then to a clearly-marked stand-in drawing. That
+stand-in is NOT the brand mark and must not ship. Drop her real file in as
+`assets/logo.svg` (preferred) or `assets/logo.png` and it appears with no code
+change. `assets/favicon.svg` needs replacing from the same file.
+
+There is deliberately no other sewing-machine illustration anywhere on the site
+— the only mark should be hers.
 
 **Photography** — `assets/photos/` is empty because macOS blocks reading
 `~/Library/Messages/Attachments`. Export the originals into a folder and they
@@ -110,7 +120,11 @@ real; the twenty-one specific bows are a plausible shop, not her inventory.
 method, colours, size run and price all need confirming; the section currently
 renders honestly as announced-but-not-live.
 
-**About copy** is generic. Needs her actual story.
+**About copy** is generic. Needs her actual story, and the section wants one
+real photograph — her machine, her table, her hands working.
+
+**No location anywhere.** These sell everywhere, so no city or state appears on
+the site by design. Don't reintroduce one.
 
 **Not built yet** — an `og.png` for link previews, and separate `/shop` and
 `/drops` routes if SEO wants them (it is one page with anchors today).
