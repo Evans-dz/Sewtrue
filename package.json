@@ -2,13 +2,14 @@
   "name": "sew-true",
   "version": "1.0.0",
   "private": true,
-  "description": "Sew True — handmade bows. Concept/production site.",
+  "description": "Sew True \u2014 handmade bows. Concept/production site.",
   "scripts": {
     "dev": "node server.js"
   },
   "type": "commonjs",
-  "dependencies": {
+  "devDependencies": {
     "@fontsource/bodoni-moda": "^5.2.5",
     "@fontsource/jost": "^5.2.5"
-  }
+  },
+  "//": "@fontsource packages are build-time only: they are the source of the woff2 files already committed in assets/fonts. The site loads nothing from node_modules."
 }
