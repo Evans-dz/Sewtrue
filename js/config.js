@@ -19,7 +19,7 @@ const SITE = {
   shipping: 'Flat $6 shipping anywhere in the US. Local pickup can be arranged.', // TODO
   turnaround: 'Ready-to-ship bows post within 2 business days.',                  // TODO
 
-  credit: { label: 'Digital experience by EZHD', url: 'https://ez-hd.co' },
+  credit: { label: 'Created and designed by EZHD', url: 'https://ez-hd.co' },
 };
 
 /* ---------------------------------------------------------------------------
