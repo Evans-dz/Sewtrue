@@ -52,10 +52,14 @@ async function listSessions(key, status) {
 
 /* "HW-REG-1,HW-REG-2" → counts, so a sweatshirt with two made can sell one
    and still be on the shelf. */
-function tally(sessions, into) {
+function tally(sessions, into, exclude) {
   for (const s of sessions) {
-    const raw = (s.metadata && s.metadata.skus) || '';
-    for (const sku of raw.split(',')) {
+    const meta = s.metadata || {};
+    /* A shopper's own unfinished session must not lock them out of the very
+       thing they are trying to buy — backing out of Stripe and trying again
+       is an ordinary thing to do. */
+    if (exclude && meta.client && meta.client === exclude) continue;
+    for (const sku of (meta.skus || '').split(',')) {
       const id = sku.trim();
       if (id) into[id] = (into[id] || 0) + 1;
     }
@@ -67,22 +71,27 @@ function tally(sessions, into) {
    against a stale reading. */
 async function readInventory(key, opts) {
   const fresh = opts && opts.fresh;
-  if (!fresh && cache.value && Date.now() - cache.at < CACHE_MS) return cache.value;
+  const exclude = opts && opts.exclude;
+  /* The cache is shared by everyone, so it can only be used when the answer
+     is the same for everyone. */
+  const cacheable = !exclude;
+  if (!fresh && cacheable && cache.value && Date.now() - cache.at < CACHE_MS) return cache.value;
 
   let value;
   try {
-    const [complete, open] = await Promise.all([
-      listSessions(key, 'complete'),
-      listSessions(key, 'open'),
-    ]);
-    value = { ok: true, sold: tally(complete, {}), held: tally(open, {}) };
+    /* Sold is read AFTER open. A session that completes between the two reads
+       then appears in both rather than in neither — held is a soft block that
+       expires, so double-counting is safe where missing it is not. */
+    const open = await listSessions(key, 'open');
+    const complete = await listSessions(key, 'complete');
+    value = { ok: true, sold: tally(complete, {}), held: tally(open, {}, exclude) };
   } catch (err) {
     /* Most likely the key is missing Checkout Sessions: Read. */
     console.error('[stock] could not read Stripe inventory:', err.status || '', err.message);
     value = { ok: false, sold: {}, held: {}, reason: 'unavailable' };
   }
 
-  cache = { at: Date.now(), value };
+  if (cacheable) cache = { at: Date.now(), value };
   return value;
 }
 
@@ -92,7 +101,8 @@ module.exports = async function handler(req, res) {
     console.error('[stock] STRIPE_SECRET_KEY is not set on this deployment');
     return res.status(200).json({ ok: false, sold: {}, held: {}, reason: 'unconfigured' });
   }
-  const inv = await readInventory(key);
+  const client = typeof req.query === 'object' && req.query ? req.query.client : null;
+  const inv = await readInventory(key, { exclude: client || null });
   inv.mode = key.indexOf('_test_') > -1 ? 'test' : 'live';
   /* Short cache at the edge too — a drop rush is a lot of people asking the
      same question in the same few seconds. */

@@ -145,11 +145,25 @@
     setTimeout(() => { const f = $('#co-name'); if (f) f.focus(); }, 60);
   }
 
+  /* Anonymous, per-browser, never leaves as anything but an opaque string.
+     Its only job is so a shopper's own unfinished Stripe session does not
+     lock them out of the piece they are trying to buy. */
+  function clientId() {
+    let id = null;
+    try { id = localStorage.getItem('sewtrue.client'); } catch (e) { /* private mode */ }
+    if (!id || !/^[a-z0-9]{6,40}$/.test(id)) {
+      id = (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 24);
+      try { localStorage.setItem('sewtrue.client', id); } catch (e) { /* fine */ }
+    }
+    return id;
+  }
+  window.SewTrueClient = clientId;
+
   function stripeCheckout() {
     const btn = $('#basket-checkout-btn'); btn.disabled = true; btn.textContent = 'Opening checkout…';
     fetch(CHECKOUT.stripeEndpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })) }),
+      body: JSON.stringify({ client: clientId(), lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })) }),
     })
       .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, status: r.status, d })))
       .then(({ ok, status, d }) => {
@@ -299,8 +313,22 @@
        replay the confirmation. */
     history.replaceState(null, '', location.pathname + location.hash);
 
-    /* Backed out at Stripe — basket untouched, just show it to them again. */
-    if (cancelled) { open(); return; }
+    /* Backed out at Stripe — basket untouched, just show it to them again.
+       And give the piece straight back to the shop rather than leaving their
+       own abandoned session sitting on a one-of-one for half an hour. */
+    if (cancelled) {
+      const sid = q.get('session_id');
+      if (sid) {
+        fetch('/api/release', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sid }),
+          keepalive: true,
+        }).then(() => { if (window.SewTrueSyncStock) window.SewTrueSyncStock(); })
+          .catch(() => { /* it expires on its own within the half hour */ });
+      }
+      open();
+      return;
+    }
 
     const session = q.get('session_id') || '';
     clear();
@@ -316,6 +344,14 @@
     if (note) note.textContent = 'Stripe has emailed your receipt. We will follow up with a ship date.';
     open();
   }
+
+  /* Back-navigating out of Stripe restores this page from the bfcache with
+     the button still disabled and reading "Opening checkout…". */
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    const btn = $('#basket-checkout-btn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Checkout'; }
+  });
 
   window.addEventListener('cart:change', render);
   document.addEventListener('DOMContentLoaded', () => {

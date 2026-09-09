@@ -20,19 +20,10 @@
      ====================================================================== */
   const priceOf = (p) => p.price;
 
-  /* Nothing is photographed yet, so the drawing is picked from the fabrics in
-     rotation. It is deterministic per SKU: the same bow always draws the same,
-     rather than reshuffling on every render. */
-  function clothFor(p) {
-    let n = 0;
-    for (let i = 0; i < p.sku.length; i++) n = (n * 31 + p.sku.charCodeAt(i)) >>> 0;
-    const a = FABRICS[n % FABRICS.length];
-    /* >>> not >> — a signed shift on a high-bit hash goes negative, and a
-       negative index here silently hands back undefined. */
-    const b = FABRICS[((n >>> 3) + 5) % FABRICS.length];
-    return [a, b];
-  }
-
+  /* Nothing is photographed yet. These are OUTLINES on purpose: a bow drawn
+     in a named print tells the customer which cloth they are buying, and on a
+     final-sale one-of-one that is a promise we cannot keep. The shape is
+     honest; the cloth is named when the piece is shot. */
   window.bowMarkup = function (p, height, opts) {
     const o = opts || {};
     if (p.photo && !o.drawn) {
@@ -43,12 +34,8 @@
         onerror="window.bowFallback(this,'${p.sku}')">`;
     }
     if (p.category === 'sweatshirts') return sweatMarkup(p);
-    const size = SIZES[p.size] || SIZES.regular;
-    const [a, b] = clothFor(p);
-    const style = `--fab-a:url(#${a.pattern});--fab-b:url(#${b.pattern});` +
-                  `--strap:${o.strap === false ? 'none' : 'block'}`;
-    return `<svg class="bow" viewBox="0 0 400 470"${height ? ' height="' + height + '"' : ''}
-      style="${style}" role="img" aria-label="${p.name}"><use href="#${size.layers === 2 ? 'bow2' : 'bow'}"/></svg>`;
+    return `<svg class="bow bow-outline" viewBox="0 0 400 470"${height ? ' height="' + height + '"' : ''}
+      role="img" aria-label="${p.name}"><use href="#bow-line"/></svg>`;
   };
   window.bowFallback = function (img, sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
@@ -282,7 +269,9 @@
 
   async function syncStock(opts) {
     try {
-      const r = await fetch('/api/stock', { cache: 'no-store' });
+      const who = window.SewTrueClient ? window.SewTrueClient() : '';
+      const r = await fetch('/api/stock' + (who ? '?client=' + encodeURIComponent(who) : ''),
+        { cache: 'no-store' });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const inv = await r.json();
       if (!inv || !inv.ok) {
@@ -298,7 +287,12 @@
         p.sold = sold >= p.made;          /* gone for good, not just held */
       });
       stockReady = true;
-      if (!opts || !opts.quiet) { renderCats(); renderShop(); }
+      if (!opts || !opts.quiet) {
+        renderCats(); renderShop();
+        /* The open drawer is looking at the same stock — redraw it too, or a
+           stepper click works off numbers that are no longer true. */
+        if (window.SewTrue && window.SewTrue.render) window.SewTrue.render();
+      }
       return true;
     } catch (err) {
       if (LOCAL) console.warn('[Sew True] /api/stock unreachable —', err.message);
@@ -309,10 +303,13 @@
   /* the basket asks for a re-read when a piece is refused at the till */
   window.SewTrueSyncStock = syncStock;
 
-  /* Someone may have bought the last one while this tab sat open. */
+  /* Someone may have bought the last one while this tab sat open. Retry
+     whether or not the first read succeeded — gating this on a successful
+     first sync meant one blip at load and the tab never checked again. */
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && stockReady) syncStock();
+    if (!document.hidden) syncStock();
   });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) syncStock(); });
 
   /* ======================================================================
      SHOP
@@ -349,9 +346,13 @@
     el.innerHTML = CATEGORIES.map((c) => {
       const n = inStock(c.id);
       const on = c.id === state.cat;
+      /* "Coming soon" means not made yet. A line that sold out has to say so,
+         or the customer is told the opposite of what happened. */
+      const made = PRODUCTS.some((p) => p.category === c.id);
+      const label = n ? n + ' ready' : (c.live && made ? 'All gone' : 'Coming soon');
       return `<button class="cat${on ? ' is-on' : ''}" type="button" role="tab"
         aria-selected="${on}" data-cat="${c.id}">${c.label}
-        <small>${c.live && n ? n + ' ready' : 'Coming soon'}</small></button>`;
+        <small>${label}</small></button>`;
     }).join('');
   }
 
@@ -397,6 +398,7 @@
     const sizes = $('#size-filters');
     const count = $('#shop-count');
     const live = cat.live && inStock(cat.id) > 0;
+    const soldOut = cat.live && !inStock(cat.id) && PRODUCTS.some((p) => p.category === cat.id);
 
     /* Announced but not stocked — a shelf, not an empty grid. */
     if (!live) {
@@ -407,9 +409,9 @@
       if (soon) {
         soon.hidden = false;
         soon.innerHTML = `<p class="eyebrow">${cat.label}</p>
-          <h3>Coming soon.</h3>
-          <p>${cat.note}</p>
-          <a class="btn btn-quiet" href="#drops">Tell me when it drops</a>`;
+          <h3>${soldOut ? 'All gone.' : 'Coming soon.'}</h3>
+          <p>${soldOut ? 'Every one of these has sold. There is never a second run.' : cat.note}</p>
+          <a class="btn btn-quiet" href="#drops">Tell me about the next drop</a>`;
       }
       return;
     }
@@ -583,7 +585,10 @@
     $('#cd-label').textContent = 'Next drop';
     $('#cd-name').textContent = next.name + ' ' + next.year;
     $('#cd-when').textContent = fmtDate(dt) + ' at ' + fmtTime(dt);
-    $('#cd-blurb').textContent = next.blurb + (next.pieces ? '  ' + next.pieces + ' pieces, and that is the whole run.' : '');
+    const made = PRODUCTS.reduce((n, p) => n + (p.made || p.stock || 0), 0);
+    const count = next.pieces || made;
+    $('#cd-blurb').textContent = next.blurb +
+      (count ? '  ' + count + ' pieces, and that is the whole run.' : '');
     tickClock(dt);
     setInterval(() => tickClock(dt), 1000);
   }
@@ -684,7 +689,7 @@
     const add = $('#qv-add');
     add.setAttribute('data-add', p.sku);
     add.disabled = p.stock < 1;
-    add.textContent = p.stock < 1 ? 'Sold out' : 'Add to basket';
+    add.textContent = p.stock < 1 ? (p.sold ? 'Sold' : 'In a basket') : 'Add to basket';
 
     $('#qv').setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -864,7 +869,7 @@
       renderShop();
       return;
     }
-    const sw = e.target.closest('.swatch');
+    const sw = e.target.closest('.swatch[data-fab]');
     if (sw) {
       const id = sw.getAttribute('data-fab');
       state.fab = state.fab === id ? null : id;

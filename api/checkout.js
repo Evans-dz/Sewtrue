@@ -18,7 +18,9 @@ const { readInventory } = require('./stock.js');
 
 const CURRENCY = 'usd';
 const SHIPPING_CENTS = 600;   /* flat $6 anywhere in the US — SITE.shipping */
-const MAX_LINES = 20;         /* a real basket is never bigger than this */
+/* A real basket is small. Keeping this tight also means one anonymous
+   request cannot put a hold on the entire drop. */
+const MAX_LINES = 6;
 
 /* Stripe has to be able to fetch product images itself, and every deployment
    except the custom domain sits behind Vercel SSO. So images are always
@@ -120,7 +122,9 @@ module.exports = async function handler(req, res) {
      whether a one-of-one gets sold twice. If the reading is unavailable we
      let the sale through and shout in the logs — a shop that cannot sell is
      a worse failure than the rare double-sale this is preventing. */
-  const inv = await readInventory(key, { fresh: true });
+  const client = typeof body.client === 'string' && /^[a-z0-9]{6,40}$/.test(body.client)
+    ? body.client : null;
+  const inv = await readInventory(key, { fresh: true, exclude: client });
   if (inv.ok) {
     for (const i of items) {
       const gone = (inv.sold[i.product.sku] || 0) + (inv.held[i.product.sku] || 0);
@@ -149,7 +153,7 @@ module.exports = async function handler(req, res) {
        half an hour rather than sitting on a one-of-one for a day. */
     expires_at: Math.floor(Date.now() / 1000) + 1800,
     success_url: origin + '/?paid=1&session_id={CHECKOUT_SESSION_ID}',
-    cancel_url: origin + '/?checkout=cancelled',
+    cancel_url: origin + '/?checkout=cancelled&session_id={CHECKOUT_SESSION_ID}',
 
     /* These ship, so Stripe collects the address and the flat rate. */
     shipping_address_collection: { allowed_countries: ['US'] },
@@ -167,6 +171,9 @@ module.exports = async function handler(req, res) {
       /* /api/stock reads this back to work out what has sold. Keep it a
          plain comma-separated list — it is parsed, not just read. */
       skus: items.map((i) => Array(i.qty).fill(i.product.sku).join(',')).join(','),
+      /* Anonymous, per-browser. Only used so a shopper's own unfinished
+         session does not block their retry. */
+      client: client || '',
       basket: items.map((i) => i.product.sku + ' x' + i.qty).join(', '),
     },
 

@@ -16,7 +16,10 @@ const SITE = {
   instagramUrl: 'https://instagram.com/sewtrue', // TODO
 
   /* TODO(client): confirm fulfilment copy. */
-  shipping: 'Flat $6 shipping anywhere in the US. Local pickup can be arranged.', // TODO
+  /* Checkout collects a US shipping address and charges the flat rate, so
+     pickup is not offered here. TODO(client): if you want local pickup, say
+     so and we add it as a second shipping option at $0. */
+  shipping: 'Flat $6 shipping anywhere in the US.',
   turnaround: 'Ready-to-ship bows post within 2 business days.',                  // TODO
 
   credit: { label: 'Created and designed by EZHD', url: 'https://ez-hd.co' },
@@ -110,8 +113,10 @@ const DROPS = [
     id: 'fall-halloween-26', name: 'Fall & Halloween', year: 2026,
     opens: '2026-09-18T19:00',
     season: 'fall-halloween',
-    blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows, the first hoodie, blankets and small goods.',
-    pieces: 24,   // TODO(client): confirm the real count once the drop is cut.
+    blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows and the first sweatshirts.',
+    /* Left null so the site counts what is actually in the catalogue rather
+       than stating a number that can drift out of step with it. */
+    pieces: null,
   },
 ];
 
@@ -138,7 +143,10 @@ const CHECKOUT = {
   currency: 'USD',
   orderEndpoint: null,        // TODO(client): e.g. 'https://formspree.io/f/xxxxxxx'
   stripeEndpoint: '/api/checkout',   // the Vercel function in api/checkout.js
-  taxNote: 'Utah sales tax added at invoice.',  // TODO
+  /* No sales tax is charged today — Stripe Tax stays off until a Utah
+     registration exists. Do not promise tax handling the checkout does not do.
+     TODO(client): once registered, turn on Stripe Tax and say so here. */
+  taxNote: 'Price is what you pay. Shipping is added at checkout.',
 };
 
 /* Notify-me signups for drops. Same deal: endpoint or email fallback. */
