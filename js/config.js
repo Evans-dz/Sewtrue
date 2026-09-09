@@ -11,7 +11,7 @@ const SITE = {
   /* No location anywhere on this site by design — these ship everywhere. */
 
   /* TODO(client): confirm these three. */
-  email: 'hello@sewtrue.co',       // TODO
+  email: 'sewtrue26@gmail.com',    // the Stripe profile's business email
   instagram: 'sewtrue',            // TODO — handle without the @
   instagramUrl: 'https://instagram.com/sewtrue', // TODO
 
@@ -150,10 +150,10 @@ const BETWEEN_DROPS = {
    cart falls back to opening a pre-filled email. It never fails silently.
 ------------------------------------------------------------------------------ */
 const CHECKOUT = {
-  mode: 'request',            // 'request' | 'stripe'
+  mode: 'stripe',             // 'request' | 'stripe'
   currency: 'USD',
   orderEndpoint: null,        // TODO(client): e.g. 'https://formspree.io/f/xxxxxxx'
-  stripeEndpoint: null,       // TODO(client): e.g. '/api/checkout'
+  stripeEndpoint: '/api/checkout',   // the Vercel function in api/checkout.js
   taxNote: 'Utah sales tax added at invoice.',  // TODO
 };
 

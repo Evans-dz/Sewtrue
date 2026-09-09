@@ -108,5 +108,13 @@ const SIZE_SHOTS = {
   'mega': '0728', 'mega-double': '0722',
 };
 
-window.FABRICS = FABRICS; window.CATEGORIES = CATEGORIES; window.SIZES = SIZES; window.PRODUCTS = PRODUCTS;
-window.SIZE_SHOTS = SIZE_SHOTS;
+/* The browser reads these as globals. The checkout function on the server
+   requires this same file, so a price has exactly one source — if these ever
+   disagreed, the shop would show one number and charge another. */
+if (typeof window !== 'undefined') {
+  window.FABRICS = FABRICS; window.CATEGORIES = CATEGORIES; window.SIZES = SIZES;
+  window.PRODUCTS = PRODUCTS; window.SIZE_SHOTS = SIZE_SHOTS;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { FABRICS, CATEGORIES, SIZES, PRODUCTS, SIZE_SHOTS };
+}
