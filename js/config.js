@@ -60,30 +60,14 @@ const SEASONS = {
     },
 
     /* The hero reel. Order is the order it plays.
-       TODO(client): every photo below is a STAND-IN pulled from the bows you
-       already sent — they are your real bows, but they are not the Fall &
-       Halloween pieces. Replace `photo` on each row as the real shots come in,
-       and delete the `standin: true` line when you do. */
+       Nothing is photographed yet, so every entry renders as an honest
+       "still on the machine" card. Add a `photo` to any row and that frame
+       becomes a real picture with nothing else to change. */
     reel: [
-      { name: 'Harvest Border',  tag: 'Bow',          meta: 'Regular double · $50',
-        photo: 'assets/photos/bow-0721.jpg', href: '#shop', standin: true },
-
-      { name: 'Wheat Field',     tag: 'Bow',          meta: 'Mega · $65',
-        photo: 'assets/photos/bow-0733.jpg', href: '#shop', standin: true },
-
-      { name: 'Cider House',     tag: 'Bow',          meta: 'Regular · $35',
-        photo: 'assets/photos/bow-0729.jpg', href: '#shop', standin: true },
-
-      /* No photo yet — these render as "on the machine" frames on purpose.
-         Add a `photo` line to any of them and it turns into a real frame. */
-      { name: 'The fall hoodie', tag: 'Sweatshirt',   meta: 'Cut and sewn for this drop',
-        href: '#shop' },
-
-      { name: 'Porch blanket',   tag: 'Blanket',      meta: 'First one ever made',
-        href: '#shop' },
-
-      { name: 'Pumpkin keyring', tag: 'Small goods',  meta: 'Made from the offcuts',
-        href: '#shop' },
+      { name: 'Halloween bows',     tag: 'Seventeen pieces', meta: '$35 to $90',  href: '#shop' },
+      { name: 'The Halloween hoodie', tag: 'Sweatshirt',     meta: '$45 · black or grey', href: '#shop' },
+      { name: 'Fall bows',          tag: 'Nine pieces',      meta: '$75 to $90',  href: '#shop' },
+      { name: 'Mega Bound',         tag: 'New this drop',    meta: 'Edge bound by hand', href: '#shop' },
     ],
 
     /* Cloth on the fabric wall this season, in hanging order.

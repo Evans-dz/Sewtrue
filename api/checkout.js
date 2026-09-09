@@ -13,7 +13,7 @@
      STRIPE_SECRET_KEY — a restricted key with Checkout Sessions: Write
    ========================================================================= */
 
-const { PRODUCTS, SIZES } = require('../js/catalog.js');
+const { PRODUCTS, SIZES, APPAREL } = require('../js/catalog.js');
 
 const CURRENCY = 'usd';
 const SHIPPING_CENTS = 600;   /* flat $6 anywhere in the US — SITE.shipping */
@@ -54,6 +54,14 @@ async function readJson(req) {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
+/* What the line says on the Stripe page and on her receipt. */
+function describe(p, size) {
+  if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
+  if (!size) return p.name;
+  return size.label + (p.edition ? ' · No. ' + p.edition : '') +
+         ' · ' + size.w + '" across, ' + size.drop + '" drop';
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -80,11 +88,13 @@ module.exports = async function handler(req, res) {
     const product = PRODUCTS.find((p) => p.sku === line.sku);
     if (!product) return res.status(400).json({ error: 'We no longer have ' + line.sku + '.' });
 
-    const size = SIZES[product.size];
-    if (!size) {
-      console.error('[checkout] ' + product.sku + ' has unknown size ' + product.size);
+    /* Price comes off the product now — the same size is priced differently
+       in the two halves of the drop. */
+    if (!Number.isFinite(product.price) || product.price <= 0) {
+      console.error('[checkout] ' + product.sku + ' has no usable price');
       return res.status(500).json({ error: 'That item is misconfigured.' });
     }
+    const size = SIZES[product.size] || null;
 
     /* One SKU cannot appear twice, or the stock check below is meaningless. */
     if (seen.has(product.sku)) return res.status(400).json({ error: 'Duplicate item in the basket.' });
@@ -134,10 +144,10 @@ module.exports = async function handler(req, res) {
       quantity: i.qty,
       price_data: {
         currency: CURRENCY,
-        unit_amount: i.size.price * 100,          /* catalogue is in dollars */
+        unit_amount: i.product.price * 100,       /* catalogue is in dollars */
         product_data: {
           name: i.product.name,
-          description: i.size.label + ' · ' + i.size.w + '" across, ' + i.size.drop + '" drop',
+          description: describe(i.product, i.size),
           images: i.product.photo
             ? [PUBLIC_ORIGIN + '/assets/photos/bow-' + i.product.photo + '-560.jpg']
             : undefined,
@@ -183,4 +193,4 @@ module.exports = async function handler(req, res) {
 
 /* Exposed so the pricing and validation can be exercised offline, with no
    key and no network call. */
-module.exports.__test = { form, PRODUCTS, SIZES, SHIPPING_CENTS, MAX_LINES };
+module.exports.__test = { form, describe, PRODUCTS, SIZES, SHIPPING_CENTS, MAX_LINES };

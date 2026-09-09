@@ -33,7 +33,14 @@
 
   const product = (sku) => PRODUCTS.find((p) => p.sku === sku);
   const count = () => lines.reduce((n, l) => n + l.qty, 0);
-  const subtotal = () => lines.reduce((n, l) => n + SIZES[product(l.sku).size].price * l.qty, 0);
+  /* How a line describes itself — a bow by its size and number, a sweatshirt
+     by its colour and size. */
+  function lineMeta(p) {
+    if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
+    const s = SIZES[p.size];
+    return s.label + (p.edition ? ' · No. ' + p.edition : '');
+  }
+  const subtotal = () => lines.reduce((n, l) => n + product(l.sku).price * l.qty, 0);
 
   function add(sku, qty) {
     const p = product(sku); if (!p || p.stock < 1) return false;
@@ -95,7 +102,7 @@
         <div class="line-thumb">${window.bowMarkup(p, 84)}</div>
         <div class="line-body">
           <h4>${p.name}</h4>
-          <p class="line-meta">${s.label} · ${p.fabrics.slice().reverse().map(fabricName).join(' over ')}</p>
+          <p class="line-meta">${lineMeta(p)}</p>
           <div class="line-controls">
             <div class="stepper" role="group" aria-label="Quantity for ${p.name}">
               <button type="button" data-step="-1" aria-label="One fewer">–</button>
@@ -105,7 +112,7 @@
             <button type="button" class="line-remove" data-remove>Remove</button>
           </div>
         </div>
-        <p class="line-price">${money(s.price * l.qty)}</p>
+        <p class="line-price">${money(p.price * l.qty)}</p>
       </article>`;
     }).join('');
     $('#basket-subtotal').textContent = money(subtotal());
@@ -120,7 +127,7 @@
   function orderSummary() {
     return lines.map((l) => {
       const p = product(l.sku); const s = SIZES[p.size];
-      return `${l.qty} × ${p.name} — ${s.label} (${p.fabrics.slice().reverse().map(fabricName).join(' over ')}) — ${p.sku} — ${money(s.price * l.qty)}`;
+      return `${l.qty} × ${p.name} — ${lineMeta(p)} — ${p.sku} — ${money(p.price * l.qty)}`;
     }).join('\n');
   }
   function resetCheckout() {
@@ -172,7 +179,7 @@
       fulfilment: form.fulfilment.value,
       items: lines.map((l) => {
         const p = product(l.sku);
-        return { sku: p.sku, name: p.name, size: SIZES[p.size].label, fabrics: p.fabrics.slice().reverse().map(fabricName), qty: l.qty, price: SIZES[p.size].price };
+        return { sku: p.sku, name: p.name, size: lineMeta(p), qty: l.qty, price: p.price };
       }),
       subtotal: subtotal(),
       summary: orderSummary(),

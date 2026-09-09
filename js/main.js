@@ -12,28 +12,65 @@
   const fabric = (id) => FABRICS.find((f) => f.id === id) || { name: id, pattern: 'chambray' };
 
   /* ======================================================================
-     THE PRODUCT TILE — a photograph, or an honest blank.
-     There is no drawn artwork left on this site, so when a photo is missing
-     we say so rather than substituting an illustration of a bow.
+     THE PRODUCT TILE
+
+     No photographs exist for this drop yet, so every bow is DRAWN from its
+     own cloth — the same SVG bow filled with the fabric's pattern. The moment
+     a row in catalog.js gains a `photo`, the picture takes over instead.
      ====================================================================== */
-  function blankTile(p, label) {
-    return `<div class="reel-blank" role="img" aria-label="${p.name} — photograph coming">
-      <span>${SIZES[p.size] ? SIZES[p.size].label : (p.category || '')}</span>
-      <b>${p.name}</b><em>${label || 'Photograph coming'}</em></div>`;
+  const priceOf = (p) => p.price;
+
+  /* Nothing is photographed yet, so the drawing is picked from the fabrics in
+     rotation. It is deterministic per SKU: the same bow always draws the same,
+     rather than reshuffling on every render. */
+  function clothFor(p) {
+    let n = 0;
+    for (let i = 0; i < p.sku.length; i++) n = (n * 31 + p.sku.charCodeAt(i)) >>> 0;
+    const a = FABRICS[n % FABRICS.length];
+    /* >>> not >> — a signed shift on a high-bit hash goes negative, and a
+       negative index here silently hands back undefined. */
+    const b = FABRICS[((n >>> 3) + 5) % FABRICS.length];
+    return [a, b];
   }
+
   window.bowMarkup = function (p, height, opts) {
     const o = opts || {};
-    if (!p.photo) return blankTile(p);
-    const b = 'assets/photos/bow-' + p.photo;
-    return `<img src="${b}-560.jpg" srcset="${b}-560.jpg 420w, ${b}.jpg 900w"
-      sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}" width="900" height="1200"
-      alt="${p.name} — ${SIZES[p.size].label}" loading="lazy" decoding="async"
-      onerror="window.bowFallback(this,'${p.sku}')">`;
+    if (p.photo && !o.drawn) {
+      const b = 'assets/photos/bow-' + p.photo;
+      return `<img src="${b}-560.jpg" srcset="${b}-560.jpg 420w, ${b}.jpg 900w"
+        sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}" width="900" height="1200"
+        alt="${p.name}" loading="lazy" decoding="async"
+        onerror="window.bowFallback(this,'${p.sku}')">`;
+    }
+    if (p.category === 'sweatshirts') return sweatMarkup(p);
+    const size = SIZES[p.size] || SIZES.regular;
+    const [a, b] = clothFor(p);
+    const style = `--fab-a:url(#${a.pattern});--fab-b:url(#${b.pattern});` +
+                  `--strap:${o.strap === false ? 'none' : 'block'}`;
+    return `<svg class="bow" viewBox="0 0 400 470"${height ? ' height="' + height + '"' : ''}
+      style="${style}" role="img" aria-label="${p.name}"><use href="#${size.layers === 2 ? 'bow2' : 'bow'}"/></svg>`;
   };
   window.bowFallback = function (img, sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
-    img.outerHTML = blankTile(p, 'Photograph missing');
+    img.outerHTML = window.bowMarkup(p, null, { drawn: true });
   };
+
+  /* Sweatshirts are not bows — a plain folded shape in the garment's colour
+     rather than a drawn bow, so the two never read as the same thing. */
+  function sweatMarkup(p) {
+    const dark = /black/i.test(p.colour || '');
+    const body = dark ? '#241f1d' : '#a9a29a';
+    const shade = dark ? '#15110f' : '#8d867e';
+    return `<svg class="bow sweat" viewBox="0 0 400 470" role="img" aria-label="${p.name}, ${p.colour}">
+      <path d="M136 96 L100 118 L64 176 L104 206 L128 176 L128 392 L272 392 L272 176 L296 206 L336 176 L300 118 L264 96
+               C250 124, 226 136, 200 136 C174 136, 150 124, 136 96 Z" fill="${body}"/>
+      <path d="M128 176 L128 392 L200 392 L200 136 C174 136, 150 124, 136 96 L100 118 L64 176 L104 206 L128 176 Z"
+            fill="${shade}" opacity=".45"/>
+      <path d="M136 96 C150 124, 174 136, 200 136 C226 136, 250 124, 264 96"
+            fill="none" stroke="rgba(255,252,246,.42)" stroke-width="3" stroke-dasharray="6 5"/>
+      <path d="M128 384 L272 384" stroke="rgba(255,252,246,.3)" stroke-width="3" stroke-dasharray="6 5"/>
+    </svg>`;
+  }
 
   /* ======================================================================
      THE SEASON — one drop dresses the whole site.
@@ -91,7 +128,7 @@
     /* No season reel configured — never leave the hero empty. Fall back to
        whatever is actually in the shop. */
     return PRODUCTS.filter((p) => p.stock > 0 && p.photo).slice(0, 5).map((p) => ({
-      name: p.name, tag: SIZES[p.size].label, meta: money(SIZES[p.size].price),
+      name: p.name, tag: topLabel(p), meta: money(p.price),
       photo: 'assets/photos/bow-' + p.photo + '.jpg', href: '#shop',
     }));
   }
@@ -239,9 +276,22 @@
 
   function matches(p) {
     if (p.category !== state.cat) return false;
-    if (state.fab && p.fabrics.indexOf(state.fab) === -1) return false;
     if (state.size !== 'all' && p.size !== state.size) return false;
     return true;
+  }
+
+  /* Sizes that actually have something in them, in order. */
+  const sizesInStock = () => Object.keys(SIZES)
+    .filter((k) => PRODUCTS.some((p) => p.size === k && p.stock > 0))
+    .sort((a, b) => SIZES[a].order - SIZES[b].order);
+
+  /* The size pills follow the drop rather than a hard-coded list, so a size
+     with nothing in it never offers an empty filter. */
+  function renderSizeFilters() {
+    const el = $('#size-filters'); if (!el) return;
+    el.innerHTML = '<button type="button" class="pill is-on" data-filter="all">All bows</button>' +
+      sizesInStock().map((k) =>
+        `<button type="button" class="pill" data-filter="${k}">${SIZES[k].label}</button>`).join('');
   }
 
   const catOf = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[0];
@@ -260,21 +310,31 @@
     }).join('');
   }
 
-  function cardMarkup(p) {
+  /* What the little line under the title says about this piece. */
+  function subtitleOf(p) {
+    if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
     const s = SIZES[p.size];
-    const fabs = p.fabrics.slice().reverse().map((f) => fabric(f).name).join(' over ');
+    return s.w + '\u2033 across, ' + s.drop + '\u2033 drop' + (s.bound ? ', bound edge' : '');
+  }
+  function topLabel(p) {
+    if (p.category === 'sweatshirts') return APPAREL[p.apparel].label;
+    return SIZES[p.size].label;
+  }
+
+  function cardMarkup(p) {
     const sold = p.stock < 1;
-    const stockNote = sold ? 'Sold' : (p.stock === 1 ? 'One of one' : p.stock + ' made');
+    const stockNote = sold ? 'Sold'
+      : (p.category === 'bows' ? 'No. ' + p.edition : p.stock + ' left');
     return `<article class="card${sold ? ' sold' : ''}" data-sku="${p.sku}" data-size="${p.size}">
       ${sold ? '<span class="tag">Sold out</span>' : ''}
-      <div class="card-top"><span>${s.label}</span><span>${stockNote}</span></div>
+      <div class="card-top"><span>${topLabel(p)}</span><span>${stockNote}</span></div>
       <button class="card-open" type="button" data-qv="${p.sku}" aria-label="Look closer at ${p.name}">
         <span class="card-art"><span class="card-door" aria-hidden="true"></span>${window.bowMarkup(p, null, { strap: false })}</span>
         <span class="card-bot">
           <span class="card-name">${p.name}</span>
-          <span class="card-price">${money(s.price)}</span>
+          <span class="card-price">${money(p.price)}</span>
         </span>
-        <span class="card-meta">${fabs}</span>
+        <span class="card-meta">${subtitleOf(p)}</span>
       </button>
       ${sold
         ? '<p class="note card-add">Gone. That fabric is finished.</p>'
@@ -331,71 +391,85 @@
   const NUMBER = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight',
     'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen'];
 
-  /* A swatch is a crop of a real bow in that cloth. Cloth with nothing sewn
-     in it yet shows as a plain tile — we never draw a fabric we do not have. */
-  function fabricShot(id) {
-    const front = PRODUCTS.find((p) => p.photo && p.fabrics[p.fabrics.length - 1] === id);
-    const any = front || PRODUCTS.find((p) => p.photo && p.fabrics.indexOf(id) > -1);
-    return any ? 'assets/photos/bow-' + any.photo + '-560.jpg' : null;
-  }
+  /* ------------------------------------------------------------------------
+     THE CLOTH WALL
+
+     No bow in this drop has a named fabric yet, so the wall cannot honestly
+     claim "three bows in this cloth" or filter by it. Until the pieces are
+     photographed and their cloth recorded, it shows the prints in rotation
+     and nothing more. Give products a `fabrics` array and it becomes a filter
+     again on its own.
+  ------------------------------------------------------------------------- */
+  const clothIsAssigned = () => PRODUCTS.some((p) => Array.isArray(p.fabrics) && p.fabrics.length);
 
   function renderQuilt() {
     const q = $('#quilt'); if (!q) return;
 
-    /* The wall follows the drop. No season set → everything in the book. */
     let ids = FABRICS.map((f) => f.id);
     if (SEASON && SEASON.cloth && SEASON.cloth.length) {
       const known = (id) => FABRICS.some((f) => f.id === id);
-      /* An id that is not in FABRICS is a typo, not a fabric. Say so while
-         the site is being worked on rather than quietly dropping the tile. */
       if (LOCAL) SEASON.cloth.filter((id) => !known(id)).forEach((id) =>
         console.warn('[Sew True] season cloth "' + id + '" is not in FABRICS (catalog.js) — tile skipped.'));
       ids = SEASON.cloth.filter(known);
     }
 
     const head = document.querySelector('#fabrics .wipe');
-    if (head) head.textContent = (NUMBER[ids.length] || ids.length) +
-      (SEASON ? ' fabrics in this drop.' : ' fabrics in rotation.');
+    if (head) head.textContent = (NUMBER[ids.length] || ids.length) + ' fabrics in rotation.';
+    const lede = document.querySelector('#fabrics .lede');
+    const live = clothIsAssigned();
+    if (lede) lede.textContent = live
+      ? 'Tap one to see every bow cut from it.'
+      : 'The prints on the machine for this drop. Each bow is named for its cloth once it is photographed.';
 
     q.innerHTML = ids.map((id) => {
       const f = fabric(id);
-      const n = PRODUCTS.filter((p) => p.fabrics.indexOf(id) > -1 && p.stock > 0).length;
-      const shot = n ? fabricShot(id) : null;
-      if (!shot) {
-        return `<div class="swatch empty"><span><b>${f.name}</b><em>Cut and coming</em></span></div>`;
+      const art = `<svg viewBox="0 0 210 210" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="210" height="210" fill="url(#${f.pattern})"/></svg>`;
+      if (!live) {
+        return `<div class="swatch still" role="img" aria-label="${f.name}">${art}
+          <span>${f.name}</span></div>`;
       }
+      const n = PRODUCTS.filter((p) => (p.fabrics || []).indexOf(id) > -1 && p.stock > 0).length;
       return `<button class="swatch" type="button" data-fab="${id}"
-        aria-label="${f.name} — ${n} in the shop">
-        <img src="${shot}" alt="" loading="lazy" decoding="async" width="560" height="747">
-        <span>${f.name}</span></button>`;
+        aria-label="${f.name} — ${n} in the shop">${art}<span>${f.name}</span></button>`;
     }).join('');
   }
 
   /* ======================================================================
      SIZES
      ====================================================================== */
+  /* The same size costs different money in the two halves of this drop, so
+     the table shows what it actually ranges between rather than one number. */
+  function priceRange(sizeKey) {
+    const ps = PRODUCTS.filter((p) => p.size === sizeKey && p.stock > 0).map((p) => p.price);
+    if (!ps.length) return '&mdash;';
+    const lo = Math.min.apply(null, ps), hi = Math.max.apply(null, ps);
+    return lo === hi ? money(lo) : money(lo) + '&ndash;' + money(hi);
+  }
+
   function renderSizes() {
     const order = Object.keys(SIZES).sort((a, b) => SIZES[a].order - SIZES[b].order);
+
+    /* The eyebrow counts the sizes rather than asserting a number that was
+       true when it was typed. */
+    const eyebrow = document.querySelector('#sizes .eyebrow');
+    if (eyebrow) eyebrow.textContent = (NUMBER[order.length] || order.length) + ' sizes';
     const body = $('#spec-body');
     if (body) body.innerHTML = order.map((k) => {
       const s = SIZES[k];
       return `<tr><td>${s.label}</td><td>${s.w}&#8243;</td><td>${s.drop}&#8243;</td>
-        <td>${s.layers === 2 ? 'Two fabrics' : 'One fabric'}</td><td>${money(s.price)}</td></tr>`;
+        <td>${s.bound ? 'Bound edge' : (s.layers === 2 ? 'Two fabrics' : 'One fabric')}</td>
+        <td>${priceRange(k)}</td></tr>`;
     }).join('');
 
-    /* Each frame is exactly as wide as that bow really is, next to the others.
-       The photographs inside are her own, so this is a measurement rather than
-       an illustration. A front door is 36 inches for scale. */
+    /* Each bow is drawn exactly as wide as it really is next to the others.
+       Line art rather than a photograph until the drop is shot — it still
+       answers the size question honestly, which is the whole job here. */
     const row = $('#scale-row');
     if (row) row.innerHTML = order.map((k) => {
       const s = SIZES[k];
-      const shot = SIZE_SHOTS[k];
-      const art = shot
-        ? `<img src="assets/photos/bow-${shot}-560.jpg" alt="" loading="lazy"
-             decoding="async" width="560" height="747">`
-        : '';
       return `<div class="scale-item" style="--w:calc(var(--u) * ${s.w})">
-        <div class="scale-shot">${art}</div>
+        <svg class="scale-bow" viewBox="0 0 400 470" aria-hidden="true"><use href="#bow-line"/></svg>
         <b>${s.label}</b><i>${s.w}&#8243;</i></div>`;
     }).join('');
   }
@@ -403,12 +477,21 @@
   /* ======================================================================
      THE DOOR — five real bows on one door, crossfaded by scroll
      ====================================================================== */
+  /* The door sequence is five photographs of real bows on a real door. There
+     is nothing honest to put in its place while the drop is unshot, so the
+     section stands down and returns by itself once SIZE_SHOTS exists again. */
   function buildDoor() {
+    const shots = (typeof SIZE_SHOTS !== 'undefined' && SIZE_SHOTS)
+      ? Object.keys(SIZES).sort((a, b) => SIZES[a].order - SIZES[b].order)
+          .map((k) => ({ key: k, size: SIZES[k], photo: SIZE_SHOTS[k] }))
+          .filter((x) => x.photo)
+      : [];
+
+    const section = $('#door-seq');
+    if (!shots.length) { if (section) section.hidden = true; return null; }
+    if (section) section.hidden = false;
+
     const frame = $('#door-frame'); if (!frame) return null;
-    const shots = Object.keys(SIZES)
-      .sort((a, b) => SIZES[a].order - SIZES[b].order)
-      .map((k) => ({ key: k, size: SIZES[k], photo: SIZE_SHOTS[k] }))
-      .filter((x) => x.photo);
     frame.innerHTML = shots.map((x, i) =>
       `<img class="door-shot" data-i="${i}" src="assets/photos/bow-${x.photo}.jpg"
         alt="A ${x.size.label.toLowerCase()} bow hanging on a front door"
@@ -529,22 +612,25 @@
     const s = SIZES[p.size];
     qvLast = document.activeElement;
     $('#qv-art').innerHTML = window.bowMarkup(p, null, { sizes: '(max-width:1000px) 88vw, 400px' });
-    $('#qv-no').textContent = p.sku + ' · ' + SIZES[p.size].label;
+    $('#qv-no').textContent = p.sku + ' · ' + topLabel(p);
     $('#qv-name').textContent = p.name;
-    $('#qv-price').textContent = money(s.price);
-    const front = p.fabrics[p.fabrics.length - 1];
-    $('#qv-fab').textContent = p.fabrics.slice().reverse().map((f) => fabric(f).name).join(' over ') +
-      ' — ' + fabric(front).note;
-    $('#qv-spec').innerHTML =
-      `<dt>Size</dt><dd>${s.label}</dd>` +
-      `<dt>Across</dt><dd>${s.w}&#8243;</dd>` +
-      `<dt>Drop</dt><dd>${s.drop}&#8243; with tails</dd>` +
-      `<dt>Layers</dt><dd>${s.layers === 2 ? 'Two fabrics, sewn back to back' : 'Single fabric'}</dd>` +
-      `<dt>Hanger</dt><dd>Leather strap, fits a standard wreath hook</dd>`;
+    $('#qv-price').textContent = money(p.price);
+    $('#qv-fab').textContent = p.category === 'sweatshirts'
+      ? p.colour + ' · ' + APPAREL[p.apparel].label
+      : 'Cloth is chosen as it is cut. This one is ' + p.edition + ' at this size.';
+    $('#qv-spec').innerHTML = p.category === 'sweatshirts'
+      ? `<dt>Size</dt><dd>${APPAREL[p.apparel].label}</dd>` +
+        `<dt>Colour</dt><dd>${p.colour}</dd>` +
+        `<dt>Made</dt><dd>Two of this size in this colour, and no more</dd>`
+      : `<dt>Size</dt><dd>${s.label}</dd>` +
+        `<dt>Across</dt><dd>${s.w}&#8243;</dd>` +
+        `<dt>Drop</dt><dd>${s.drop}&#8243; with tails</dd>` +
+        `<dt>Make</dt><dd>${s.bound ? 'Single layer, edge bound by hand' : (s.layers === 2 ? 'Two fabrics, sewn back to back' : 'Single fabric')}</dd>` +
+        `<dt>Hanger</dt><dd>Leather strap, fits a standard wreath hook</dd>`;
     const stock = $('#qv-stock');
-    stock.textContent = p.stock < 1 ? 'Sold out — that fabric is finished.'
+    stock.textContent = p.stock < 1 ? 'Sold. That one is finished for good.'
       : p.stock === 1 ? 'One of one. When it goes, it is gone.'
-      : p.stock + ' ready to ship.';
+      : p.stock + ' left.';
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
     const add = $('#qv-add');
     add.setAttribute('data-add', p.sku);
@@ -622,7 +708,7 @@
     /* ribbon wipe — headings unfurl left to right */
     $$('.wipe').forEach((el) => {
       gsap.to(el, {
-        clipPath: 'inset(0 -1% 0 0)', duration: 1.05, ease: 'power3.inOut',
+        clipPath: 'inset(-.28em -1% -.3em 0)', duration: 1.05, ease: 'power3.inOut',
         scrollTrigger: { trigger: el, start: 'top 88%' },
       });
     });
@@ -764,6 +850,7 @@
     fillSite();
     applySeason();      /* must run first — the shop and the wall read from it */
     renderCats();
+    renderSizeFilters();
     renderShop();
     renderQuilt();
     renderSizes();
