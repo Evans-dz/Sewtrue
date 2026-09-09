@@ -255,11 +255,48 @@
     if (e.key === 'Escape' && document.body.classList.contains('drawer-open')) close();
   });
 
+  /* ------------------------------------------------------------------------
+     COMING BACK FROM STRIPE
+
+     Stripe returns the customer to success_url once the card clears. Nothing
+     else on the site knows that happened — so without this the basket would
+     still be holding the bow they just bought, which reads as a failed order
+     and invites them to pay for it twice.
+  ------------------------------------------------------------------------- */
+  function handleReturn() {
+    const q = new URLSearchParams(location.search);
+    const paid = q.get('paid') === '1';
+    const cancelled = q.get('checkout') === 'cancelled';
+    if (!paid && !cancelled) return;
+
+    /* Out of the address bar first, so a refresh or a forwarded link does not
+       replay the confirmation. */
+    history.replaceState(null, '', location.pathname + location.hash);
+
+    /* Backed out at Stripe — basket untouched, just show it to them again. */
+    if (cancelled) { open(); return; }
+
+    const session = q.get('session_id') || '';
+    clear();
+
+    const done = $('#basket-done');
+    if (!done) return;
+    $('#basket-main').hidden = true;
+    const co = $('#basket-checkout'); if (co) co.hidden = true;
+    done.hidden = false;
+    $('#done-code').textContent = session ? session.slice(-8).toUpperCase() : 'received';
+    $('#done-total').textContent = 'paid by card';
+    const note = done.querySelector('.note');
+    if (note) note.textContent = 'Stripe has emailed your receipt. We will follow up with a ship date.';
+    open();
+  }
+
   window.addEventListener('cart:change', render);
   document.addEventListener('DOMContentLoaded', () => {
     const form = $('#checkout-form');
     if (form) form.addEventListener('submit', submitOrder);
     render();
+    handleReturn();   /* after render, so the drawer is populated first */
   });
 
   window.SewTrue = { add, setQty, remove, clear, count, subtotal, lines: () => lines.slice(), open, close, render, money, fabricName };
