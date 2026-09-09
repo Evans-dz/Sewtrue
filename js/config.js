@@ -11,12 +11,15 @@ const SITE = {
   /* No location anywhere on this site by design — these ship everywhere. */
 
   /* TODO(client): confirm these three. */
-  email: 'hello@sewtrue.co',       // TODO
+  email: 'sewtrue26@gmail.com',    // the Stripe profile's business email
   instagram: 'sewtrue',            // TODO — handle without the @
   instagramUrl: 'https://instagram.com/sewtrue', // TODO
 
   /* TODO(client): confirm fulfilment copy. */
-  shipping: 'Flat $6 shipping anywhere in the US. Local pickup can be arranged.', // TODO
+  /* Checkout collects a US shipping address and charges the flat rate, so
+     pickup is not offered here. TODO(client): if you want local pickup, say
+     so and we add it as a second shipping option at $0. */
+  shipping: 'Flat $6 shipping anywhere in the US.',
   turnaround: 'Ready-to-ship bows post within 2 business days.',                  // TODO
 
   credit: { label: 'Created and designed by EZHD', url: 'https://ez-hd.co' },
@@ -60,30 +63,14 @@ const SEASONS = {
     },
 
     /* The hero reel. Order is the order it plays.
-       TODO(client): every photo below is a STAND-IN pulled from the bows you
-       already sent — they are your real bows, but they are not the Fall &
-       Halloween pieces. Replace `photo` on each row as the real shots come in,
-       and delete the `standin: true` line when you do. */
+       Nothing is photographed yet, so every entry renders as an honest
+       "still on the machine" card. Add a `photo` to any row and that frame
+       becomes a real picture with nothing else to change. */
     reel: [
-      { name: 'Harvest Border',  tag: 'Bow',          meta: 'Regular double · $50',
-        photo: 'assets/photos/bow-0721.jpg', href: '#shop', standin: true },
-
-      { name: 'Wheat Field',     tag: 'Bow',          meta: 'Mega · $65',
-        photo: 'assets/photos/bow-0733.jpg', href: '#shop', standin: true },
-
-      { name: 'Cider House',     tag: 'Bow',          meta: 'Regular · $35',
-        photo: 'assets/photos/bow-0729.jpg', href: '#shop', standin: true },
-
-      /* No photo yet — these render as "on the machine" frames on purpose.
-         Add a `photo` line to any of them and it turns into a real frame. */
-      { name: 'The fall hoodie', tag: 'Sweatshirt',   meta: 'Cut and sewn for this drop',
-        href: '#shop' },
-
-      { name: 'Porch blanket',   tag: 'Blanket',      meta: 'First one ever made',
-        href: '#shop' },
-
-      { name: 'Pumpkin keyring', tag: 'Small goods',  meta: 'Made from the offcuts',
-        href: '#shop' },
+      { name: 'Halloween bows',     tag: 'Seventeen pieces', meta: '$35 to $90',  href: '#shop' },
+      { name: 'The Halloween hoodie', tag: 'Sweatshirt',     meta: '$45 · black or grey', href: '#shop' },
+      { name: 'Fall bows',          tag: 'Nine pieces',      meta: '$75 to $90',  href: '#shop' },
+      { name: 'Mega Bound',         tag: 'New this drop',    meta: 'Edge bound by hand', href: '#shop' },
     ],
 
     /* Cloth on the fabric wall this season, in hanging order.
@@ -126,8 +113,10 @@ const DROPS = [
     id: 'fall-halloween-26', name: 'Fall & Halloween', year: 2026,
     opens: '2026-09-18T19:00',
     season: 'fall-halloween',
-    blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows, the first hoodie, blankets and small goods.',
-    pieces: 24,   // TODO(client): confirm the real count once the drop is cut.
+    blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows and the first sweatshirts.',
+    /* Left null so the site counts what is actually in the catalogue rather
+       than stating a number that can drift out of step with it. */
+    pieces: null,
   },
 ];
 
@@ -150,11 +139,14 @@ const BETWEEN_DROPS = {
    cart falls back to opening a pre-filled email. It never fails silently.
 ------------------------------------------------------------------------------ */
 const CHECKOUT = {
-  mode: 'request',            // 'request' | 'stripe'
+  mode: 'stripe',             // 'request' | 'stripe'
   currency: 'USD',
   orderEndpoint: null,        // TODO(client): e.g. 'https://formspree.io/f/xxxxxxx'
-  stripeEndpoint: null,       // TODO(client): e.g. '/api/checkout'
-  taxNote: 'Utah sales tax added at invoice.',  // TODO
+  stripeEndpoint: '/api/checkout',   // the Vercel function in api/checkout.js
+  /* No sales tax is charged today — Stripe Tax stays off until a Utah
+     registration exists. Do not promise tax handling the checkout does not do.
+     TODO(client): once registered, turn on Stripe Tax and say so here. */
+  taxNote: 'Price is what you pay. Shipping is added at checkout.',
 };
 
 /* Notify-me signups for drops. Same deal: endpoint or email fallback. */
