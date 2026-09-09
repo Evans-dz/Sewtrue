@@ -139,6 +139,16 @@
 
   function startCheckout() {
     if (!lines.length) return;
+    /* The server refuses this too — this is only so the reason is legible. */
+    if (window.SewTrueShopOpen && !window.SewTrueShopOpen()) {
+      const err = $('#checkout-error');
+      if (err) {
+        err.hidden = false;
+        err.innerHTML = '<p>The drop has not opened yet.</p>' +
+          '<p>Your basket is saved. Come back when the countdown runs out and it will be waiting.</p>';
+      }
+      return;
+    }
     if (CHECKOUT.mode === 'stripe' && CHECKOUT.stripeEndpoint) return stripeCheckout();
     $('#basket-main').hidden = true;
     $('#basket-checkout').hidden = false;
@@ -173,6 +183,15 @@
         /* 409 is the one that matters: something in the basket went while
            they were deciding. Say which, take it out, and let the shop
            catch up — do not offer to email an order for a bow that is gone. */
+        if (status === 423) {
+          const err = $('#checkout-error');
+          if (err) {
+            err.hidden = false;
+            err.innerHTML = '<p>' + ((d && d.error) || 'The drop has not opened yet.') + '</p>' +
+              '<p>Your basket is saved — nothing was lost.</p>';
+          }
+          return;
+        }
         if (status === 409) {
           if (d && d.sku) remove(d.sku);
           const err = $('#checkout-error');

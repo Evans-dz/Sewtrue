@@ -257,6 +257,29 @@
   }
 
   /* ======================================================================
+     IS THE SHOP OPEN?
+
+     The pieces are on show before the drop, but none of them can be bought.
+     The server enforces the same hour from the same line of config — this is
+     only what the customer sees, not what stops them.
+     ====================================================================== */
+  function dropOpensAt() {
+    if (!CHECKOUT.holdUntilDrop) return null;
+    const now = Date.now();
+    const ts = DROPS.map((d) => new Date(d.opens).getTime())
+      .filter((t) => !isNaN(t) && t > now);
+    return ts.length ? Math.min.apply(null, ts) : null;
+  }
+  const shopOpen = () => !dropOpensAt();
+  function opensLabel() {
+    const t = dropOpensAt(); if (!t) return '';
+    const d = new Date(t);
+    return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) +
+           ' at ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+  }
+  window.SewTrueShopOpen = shopOpen;
+
+  /* ======================================================================
      WHAT IS LEFT
 
      Stripe is the inventory. /api/stock says what has sold and what is being
@@ -387,7 +410,9 @@
       </button>
       ${sold
         ? `<p class="note card-add">${held ? 'Someone is paying for it. Check back in half an hour.' : 'Gone. There was only ever one.'}</p>`
-        : `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`}
+        : (shopOpen()
+          ? `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`
+          : `<p class="note card-add">Opens ${opensLabel()}</p>`)}
     </article>`;
   }
 
@@ -422,6 +447,12 @@
 
     const list = PRODUCTS.filter(matches);
     grid.innerHTML = list.map(cardMarkup).join('');
+
+    const lede = document.querySelector('#shop .lede');
+    if (lede) lede.textContent = shopOpen()
+      ? 'What is here is what exists. Nothing is reprinted, nothing is backordered.'
+      : 'This is the whole drop, laid out before it opens. Nothing can be bought until '
+        + opensLabel() + '.';
 
     const n = list.length;
     const unit = cat.id === 'bows' ? (n === 1 ? ' bow' : ' bows')
@@ -594,6 +625,7 @@
   }
 
   const pad = (n) => String(n).padStart(2, '0');
+  let openedLive = false;
   let lastTick = {};
   function tickClock(target) {
     let ms = target.getTime() - Date.now();
@@ -606,6 +638,14 @@
 
     const chip = $('#hero-drop-chip');
     if (chip) chip.textContent = d > 0 ? 'in ' + d + (d === 1 ? ' day' : ' days') : 'today';
+
+    /* The moment the hour arrives, open the shop where it stands rather than
+       making anyone reload to find out. */
+    if (ms <= 0 && !openedLive) {
+      openedLive = true;
+      renderShop(); renderCats();
+      if (window.SewTrue && window.SewTrue.render) window.SewTrue.render();
+    }
     const sr = $('#cd-sr');
     if (sr && s === 0) sr.textContent = `${d} days, ${h} hours until the drop opens.`;
   }
@@ -688,8 +728,10 @@
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
     const add = $('#qv-add');
     add.setAttribute('data-add', p.sku);
-    add.disabled = p.stock < 1;
-    add.textContent = p.stock < 1 ? (p.sold ? 'Sold' : 'In a basket') : 'Add to basket';
+    const shut = !shopOpen();
+    add.disabled = p.stock < 1 || shut;
+    add.textContent = p.stock < 1 ? (p.sold ? 'Sold' : 'In a basket')
+      : (shut ? 'Opens ' + opensLabel() : 'Add to basket');
 
     $('#qv').setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';

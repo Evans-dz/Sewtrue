@@ -645,3 +645,6 @@ body.drawer-open .basket{transform:none}
   .reel-frame.on img{transform:none}
   .reel-tick.on.run i::after{transition:none}
 }
+
+/* The footer bow is drawn and left alone — no tween, no scroll trigger. */
+.foot-bow-art{color:var(--ink)}

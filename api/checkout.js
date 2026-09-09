@@ -15,6 +15,17 @@
 
 const { PRODUCTS, SIZES, APPAREL } = require('../js/catalog.js');
 const { readInventory } = require('./stock.js');
+const { DROPS, CHECKOUT } = require('../js/config.js');
+
+/* When the till opens. Reads the same row of config the page does, so the
+   button and the server can never disagree about the hour. */
+function opensAt() {
+  if (!CHECKOUT.holdUntilDrop) return null;
+  const times = DROPS.map((d) => new Date(d.opens).getTime()).filter((t) => !isNaN(t));
+  if (!times.length) return null;
+  const next = Math.min.apply(null, times.filter((t) => t > Date.now()));
+  return isFinite(next) ? next : null;
+}
 
 const CURRENCY = 'usd';
 const SHIPPING_CENTS = 600;   /* flat $6 anywhere in the US — SITE.shipping */
@@ -76,6 +87,17 @@ module.exports = async function handler(req, res) {
     /* Loud in the logs, vague to the customer. */
     console.error('[checkout] STRIPE_SECRET_KEY is not set on this deployment');
     return res.status(500).json({ error: 'Checkout is not configured yet.' });
+  }
+
+  /* ---- is the shop even open? -------------------------------------------
+     A disabled button is a suggestion. This is the rule: nothing is sold
+     before the drop opens, however the request got here. */
+  const opens = opensAt();
+  if (opens && Date.now() < opens) {
+    return res.status(423).json({
+      error: 'The drop has not opened yet.',
+      opensAt: new Date(opens).toISOString(),
+    });
   }
 
   /* ---- read the basket ------------------------------------------------- */

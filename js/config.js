@@ -111,7 +111,11 @@ const SEASON_BETWEEN = 'fall-halloween';
 const DROPS = [
   {
     id: 'fall-halloween-26', name: 'Fall & Halloween', year: 2026,
-    opens: '2026-09-18T19:00',
+    /* ALWAYS carry the offset. A bare '2026-09-18T19:00' means 19:00 wherever
+       the code happens to run — the shop would open at 1pm Utah because Vercel
+       runs on UTC. -06:00 is Mountain Daylight Time, which is what Utah is on
+       in September. */
+    opens: '2026-09-18T19:00:00-06:00',
     season: 'fall-halloween',
     blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows and the first sweatshirts.',
     /* Left null so the site counts what is actually in the catalogue rather
@@ -140,6 +144,15 @@ const BETWEEN_DROPS = {
 ------------------------------------------------------------------------------ */
 const CHECKOUT = {
   mode: 'stripe',             // 'request' | 'stripe'
+
+  /* NOTHING CAN BE BOUGHT until the drop opens. The shop is still on show —
+     people can look at what is coming — but every buy button is shut and the
+     server refuses a checkout before the hour.
+
+     This is enforced in api/checkout.js as well as in the page, because a
+     disabled button is a suggestion and a shop full of one-of-ones needs a
+     rule. Set false to sell the moment the site is up. */
+  holdUntilDrop: true,
   currency: 'USD',
   orderEndpoint: null,        // TODO(client): e.g. 'https://formspree.io/f/xxxxxxx'
   stripeEndpoint: '/api/checkout',   // the Vercel function in api/checkout.js
@@ -155,6 +168,13 @@ const NOTIFY = {
   successNote: "You're on the list. We'll email the morning it opens.",
 };
 
-window.SITE = SITE; window.SEASONS = SEASONS; window.SEASON_BETWEEN = SEASON_BETWEEN;
-window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS;
-window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;
+/* The browser reads these as globals; the checkout function on the server
+   requires this same file, so the page and the till open at the same instant. */
+if (typeof window !== 'undefined') {
+  window.SITE = SITE; window.SEASONS = SEASONS; window.SEASON_BETWEEN = SEASON_BETWEEN;
+  window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS;
+  window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { SITE, SEASONS, SEASON_BETWEEN, DROPS, BETWEEN_DROPS, CHECKOUT, NOTIFY };
+}
