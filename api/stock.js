@@ -93,6 +93,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: false, sold: {}, held: {}, reason: 'unconfigured' });
   }
   const inv = await readInventory(key);
+  inv.mode = key.indexOf('_test_') > -1 ? 'test' : 'live';
   /* Short cache at the edge too — a drop rush is a lot of people asking the
      same question in the same few seconds. */
   res.setHeader('Cache-Control', 'public, max-age=5, s-maxage=10, stale-while-revalidate=30');
