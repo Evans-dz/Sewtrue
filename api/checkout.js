@@ -14,6 +14,7 @@
    ========================================================================= */
 
 const { PRODUCTS, SIZES, APPAREL } = require('../js/catalog.js');
+const { readInventory } = require('./stock.js');
 
 const CURRENCY = 'usd';
 const SHIPPING_CENTS = 600;   /* flat $6 anywhere in the US — SITE.shipping */
@@ -114,6 +115,29 @@ module.exports = async function handler(req, res) {
     items.push({ product, size, qty });
   }
 
+  /* ---- has any of it already gone? -------------------------------------
+     Read Stripe fresh, never the cache: this is the moment that decides
+     whether a one-of-one gets sold twice. If the reading is unavailable we
+     let the sale through and shout in the logs — a shop that cannot sell is
+     a worse failure than the rare double-sale this is preventing. */
+  const inv = await readInventory(key, { fresh: true });
+  if (inv.ok) {
+    for (const i of items) {
+      const gone = (inv.sold[i.product.sku] || 0) + (inv.held[i.product.sku] || 0);
+      const left = i.product.stock - gone;
+      if (left < i.qty) {
+        return res.status(409).json({
+          error: left < 1
+            ? i.product.name + ' has just gone.'
+            : 'Only ' + left + ' of ' + i.product.name + ' is left.',
+          sku: i.product.sku,
+        });
+      }
+    }
+  } else {
+    console.error('[checkout] selling without an inventory check — ' + inv.reason);
+  }
+
   /* ---- where Stripe sends them back ------------------------------------ */
   const proto = req.headers['x-forwarded-proto'] || 'https';
   const host = req.headers['x-forwarded-host'] || req.headers.host;
@@ -121,6 +145,9 @@ module.exports = async function handler(req, res) {
 
   const params = {
     mode: 'payment',
+    /* Stripe's minimum. An abandoned basket stops holding its pieces after
+       half an hour rather than sitting on a one-of-one for a day. */
+    expires_at: Math.floor(Date.now() / 1000) + 1800,
     success_url: origin + '/?paid=1&session_id={CHECKOUT_SESSION_ID}',
     cancel_url: origin + '/?checkout=cancelled',
 
@@ -137,6 +164,9 @@ module.exports = async function handler(req, res) {
 
     /* So she can read an order off the payment without opening the site. */
     metadata: {
+      /* /api/stock reads this back to work out what has sold. Keep it a
+         plain comma-separated list — it is parsed, not just read. */
+      skus: items.map((i) => Array(i.qty).fill(i.product.sku).join(',')).join(','),
       basket: items.map((i) => i.product.sku + ' x' + i.qty).join(', '),
     },
 

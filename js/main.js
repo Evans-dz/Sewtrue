@@ -270,6 +270,51 @@
   }
 
   /* ======================================================================
+     WHAT IS LEFT
+
+     Stripe is the inventory. /api/stock says what has sold and what is being
+     paid for right now; `made` is what she cut, so `stock` is simply what is
+     left of it. Re-derived from `made` every time rather than decremented,
+     so a second sync can never double-count.
+     ====================================================================== */
+  PRODUCTS.forEach((p) => { p.made = p.stock; });
+  let stockReady = false;
+
+  async function syncStock(opts) {
+    try {
+      const r = await fetch('/api/stock', { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const inv = await r.json();
+      if (!inv || !inv.ok) {
+        /* The shop stays open on its own figures rather than showing a wall
+           of false "sold out". */
+        if (LOCAL) console.warn('[Sew True] inventory unavailable (' + ((inv && inv.reason) || '?') + ') — showing the catalogue as cut.');
+        return false;
+      }
+      PRODUCTS.forEach((p) => {
+        const sold = inv.sold[p.sku] || 0;
+        const held = inv.held[p.sku] || 0;
+        p.stock = Math.max(0, p.made - sold - held);
+        p.sold = sold >= p.made;          /* gone for good, not just held */
+      });
+      stockReady = true;
+      if (!opts || !opts.quiet) { renderCats(); renderShop(); }
+      return true;
+    } catch (err) {
+      if (LOCAL) console.warn('[Sew True] /api/stock unreachable —', err.message);
+      return false;
+    }
+  }
+
+  /* the basket asks for a re-read when a piece is refused at the till */
+  window.SewTrueSyncStock = syncStock;
+
+  /* Someone may have bought the last one while this tab sat open. */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && stockReady) syncStock();
+  });
+
+  /* ======================================================================
      SHOP
      ====================================================================== */
   const state = { cat: 'bows', size: 'all', fab: null };
@@ -323,10 +368,13 @@
 
   function cardMarkup(p) {
     const sold = p.stock < 1;
-    const stockNote = sold ? 'Sold'
+    /* Gone for good and "someone is at the till with it" are different
+       things, and a customer deserves to know which. */
+    const held = sold && !p.sold;
+    const stockNote = sold ? (held ? 'In a basket' : 'Sold')
       : (p.category === 'bows' ? 'No. ' + p.edition : p.stock + ' left');
     return `<article class="card${sold ? ' sold' : ''}" data-sku="${p.sku}" data-size="${p.size}">
-      ${sold ? '<span class="tag">Sold out</span>' : ''}
+      ${sold ? `<span class="tag">${held ? 'Held' : 'Sold'}</span>` : ''}
       <div class="card-top"><span>${topLabel(p)}</span><span>${stockNote}</span></div>
       <button class="card-open" type="button" data-qv="${p.sku}" aria-label="Look closer at ${p.name}">
         <span class="card-art"><span class="card-door" aria-hidden="true"></span>${window.bowMarkup(p, null, { strap: false })}</span>
@@ -337,7 +385,7 @@
         <span class="card-meta">${subtitleOf(p)}</span>
       </button>
       ${sold
-        ? '<p class="note card-add">Gone. That fabric is finished.</p>'
+        ? `<p class="note card-add">${held ? 'Someone is paying for it. Check back in half an hour.' : 'Gone. There was only ever one.'}</p>`
         : `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`}
     </article>`;
   }
@@ -628,7 +676,8 @@
         `<dt>Make</dt><dd>${s.bound ? 'Single layer, edge bound by hand' : (s.layers === 2 ? 'Two fabrics, sewn back to back' : 'Single fabric')}</dd>` +
         `<dt>Hanger</dt><dd>Leather strap, fits a standard wreath hook</dd>`;
     const stock = $('#qv-stock');
-    stock.textContent = p.stock < 1 ? 'Sold. That one is finished for good.'
+    stock.textContent = p.stock < 1
+      ? (p.sold ? 'Sold. That one is finished for good.' : 'In someone\'s basket right now.')
       : p.stock === 1 ? 'One of one. When it goes, it is gone.'
       : p.stock + ' left.';
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
@@ -858,6 +907,7 @@
     wireNotify();
     buildReel();
     wireReel();
+    syncStock();   /* Stripe has the last word on what is left */
     window.__doorShots = buildDoor();
     motion();
   });

@@ -151,8 +151,27 @@
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })) }),
     })
-      .then((r) => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
-      .then((d) => { if (d && d.url) { window.location.href = d.url; } else throw new Error('No session URL'); })
+      .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, status: r.status, d })))
+      .then(({ ok, status, d }) => {
+        if (ok && d && d.url) { window.location.href = d.url; return; }
+        btn.disabled = false; btn.textContent = 'Checkout';
+
+        /* 409 is the one that matters: something in the basket went while
+           they were deciding. Say which, take it out, and let the shop
+           catch up — do not offer to email an order for a bow that is gone. */
+        if (status === 409) {
+          if (d && d.sku) remove(d.sku);
+          const err = $('#checkout-error');
+          if (err) {
+            err.hidden = false;
+            err.innerHTML = `<p>${(d && d.error) || 'One of those has just gone.'}</p>
+              <p>It has been taken out of your basket. Everything else is still yours.</p>`;
+          }
+          if (window.SewTrueSyncStock) window.SewTrueSyncStock();
+          return;
+        }
+        showError((d && d.error) || 'Card checkout is not responding.');
+      })
       .catch((err) => {
         btn.disabled = false; btn.textContent = 'Checkout';
         showError('Card checkout is not responding. ' + err.message);
