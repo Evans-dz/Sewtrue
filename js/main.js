@@ -12,31 +12,45 @@
   const fabric = (id) => FABRICS.find((f) => f.id === id) || { name: id, pattern: 'chambray' };
 
   /* ======================================================================
-     THE BOW — draws a product from its own cloth.
-     If the product carries a photo, the photo wins; if the photo 404s we
-     fall back to the drawing rather than showing a broken frame.
+     THE PRODUCT TILE — a photograph, or an honest blank.
+     There is no drawn artwork left on this site, so when a photo is missing
+     we say so rather than substituting an illustration of a bow.
      ====================================================================== */
+  function blankTile(p, label) {
+    return `<div class="reel-blank" role="img" aria-label="${p.name} — photograph coming">
+      <span>${SIZES[p.size] ? SIZES[p.size].label : (p.category || '')}</span>
+      <b>${p.name}</b><em>${label || 'Photograph coming'}</em></div>`;
+  }
   window.bowMarkup = function (p, height, opts) {
     const o = opts || {};
-    if (p.photo && !o.drawn) {
-      const b = 'assets/photos/bow-' + p.photo;
-      return `<img src="${b}-560.jpg" srcset="${b}-560.jpg 420w, ${b}.jpg 900w"
-        sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}" width="900" height="1200"
-        alt="${p.name} — ${SIZES[p.size].label}" loading="lazy" decoding="async"
-        onerror="window.bowFallback(this,'${p.sku}')">`;
-    }
-    const size = SIZES[p.size];
-    const a = fabric(p.fabrics[0]).pattern;
-    const b = fabric(p.fabrics[1] || p.fabrics[0]).pattern;
-    const style = `--fab-a:url(#${a});--fab-b:url(#${b});` +
-                  `--strap:${o.strap === false ? 'none' : 'block'}`;
-    return `<svg class="bow" viewBox="0 0 400 470"${height ? ' height="' + height + '"' : ''}
-            style="${style}" role="img" aria-label="${p.name}"><use href="#${size.layers === 2 ? 'bow2' : 'bow'}"/></svg>`;
+    if (!p.photo) return blankTile(p);
+    const b = 'assets/photos/bow-' + p.photo;
+    return `<img src="${b}-560.jpg" srcset="${b}-560.jpg 420w, ${b}.jpg 900w"
+      sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}" width="900" height="1200"
+      alt="${p.name} — ${SIZES[p.size].label}" loading="lazy" decoding="async"
+      onerror="window.bowFallback(this,'${p.sku}')">`;
   };
   window.bowFallback = function (img, sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
-    img.outerHTML = window.bowMarkup(p, null, { drawn: true });
+    img.outerHTML = blankTile(p, 'Photograph missing');
   };
+
+  /* ======================================================================
+     THE SEASON — one drop dresses the whole site.
+     Colour tokens are written onto <html> from config.js, so a new season
+     never means touching CSS.
+     ====================================================================== */
+  let SEASON = null;
+  function applySeason() {
+    const d = nextDrop();
+    const id = (d && d.season) || SEASON_BETWEEN;
+    SEASON = (id && SEASONS[id]) ? Object.assign({ id }, SEASONS[id]) : null;
+    if (!SEASON) return;
+    const root = document.documentElement;
+    root.setAttribute('data-season', SEASON.id);
+    const tint = SEASON.tint || {};
+    Object.keys(tint).forEach((k) => root.style.setProperty(k, tint[k]));
+  }
 
   /* ======================================================================
      SITE FACTS
@@ -57,14 +71,193 @@
   }
 
   /* ======================================================================
+     THE SEASON REEL — the hero.
+
+     Plays the current drop in order and loops. It can be dragged, tapped,
+     arrowed or tabbed through, and it stops the moment anyone touches it or
+     looks away from the tab. Every frame is a photograph; a piece that has
+     not been shot yet gets an honest "on the machine" card instead of a
+     stand-in image of something else.
+     ====================================================================== */
+  const REEL = { i: 0, items: [], timer: null, dwell: 5200, held: false };
+
+  /* Stand-in badges are a working aid, not something a customer should read.
+     They show while the site is being built locally and never in production. */
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) ||
+                location.protocol === 'file:';
+
+  function reelItems() {
+    if (SEASON && SEASON.reel && SEASON.reel.length) return SEASON.reel;
+    /* No season reel configured — never leave the hero empty. Fall back to
+       whatever is actually in the shop. */
+    return PRODUCTS.filter((p) => p.stock > 0 && p.photo).slice(0, 5).map((p) => ({
+      name: p.name, tag: SIZES[p.size].label, meta: money(SIZES[p.size].price),
+      photo: 'assets/photos/bow-' + p.photo + '.jpg', href: '#shop',
+    }));
+  }
+
+  function buildReel() {
+    const stage = $('#reel-stage'); if (!stage) return;
+    const items = REEL.items = reelItems();
+    if (!items.length) { $('#reel').hidden = true; return; }
+
+    stage.innerHTML = items.map((it, i) => {
+      const body = it.photo
+        ? `<img src="${it.photo}" alt="${it.name} — ${it.tag || ''}" width="900" height="1200"
+             ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">` +
+          (it.standin && LOCAL ? '<span class="reel-standin">Stand-in photo</span>' : '')
+        : `<div class="reel-blank"><span>${it.tag || ''}</span><b>${it.name}</b>
+             <em>Still on the machine</em></div>`;
+      return `<div class="reel-frame${i ? '' : ' on'}" data-i="${i}">${body}</div>`;
+    }).join('');
+
+    const track = $('#reel-track');
+    track.innerHTML = items.map((it, i) =>
+      `<button class="reel-tick" type="button" data-reel="${i}"
+        aria-label="${it.name}${it.meta ? ' — ' + it.meta : ''}"><i></i></button>`).join('');
+    track.style.setProperty('--dwell', (REEL.dwell / 1000) + 's');
+
+    const season = $('#reel-season');
+    if (season) season.textContent = SEASON ? SEASON.name : SITE.name;
+
+    show(0);
+    if (!REDUCED) play();
+
+    /* A note for whoever is updating the site, not for the page. */
+    if (LOCAL) {
+      const left = items.filter((x) => x.standin || !x.photo).map((x) => x.name);
+      if (left.length) console.info('[Sew True] reel photos still to replace: ' + left.join(', '));
+    }
+  }
+
+  function show(i) {
+    const items = REEL.items;
+    if (!items.length) return;
+    i = ((i % items.length) + items.length) % items.length;
+    REEL.i = i;
+    const it = items[i];
+
+    $$('.reel-frame').forEach((f) => f.classList.toggle('on', +f.dataset.i === i));
+    $$('.reel-tick').forEach((t, n) => {
+      t.classList.remove('run');
+      t.classList.toggle('on', n === i);
+      t.classList.toggle('done', n < i);
+      t.setAttribute('aria-current', n === i ? 'true' : 'false');
+    });
+
+    const tag = $('#reel-tag'); if (tag) tag.textContent = it.tag || '';
+    const meta = $('#reel-meta'); if (meta) meta.textContent = it.meta || '';
+    const name = $('#reel-name');
+    if (name) name.innerHTML = it.href
+      ? `<a href="${it.href}">${it.name}</a>` : it.name;
+    const cap = $('#reel-cap');
+    if (cap) cap.textContent = it.photo
+      ? (SEASON ? 'In the ' + SEASON.name + ' drop.' : 'In the shop now.')
+      : 'Not photographed yet — it goes up with the drop.';
+  }
+
+  function play() {
+    stop();
+    const tick = $$('.reel-tick')[REEL.i];
+    if (tick) { void tick.offsetWidth; tick.classList.add('run'); }
+    REEL.timer = setTimeout(() => { show(REEL.i + 1); play(); }, REEL.dwell);
+  }
+  function stop() {
+    clearTimeout(REEL.timer); REEL.timer = null;
+    const tick = $$('.reel-tick')[REEL.i];
+    if (tick) tick.classList.remove('run');
+  }
+  function goto(i, hold) {
+    show(i);
+    if (hold || REDUCED) stop(); else play();
+  }
+
+  function wireReel() {
+    const plate = $('#reel'); if (!plate) return;
+    const track = $('#reel-track');
+
+    /* hover, focus and a hidden tab all pause it */
+    plate.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') stop(); });
+    plate.addEventListener('pointerleave', () => { if (!REEL.held && !REDUCED) play(); });
+    plate.addEventListener('focusin', stop);
+    plate.addEventListener('focusout', (e) => {
+      if (!plate.contains(e.relatedTarget) && !REDUCED) play();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else if (!REDUCED && !REEL.held) play();
+    });
+
+    /* tap a stitch */
+    track.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-reel]');
+      if (t) goto(+t.getAttribute('data-reel'));
+    });
+
+    /* drag the track to scrub */
+    const at = (x) => {
+      const r = track.getBoundingClientRect();
+      return Math.floor(((x - r.left) / r.width) * REEL.items.length);
+    };
+    track.addEventListener('pointerdown', (e) => {
+      REEL.held = true; stop();
+      track.setPointerCapture(e.pointerId);
+      goto(at(e.clientX), true);
+    });
+    track.addEventListener('pointermove', (e) => {
+      if (!REEL.held) return;
+      const i = at(e.clientX);
+      if (i !== REEL.i) goto(i, true);
+    });
+    const release = () => { REEL.held = false; if (!REDUCED) play(); };
+    track.addEventListener('pointerup', release);
+    track.addEventListener('pointercancel', release);
+
+    /* arrow through it */
+    track.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      const i = REEL.i + (e.key === 'ArrowRight' ? 1 : -1);
+      goto(i, true);
+      const t = $$('.reel-tick')[REEL.i]; if (t) t.focus();
+    });
+
+    /* the picture itself is a link to the thing */
+    $('#reel-stage').addEventListener('click', () => {
+      const it = REEL.items[REEL.i];
+      if (it && it.href) {
+        const el = document.querySelector(it.href);
+        if (el && window.lenisInstance) window.lenisInstance.scrollTo(el, { offset: -70 });
+        else if (el) el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
+      }
+    });
+  }
+
+  /* ======================================================================
      SHOP
      ====================================================================== */
-  const state = { size: 'all', fab: null };
+  const state = { cat: 'bows', size: 'all', fab: null };
 
   function matches(p) {
+    if (p.category !== state.cat) return false;
     if (state.fab && p.fabrics.indexOf(state.fab) === -1) return false;
     if (state.size !== 'all' && p.size !== state.size) return false;
     return true;
+  }
+
+  const catOf = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[0];
+  const inStock = (id) => PRODUCTS.filter((p) => p.category === id && p.stock > 0).length;
+
+  /* The whole line is on show from day one. A category with nothing in it yet
+     says so plainly instead of rendering an empty grid. */
+  function renderCats() {
+    const el = $('#cats'); if (!el) return;
+    el.innerHTML = CATEGORIES.map((c) => {
+      const n = inStock(c.id);
+      const on = c.id === state.cat;
+      return `<button class="cat${on ? ' is-on' : ''}" type="button" role="tab"
+        aria-selected="${on}" data-cat="${c.id}">${c.label}
+        <small>${c.live && n ? n + ' ready' : 'Coming soon'}</small></button>`;
+    }).join('');
   }
 
   function cardMarkup(p) {
@@ -91,12 +284,39 @@
 
   function renderShop() {
     const grid = $('#shop-grid'); if (!grid) return;
+    const cat = catOf(state.cat);
+    const soon = $('#shop-soon');
+    const sizes = $('#size-filters');
+    const count = $('#shop-count');
+    const live = cat.live && inStock(cat.id) > 0;
+
+    /* Announced but not stocked — a shelf, not an empty grid. */
+    if (!live) {
+      grid.innerHTML = '';
+      grid.hidden = true;
+      if (sizes) sizes.hidden = true;
+      if (count) count.textContent = '';
+      if (soon) {
+        soon.hidden = false;
+        soon.innerHTML = `<p class="eyebrow">${cat.label}</p>
+          <h3>Coming soon.</h3>
+          <p>${cat.note}</p>
+          <a class="btn btn-quiet" href="#drops">Tell me when it drops</a>`;
+      }
+      return;
+    }
+
+    if (soon) { soon.hidden = true; soon.innerHTML = ''; }
+    grid.hidden = false;
+    if (sizes) sizes.hidden = cat.id !== 'bows';
+
     const list = PRODUCTS.filter(matches);
     grid.innerHTML = list.map(cardMarkup).join('');
 
-    const count = $('#shop-count');
     const n = list.length;
-    let label = n + (n === 1 ? ' bow' : ' bows');
+    const unit = cat.id === 'bows' ? (n === 1 ? ' bow' : ' bows')
+                                   : ' ' + cat.label.toLowerCase();
+    let label = n + unit;
     if (state.fab) label += ' in ' + fabric(state.fab).name;
     else if (state.size !== 'all') label += ' · ' + SIZES[state.size].label;
     count.innerHTML = label + ((state.fab || state.size !== 'all')
@@ -111,15 +331,42 @@
   const NUMBER = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight',
     'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen'];
 
+  /* A swatch is a crop of a real bow in that cloth. Cloth with nothing sewn
+     in it yet shows as a plain tile — we never draw a fabric we do not have. */
+  function fabricShot(id) {
+    const front = PRODUCTS.find((p) => p.photo && p.fabrics[p.fabrics.length - 1] === id);
+    const any = front || PRODUCTS.find((p) => p.photo && p.fabrics.indexOf(id) > -1);
+    return any ? 'assets/photos/bow-' + any.photo + '-560.jpg' : null;
+  }
+
   function renderQuilt() {
     const q = $('#quilt'); if (!q) return;
+
+    /* The wall follows the drop. No season set → everything in the book. */
+    let ids = FABRICS.map((f) => f.id);
+    if (SEASON && SEASON.cloth && SEASON.cloth.length) {
+      const known = (id) => FABRICS.some((f) => f.id === id);
+      /* An id that is not in FABRICS is a typo, not a fabric. Say so while
+         the site is being worked on rather than quietly dropping the tile. */
+      if (LOCAL) SEASON.cloth.filter((id) => !known(id)).forEach((id) =>
+        console.warn('[Sew True] season cloth "' + id + '" is not in FABRICS (catalog.js) — tile skipped.'));
+      ids = SEASON.cloth.filter(known);
+    }
+
     const head = document.querySelector('#fabrics .wipe');
-    if (head) head.textContent = (NUMBER[FABRICS.length] || FABRICS.length) + ' fabrics in rotation.';
-    q.innerHTML = FABRICS.map((f) => {
-      const n = PRODUCTS.filter((p) => p.fabrics.indexOf(f.id) > -1 && p.stock > 0).length;
-      return `<button class="swatch" type="button" data-fab="${f.id}"
+    if (head) head.textContent = (NUMBER[ids.length] || ids.length) +
+      (SEASON ? ' fabrics in this drop.' : ' fabrics in rotation.');
+
+    q.innerHTML = ids.map((id) => {
+      const f = fabric(id);
+      const n = PRODUCTS.filter((p) => p.fabrics.indexOf(id) > -1 && p.stock > 0).length;
+      const shot = n ? fabricShot(id) : null;
+      if (!shot) {
+        return `<div class="swatch empty"><span><b>${f.name}</b><em>Cut and coming</em></span></div>`;
+      }
+      return `<button class="swatch" type="button" data-fab="${id}"
         aria-label="${f.name} — ${n} in the shop">
-        <svg viewBox="0 0 210 210" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="210" height="210" fill="url(#${f.pattern})"/></svg>
+        <img src="${shot}" alt="" loading="lazy" decoding="async" width="560" height="747">
         <span>${f.name}</span></button>`;
     }).join('');
   }
@@ -136,12 +383,20 @@
         <td>${s.layers === 2 ? 'Two fabrics' : 'One fabric'}</td><td>${money(s.price)}</td></tr>`;
     }).join('');
 
+    /* Each frame is exactly as wide as that bow really is, next to the others.
+       The photographs inside are her own, so this is a measurement rather than
+       an illustration. A front door is 36 inches for scale. */
     const row = $('#scale-row');
     if (row) row.innerHTML = order.map((k) => {
       const s = SIZES[k];
-      const h = Math.round(s.w * 8.6);
-      return `<div class="scale-item"><svg viewBox="0 0 400 470" height="${h}" aria-hidden="true">
-        <use href="#bow-line"/></svg><b>${s.label}</b></div>`;
+      const shot = SIZE_SHOTS[k];
+      const art = shot
+        ? `<img src="assets/photos/bow-${shot}-560.jpg" alt="" loading="lazy"
+             decoding="async" width="560" height="747">`
+        : '';
+      return `<div class="scale-item" style="--w:calc(var(--u) * ${s.w})">
+        <div class="scale-shot">${art}</div>
+        <b>${s.label}</b><i>${s.w}&#8243;</i></div>`;
     }).join('');
   }
 
@@ -314,7 +569,7 @@
   window.SewTrueFly = function (fromEl) {
     if (REDUCED) return bump();
     const card = fromEl.closest('.card') || fromEl.closest('.qv-card');
-    const art = card && card.querySelector('.bow, img');
+    const art = card && card.querySelector('img');
     const target = $('.basket-btn');
     if (!art || !target) return bump();
     const a = art.getBoundingClientRect(), b = target.getBoundingClientRect();
@@ -401,10 +656,6 @@
       { clipPath: 'inset(0 0 0 0)', ease: 'none',
         scrollTrigger: { trigger: '.foot', start: 'top 95%', end: 'top 35%', scrub: .6 } });
 
-    gsap.fromTo('.foot-bow-art', { opacity: 0, scale: .8, rotate: -8 },
-      { opacity: 1, scale: 1, rotate: 0, duration: .9, ease: 'back.out(1.7)',
-        scrollTrigger: { trigger: '.foot', start: 'top 55%' } });
-
     /* plate drifts a little as the hero leaves */
     gsap.to('.plate', {
       yPercent: -8, rotate: .4, ease: 'none',
@@ -426,36 +677,6 @@
         if (rail) rail.classList.toggle('live', self.progress > 0.004);
       },
     });
-
-    /* ---- Idea 1: turn the bow ----------------------------------------- */
-    const bow = $('#bow3d');
-    const hero = $('.hero');
-    if (bow && hero) {
-      const sheen = bow.querySelector('.b3-sheen');
-      let mx = 0, my = 0, sy = 0;
-      const set = () => {
-        const ry = mx * 15 + sy * 9;
-        const rx = my * -8;
-        bow.style.transform = `rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg)`;
-        if (sheen) {
-          sheen.style.opacity = Math.min(.85, Math.abs(ry) / 20).toFixed(3);
-          sheen.style.transform = `translateZ(22px) translateX(${(-ry * 1.7).toFixed(1)}%)`;
-        }
-      };
-      hero.addEventListener('pointermove', (e) => {
-        if (e.pointerType === 'touch') return;
-        const r = hero.getBoundingClientRect();
-        mx = ((e.clientX - r.left) / r.width) * 2 - 1;
-        my = ((e.clientY - r.top) / r.height) * 2 - 1;
-        set();
-      });
-      hero.addEventListener('pointerleave', () => { mx = 0; my = 0; set(); });
-      ScrollTrigger.create({
-        trigger: '.hero', start: 'top top', end: 'bottom top', scrub: .5,
-        onUpdate: (self) => { sy = self.progress; set(); },
-      });
-      set();
-    }
 
     /* ---- Idea 2: the door --------------------------------------------- */
     const shots = window.__doorShots;
@@ -489,6 +710,16 @@
      WIRING
      ====================================================================== */
   document.addEventListener('click', (e) => {
+    const cat = e.target.closest('[data-cat]');
+    if (cat) {
+      state.cat = cat.getAttribute('data-cat');
+      state.size = 'all'; state.fab = null;
+      $$('.pill').forEach((b) => b.classList.toggle('is-on', b.getAttribute('data-filter') === 'all'));
+      $$('.swatch').forEach((sw) => sw.classList.remove('is-on'));
+      renderCats();
+      renderShop();
+      return;
+    }
     const pill = e.target.closest('.pill');
     if (pill) {
       state.size = pill.getAttribute('data-filter');
@@ -503,6 +734,8 @@
       const id = sw.getAttribute('data-fab');
       state.fab = state.fab === id ? null : id;
       state.size = 'all';
+      state.cat = 'bows';
+      renderCats();
       $$('.pill').forEach((b) => b.classList.toggle('is-on', b.getAttribute('data-filter') === 'all'));
       $$('.swatch').forEach((s) => s.classList.toggle('is-on', s === sw && state.fab));
       renderShop();
@@ -529,11 +762,15 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     fillSite();
+    applySeason();      /* must run first — the shop and the wall read from it */
+    renderCats();
     renderShop();
     renderQuilt();
     renderSizes();
     renderDrops();
     wireNotify();
+    buildReel();
+    wireReel();
     window.__doorShots = buildDoor();
     motion();
   });

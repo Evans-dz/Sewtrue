@@ -39,6 +39,9 @@ a{color:inherit}
 h1,h2,h3,h4{margin:0;font-weight:400}
 p{margin:0 0 1em}
 button{font:inherit;color:inherit}
+/* A class that sets `display` outranks the UA rule for [hidden], so the
+   attribute has to win explicitly or hiding a flex/grid block does nothing. */
+[hidden]{display:none!important}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .skip{position:absolute;left:-999px;top:0;z-index:200;background:var(--ink);color:var(--paper);padding:12px 18px}
 .skip:focus{left:12px;top:12px}
@@ -51,7 +54,6 @@ button{font:inherit;color:inherit}
   mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
 }
-.fabric-defs{position:absolute;width:0;height:0;overflow:hidden}
 
 /* -- type ----------------------------------------------------------------- */
 .display{font-family:var(--serif);font-weight:400;line-height:.98;letter-spacing:-.015em;
@@ -173,8 +175,6 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .card-top{display:flex;justify-content:space-between;font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;
   color:var(--muted);position:relative;z-index:1}
 .card-art{position:relative;padding:6px 0 2px;display:grid;place-items:end center;min-height:210px}
-.card-art .bow{width:auto;height:200px;transition:transform .5s var(--ease)}
-.card:hover .card-art .bow{transform:translateY(-4px) rotate(-1deg)}
 .card-art img{height:200px;width:100%;object-fit:cover}
 .card-door{display:none}
 .card-bot{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
@@ -310,7 +310,6 @@ body.drawer-open .basket{transform:none}
 .basket-empty span{display:block;font-family:var(--serif);font-style:italic;margin-top:.6em;font-size:.98rem}
 .line{display:grid;grid-template-columns:64px 1fr auto;gap:14px;padding:16px 0;border-bottom:1px solid var(--rule)}
 .line-thumb{display:grid;place-items:center}
-.line-thumb .bow{width:100%;height:auto}
 .line-thumb img{width:64px;height:64px;object-fit:cover}
 .line h4{font-family:var(--serif);font-size:1.06rem;margin:0 0 .18em;font-weight:400}
 .line-meta{font-size:.76rem;color:var(--muted);margin:0 0 .7em}
@@ -360,7 +359,6 @@ body.drawer-open .basket{transform:none}
   letter-spacing:.14em;text-transform:uppercase;color:var(--muted);z-index:2}
 .qv-art{background:var(--paper-2);display:grid;place-items:center;padding:18px;position:relative}
 .qv-art::before{content:'';position:absolute;inset:8px;border:1px solid var(--rule)}
-.qv-art .bow{width:auto;height:min(46vh,330px)}
 .qv-art img{width:100%;height:100%;object-fit:cover}
 .qv-body .display{font-size:2.1rem;margin:0 0 .18em}
 .qv-price{font-family:var(--serif);font-size:1.4rem;margin:0 0 .5em}
@@ -385,7 +383,6 @@ body.drawer-open .basket{transform:none}
   .split-art{order:-1}
   .countdown-card{grid-template-columns:1fr}
   .qv-card{grid-template-columns:1fr;max-height:92vh}
-  .qv-art .bow{height:min(34vh,260px)}
 }
 @media (max-width:760px){
   .nav{display:none}
@@ -397,7 +394,6 @@ body.drawer-open .basket{transform:none}
   .drop-pieces{margin-top:6px}
   .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
   .card-art{min-height:150px}
-  .card-art .bow{height:140px}
   .cd-clock{grid-template-columns:repeat(4,1fr);gap:4px}
   .spec th,.spec td{padding:11px 6px;font-size:.9rem}
   .tape span{padding:0 12px}
@@ -431,9 +427,6 @@ body.drawer-open .basket{transform:none}
 .hero-thread{z-index:0}
 .hero-inner,.tape{position:relative;z-index:1}
 
-/* footer bow scales from its own centre */
-.foot-bow-art{transform-box:fill-box;transform-origin:center}
-
 /* no drop on the calendar */
 .countdown-card.no-drop .cd-clock,.countdown-card.no-drop .cd-blurb{display:none}
 
@@ -462,13 +455,6 @@ body.drawer-open .basket{transform:none}
 .brand-standin{display:flex;align-items:center;gap:12px}
 .brand-standin[hidden]{display:none}
 
-/* Sweatshirts — announced, nothing more */
-.coming{text-align:center;max-width:560px;margin:0 auto;padding:clamp(30px,5vw,64px) 0;
-  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
-.coming .display{margin-bottom:.35em}
-.coming-word{font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,2vw,1.5rem);
-  color:var(--muted);margin:0 0 1.4em}
-
 /* Between drops the card is a statement, not a clock */
 .countdown-card.no-drop{grid-template-columns:1fr;max-width:760px}
 .countdown-card.no-drop .cd-when{max-width:44ch}
@@ -494,16 +480,6 @@ body.drawer-open .basket{transform:none}
 .head-progress.live .spool{opacity:1}
 .spool-spin{transform-box:fill-box;transform-origin:center}
 
-/* -- Idea 1: the bow turns ------------------------------------------------ */
-.plate{perspective:1000px}
-.bow3d{position:relative;width:100%;aspect-ratio:400/470;margin:6px 0;
-  transform-style:preserve-3d;will-change:transform}
-.b3{position:absolute;inset:0;width:100%;height:100%}
-.b3-tails{transform:translateZ(-13px)}
-.b3-loops{transform:translateZ(6px)}
-.b3-knot{transform:translateZ(17px)}
-.b3-sheen{position:absolute;inset:0;pointer-events:none;transform:translateZ(22px);
-  background:linear-gradient(105deg,transparent 34%,rgba(255,252,246,.42) 50%,transparent 66%);
   opacity:0;mix-blend-mode:soft-light}
 
 /* -- Idea 2: the door ----------------------------------------------------- */
@@ -541,7 +517,6 @@ body.drawer-open .basket{transform:none}
 @media (prefers-reduced-motion:reduce){
   .door-seq{height:auto}
   .door-stage{position:static;height:auto;padding:60px 0}
-  .b3-sheen{display:none}
 }
 
 /* the door sequence degrades to a plain stack when motion is reduced */
@@ -549,6 +524,121 @@ body.drawer-open .basket{transform:none}
   .door-frame{aspect-ratio:auto;width:min(88vw,420px);transform:none!important;box-shadow:none}
   .door-shot{position:static;opacity:1!important;height:auto;margin-bottom:14px}
   .door-cap,.door-ticks{display:none}
-  .bow3d{transform:none!important}
 }
-.bow3d{transition:transform .34s cubic-bezier(.22,.61,.36,1)}
+
+/* ===================== revision 4: the season ============================= */
+/*
+   The drawn bow is gone. The hero is a reel of real photographs of whatever is
+   in the current drop, and the season is allowed to move a handful of colour
+   tokens — nothing more. Season values are written onto <html> from config.js,
+   so a new season is a data change, never a CSS change.
+*/
+:root{
+  --accent:#14110f;      /* year-round the accent IS the ink — no colour */
+  --accent-2:#3a3430;
+}
+
+/* -- the reel ------------------------------------------------------------- */
+.reel .plate-head span:last-child,
+.reel .plate-foot span:last-child{text-align:right}
+#reel-tag{color:var(--accent);font-weight:500}
+
+.reel-stage{position:relative;aspect-ratio:4/5;margin:6px 0 2px;overflow:hidden;
+  background:var(--paper-3);isolation:isolate}
+.reel-frame{position:absolute;inset:0;opacity:0;transition:opacity .9s var(--ease);
+  pointer-events:none}
+.reel-frame.on{opacity:1;pointer-events:auto}
+.reel-frame img{width:100%;height:100%;object-fit:cover;display:block;
+  transform:scale(1.04);transition:transform 9s linear}
+.reel-frame.on img{transform:scale(1.12)}
+
+/* a piece with no photograph yet. Says so, rather than faking one. */
+.reel-blank{display:grid;place-content:center;gap:.5em;text-align:center;height:100%;
+  padding:24px;background:var(--paper-2);box-shadow:inset 0 0 0 1px var(--rule)}
+.reel-blank b{font-family:var(--serif);font-weight:400;font-size:clamp(1.2rem,2.4vw,1.7rem);
+  line-height:1.15}
+.reel-blank span{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.reel-blank em{font-style:italic;font-family:var(--serif);color:var(--muted);font-size:.92rem}
+
+/* a photo standing in for one not yet shot */
+.reel-standin{position:absolute;left:10px;bottom:10px;z-index:2;font-size:.6rem;
+  letter-spacing:.18em;text-transform:uppercase;background:rgba(20,17,15,.72);
+  color:var(--paper);padding:4px 8px}
+
+/* the thread track — one stitch per piece, drag or tap to scrub */
+.reel-track{display:flex;gap:5px;margin:10px 2px 0;touch-action:pan-y;cursor:ew-resize}
+.reel-tick{flex:1 1 0;height:16px;background:none;border:0;padding:6px 0 0;cursor:pointer}
+.reel-tick i{display:block;height:2px;background:var(--rule-2);position:relative;overflow:hidden}
+.reel-tick i::after{content:'';position:absolute;inset:0;width:0;background:var(--accent)}
+.reel-tick.on i::after{width:100%}
+.reel-tick.on.run i::after{transition:width var(--dwell,5s) linear}
+.reel-tick.done i::after{width:100%;background:var(--rule-2)}
+.reel-tick:hover i,.reel-tick:focus-visible i{background:var(--accent-2)}
+#reel-name{font-family:var(--serif);letter-spacing:.02em;text-transform:none;font-size:.92rem}
+#reel-meta{font-variant-numeric:tabular-nums}
+.plate-cap{min-height:1.4em}
+
+/* -- shop: the whole line, not just bows ---------------------------------- */
+.cats{display:flex;flex-wrap:wrap;gap:clamp(14px,2.4vw,32px);margin:0 0 22px;
+  border-bottom:1px solid var(--rule)}
+.cat{background:none;border:0;padding:0 0 12px;cursor:pointer;font:inherit;font-size:.95rem;
+  letter-spacing:.03em;color:var(--muted);position:relative;transition:color .25s}
+.cat::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.cat:hover{color:var(--ink)}
+.cat.is-on{color:var(--ink)}
+.cat.is-on::after{transform:scaleX(1)}
+.cat small{display:block;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin-top:3px}
+
+/* a line that is announced but not yet stocked */
+.soon{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  padding:clamp(38px,6vw,72px) 0;text-align:center;max-width:620px;margin:0 auto}
+.soon h3{font-family:var(--serif);font-weight:400;font-size:clamp(1.9rem,4vw,3rem);
+  line-height:1.05;margin:0 0 .3em}
+.soon p{color:var(--ink-2);margin:0 auto 1.6em;max-width:44ch}
+.soon .eyebrow{margin-bottom:1em}
+
+/* -- the cloth wall, photographed ----------------------------------------- */
+.swatch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .6s var(--ease)}
+.swatch:hover img,.swatch:focus-visible img{transform:scale(1.06)}
+.swatch.empty{background:var(--paper-2);display:grid;place-content:center;padding:10px;
+  box-shadow:inset 0 0 0 1px var(--rule);cursor:default}
+.swatch.empty:hover{transform:none;box-shadow:inset 0 0 0 1px var(--rule)}
+.swatch.empty b{font-family:var(--serif);font-weight:400;font-size:.95rem;line-height:1.2;
+  display:block;margin-bottom:.4em}
+.swatch.empty em{font-style:italic;font-size:.72rem;color:var(--muted)}
+.swatch.empty span{position:static;opacity:1;background:none;padding:0;color:inherit;transform:none}
+
+/* -- sizes, at true relative scale ---------------------------------------- */
+/* Each frame is as wide as that bow really is, against the others. The photos
+   inside are her own, so this is a measurement, not an illustration. */
+/* --u is one inch. Every frame is its real width in those units. */
+.scale-row{align-items:flex-end;--u:clamp(3.2px,1.02vw,12.4px)}
+.scale-item{flex:0 0 auto;width:var(--w)}
+.scale-item .scale-shot{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--paper-3)}
+.scale-item .scale-shot img{width:100%;height:100%;object-fit:cover;display:block}
+.scale-item b{margin-top:.7em}
+.scale-item i{display:block;font-style:normal;font-size:.68rem;color:var(--muted);
+  letter-spacing:.1em;margin-top:.2em;font-variant-numeric:tabular-nums}
+
+@media (max-width:760px){
+  .scale-row{gap:8px;overflow-x:auto;justify-content:flex-start;padding-bottom:6px;
+    scrollbar-width:none}
+  .scale-row::-webkit-scrollbar{display:none}
+  /* a thumb needs more than a hairline to grab */
+  .reel-track{gap:4px}
+  .reel-tick{height:30px;padding-top:14px}
+  /* four lines on one strip beats two ragged rows */
+  .cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+    margin-inline:calc(var(--pad) * -1);padding-inline:var(--pad);gap:22px}
+  .cats::-webkit-scrollbar{display:none}
+  .cat{white-space:nowrap}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .reel-frame img{transition:none;transform:none}
+  .reel-frame.on img{transform:none}
+  .reel-tick.on.run i::after{transition:none}
+}

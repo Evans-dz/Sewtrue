@@ -23,6 +23,86 @@ const SITE = {
 };
 
 /* ---------------------------------------------------------------------------
+   SEASONS
+
+   A season is the whole face of the site: the reel that plays in the hero,
+   the colours, and which cloth is in rotation. The drop below points at one
+   of these by id, and everything follows from that. Nothing else to change.
+
+   To dress the site for a new season:
+     1. add a season here,
+     2. point the drop at it with `season: 'your-id'`.
+
+   `tint`  — the handful of colours the season is allowed to move. Leave any
+             line out and the site keeps its year-round bone-and-ink value.
+   `reel`  — the hero. Plays in order, loops, and can be scrubbed by hand.
+             Every entry is one thing in the drop, and it does NOT have to be
+             a bow — this is where the hoodies, blankets and small goods show.
+             An entry with no `photo` renders as an honest "on the machine"
+             frame rather than a fake one. Add the photo and it becomes real.
+   `cloth` — fabric ids in rotation this season, in the order they should hang
+             on the fabric wall. Ids come from FABRICS in catalog.js.
+------------------------------------------------------------------------------ */
+const SEASONS = {
+
+  'fall-halloween': {
+    name: 'Fall & Halloween',
+    /* Harvest first, spooky second. The season warms the paper and swaps the
+       accent to ember; the bones of the site stay black, bone and grain. */
+    tint: {
+      '--accent':  '#a8481c',
+      '--accent-2':'#7d3413',
+      '--paper':   '#f2e9d9',
+      '--paper-2': '#e9dfcb',
+      '--paper-3': '#dbcfb6',
+      '--noir':    '#131010',
+      '--noir-2':  '#1d1917',
+    },
+
+    /* The hero reel. Order is the order it plays.
+       TODO(client): every photo below is a STAND-IN pulled from the bows you
+       already sent — they are your real bows, but they are not the Fall &
+       Halloween pieces. Replace `photo` on each row as the real shots come in,
+       and delete the `standin: true` line when you do. */
+    reel: [
+      { name: 'Harvest Border',  tag: 'Bow',          meta: 'Regular double · $50',
+        photo: 'assets/photos/bow-0721.jpg', href: '#shop', standin: true },
+
+      { name: 'Wheat Field',     tag: 'Bow',          meta: 'Mega · $65',
+        photo: 'assets/photos/bow-0733.jpg', href: '#shop', standin: true },
+
+      { name: 'Cider House',     tag: 'Bow',          meta: 'Regular · $35',
+        photo: 'assets/photos/bow-0729.jpg', href: '#shop', standin: true },
+
+      /* No photo yet — these render as "on the machine" frames on purpose.
+         Add a `photo` line to any of them and it turns into a real frame. */
+      { name: 'The fall hoodie', tag: 'Sweatshirt',   meta: 'Cut and sewn for this drop',
+        href: '#shop' },
+
+      { name: 'Porch blanket',   tag: 'Blanket',      meta: 'First one ever made',
+        href: '#shop' },
+
+      { name: 'Pumpkin keyring', tag: 'Small goods',  meta: 'Made from the offcuts',
+        href: '#shop' },
+    ],
+
+    /* Cloth on the fabric wall this season, in hanging order.
+       TODO(client): swap these for the real Fall & Halloween bolts. Any id
+       listed here that has no bow photographed in it yet shows as an honest
+       "cut and coming" tile instead of a made-up swatch. */
+    cloth: [
+      'gingham-tan', 'check-cider', 'dot-wheat', 'patchwork',
+      'border-indigo', 'bandana-navy', 'buffalo-red', 'chambray',
+    ],
+  },
+
+};
+
+/* Which season the site wears when no drop is running. Set to null to keep
+   the plain year-round bone-and-ink look between drops. */
+const SEASON_BETWEEN = 'fall-halloween';
+
+/* ---------------------------------------------------------------------------
    DROPS
 
    ONLY ONE DROP IS EVER ON THE SITE. This list holds drops that have been
@@ -33,8 +113,9 @@ const SITE = {
    itself to the "new designs in progress" state. To announce the next drop,
    add a row here. To take the countdown down early, delete the row.
 
+   `season` points at a key in SEASONS above and dresses the whole site.
+
    Dates are LOCAL time: 'YYYY-MM-DDTHH:MM'.
-   TODO(client): the date below is a placeholder. Confirm the real one.
 
    The cadence, for reference — Spring, Summer and Fall plus Valentine's,
    Fourth of July, Halloween and Christmas. Do not paste them all in here;
@@ -42,9 +123,11 @@ const SITE = {
 ------------------------------------------------------------------------------ */
 const DROPS = [
   {
-    id: 'fall-26', name: 'Fall', year: 2026, opens: '2026-09-18T19:00',
-    blurb: 'Rust, wheat and flannel. Warm checks for a cooling porch.',
-    pieces: 24,
+    id: 'fall-halloween-26', name: 'Fall & Halloween', year: 2026,
+    opens: '2026-09-18T19:00',
+    season: 'fall-halloween',
+    blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows, the first hoodie, blankets and small goods.',
+    pieces: 24,   // TODO(client): confirm the real count once the drop is cut.
   },
 ];
 
@@ -80,4 +163,6 @@ const NOTIFY = {
   successNote: "You're on the list. We'll email the morning it opens.",
 };
 
-window.SITE = SITE; window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS; window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;
+window.SITE = SITE; window.SEASONS = SEASONS; window.SEASON_BETWEEN = SEASON_BETWEEN;
+window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS;
+window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;

@@ -43,6 +43,25 @@ const SIZES = {
   'mega-double':   { label: 'Mega Double',    price: 80, w: 20, drop: 30, layers: 2, order: 5 },
 };
 
+
+/* -- Categories -----------------------------------------------------------
+   The whole line, not just bows. Only `live: true` categories have stock and
+   render a grid; the rest show a coming-soon shelf so the shop reads as the
+   full range from day one.
+
+   To open a category: add products with that `category` id, then flip `live`.
+-------------------------------------------------------------------------- */
+const CATEGORIES = [
+  { id: 'bows',        label: 'Bows',        live: true,
+    note: 'Five sizes, cut on the grain and sewn, never glued.' },
+  { id: 'sweatshirts', label: 'Sweatshirts', live: false,
+    note: 'The first hoodie is cut for the Fall & Halloween drop.' },
+  { id: 'blankets',    label: 'Blankets',    live: false,
+    note: 'Pieced and quilted. First ones land with the drop.' },
+  { id: 'small-goods', label: 'Small goods', live: false,
+    note: 'Keyrings, scrunchies and ornaments, made from the offcuts.' },
+];
+
 /* -- The shop -------------------------------------------------------------
    `fabrics` is [outer, inner] as the bow is actually built — the inner cloth
    is the one you read first, so the site names it first.
@@ -51,35 +70,35 @@ const SIZES = {
 -------------------------------------------------------------------------- */
 const PRODUCTS = [
   /* ---------- Mini · $25 ---------- */
-  { sku: 'ST-101', name: 'Cider Mini',       size: 'mini', fabrics: ['check-cider'], photo: '0724', stock: 1 }, // CHECK: mini or regular
-  { sku: 'ST-102', name: 'Sunday Mini',      size: 'mini', fabrics: ['bandana-red'], photo: '0725', stock: 1 },
-  { sku: 'ST-103', name: 'Homestead Mini',   size: 'mini', fabrics: ['patchwork'],   photo: '0727', stock: 1 }, // CHECK: mini / regular / mega
-  { sku: 'ST-104', name: 'Picnic Mini',      size: 'mini', fabrics: ['gingham-red'], photo: '0739', stock: 1 },
+  { sku: 'ST-101', category: 'bows', name: 'Cider Mini',       size: 'mini', fabrics: ['check-cider'], photo: '0724', stock: 1 }, // CHECK: mini or regular
+  { sku: 'ST-102', category: 'bows', name: 'Sunday Mini',      size: 'mini', fabrics: ['bandana-red'], photo: '0725', stock: 1 },
+  { sku: 'ST-103', category: 'bows', name: 'Homestead Mini',   size: 'mini', fabrics: ['patchwork'],   photo: '0727', stock: 1 }, // CHECK: mini / regular / mega
+  { sku: 'ST-104', category: 'bows', name: 'Picnic Mini',      size: 'mini', fabrics: ['gingham-red'], photo: '0739', stock: 1 },
 
   /* ---------- Regular · $35 ---------- */
-  { sku: 'ST-111', name: 'Cider House',      size: 'regular', fabrics: ['check-cider'], photo: '0729', stock: 1 }, // CHECK
-  { sku: 'ST-112', name: 'Sunday Best',      size: 'regular', fabrics: ['bandana-red'], photo: '0730', stock: 1 },
-  { sku: 'ST-113', name: 'Wheat Field',      size: 'regular', fabrics: ['dot-wheat'],   photo: '0731', stock: 1 },
-  { sku: 'ST-114', name: 'Homestead',        size: 'regular', fabrics: ['patchwork'],   photo: '0732', stock: 1 }, // CHECK
+  { sku: 'ST-111', category: 'bows', name: 'Cider House',      size: 'regular', fabrics: ['check-cider'], photo: '0729', stock: 1 }, // CHECK
+  { sku: 'ST-112', category: 'bows', name: 'Sunday Best',      size: 'regular', fabrics: ['bandana-red'], photo: '0730', stock: 1 },
+  { sku: 'ST-113', category: 'bows', name: 'Wheat Field',      size: 'regular', fabrics: ['dot-wheat'],   photo: '0731', stock: 1 },
+  { sku: 'ST-114', category: 'bows', name: 'Homestead',        size: 'regular', fabrics: ['patchwork'],   photo: '0732', stock: 1 }, // CHECK
 
   /* ---------- Regular Double · $50 ---------- */
-  { sku: 'ST-121', name: 'Chambray Picnic',  size: 'regular-double', fabrics: ['chambray', 'gingham-red'],    photo: '0720', stock: 1 },
-  { sku: 'ST-122', name: 'Harvest Border',   size: 'regular-double', fabrics: ['border-indigo', 'gingham-tan'], photo: '0721', stock: 1 },
-  { sku: 'ST-123', name: 'Star Route',       size: 'regular-double', fabrics: ['gingham-red', 'star-plaid'],  photo: '0723', stock: 1 },
-  { sku: 'ST-124', name: 'Double Picnic',    size: 'regular-double', fabrics: ['gingham-red', 'buffalo-red'], photo: '0726', stock: 1 },
-  { sku: 'ST-125', name: 'Paisley Picnic',   size: 'regular-double', fabrics: ['buffalo-red', 'bandana-navy'], photo: '0737', stock: 1 },
-  { sku: 'ST-126', name: 'Chambray & Wheat', size: 'regular-double', fabrics: ['chambray', 'dot-wheat'],      photo: '0738', stock: 1 },
+  { sku: 'ST-121', category: 'bows', name: 'Chambray Picnic',  size: 'regular-double', fabrics: ['chambray', 'gingham-red'],    photo: '0720', stock: 1 },
+  { sku: 'ST-122', category: 'bows', name: 'Harvest Border',   size: 'regular-double', fabrics: ['border-indigo', 'gingham-tan'], photo: '0721', stock: 1 },
+  { sku: 'ST-123', category: 'bows', name: 'Star Route',       size: 'regular-double', fabrics: ['gingham-red', 'star-plaid'],  photo: '0723', stock: 1 },
+  { sku: 'ST-124', category: 'bows', name: 'Double Picnic',    size: 'regular-double', fabrics: ['gingham-red', 'buffalo-red'], photo: '0726', stock: 1 },
+  { sku: 'ST-125', category: 'bows', name: 'Paisley Picnic',   size: 'regular-double', fabrics: ['buffalo-red', 'bandana-navy'], photo: '0737', stock: 1 },
+  { sku: 'ST-126', category: 'bows', name: 'Chambray & Wheat', size: 'regular-double', fabrics: ['chambray', 'dot-wheat'],      photo: '0738', stock: 1 },
 
   /* ---------- Mega · $65 ---------- */
-  { sku: 'ST-131', name: 'Homestead Mega',   size: 'mega', fabrics: ['patchwork'], photo: '0728', stock: 1 }, // CHECK
-  { sku: 'ST-132', name: 'Wheat Field Mega', size: 'mega', fabrics: ['dot-wheat'], photo: '0733', stock: 1 },
+  { sku: 'ST-131', category: 'bows', name: 'Homestead Mega',   size: 'mega', fabrics: ['patchwork'], photo: '0728', stock: 1 }, // CHECK
+  { sku: 'ST-132', category: 'bows', name: 'Wheat Field Mega', size: 'mega', fabrics: ['dot-wheat'], photo: '0733', stock: 1 },
 
   /* ---------- Mega Double · $80 ---------- */
-  { sku: 'ST-141', name: 'Sunday Chambray',  size: 'mega-double', fabrics: ['chambray', 'dot-wheat'],       photo: '0719', stock: 1 },
-  { sku: 'ST-142', name: 'Front Porch',      size: 'mega-double', fabrics: ['bandana-navy', 'buffalo-red'], photo: '0722', stock: 1 },
-  { sku: 'ST-143', name: 'Night Porch',      size: 'mega-double', fabrics: ['bandana-navy', 'gingham-red'], photo: '0734', stock: 1 },
-  { sku: 'ST-144', name: 'Border Town',      size: 'mega-double', fabrics: ['border-indigo', 'buffalo-red'], photo: '0736', stock: 1 },
-  { sku: 'ST-145', name: 'Old Glory',        size: 'mega-double', fabrics: ['star-plaid', 'gingham-red'],   photo: '0740', stock: 1 },
+  { sku: 'ST-141', category: 'bows', name: 'Sunday Chambray',  size: 'mega-double', fabrics: ['chambray', 'dot-wheat'],       photo: '0719', stock: 1 },
+  { sku: 'ST-142', category: 'bows', name: 'Front Porch',      size: 'mega-double', fabrics: ['bandana-navy', 'buffalo-red'], photo: '0722', stock: 1 },
+  { sku: 'ST-143', category: 'bows', name: 'Night Porch',      size: 'mega-double', fabrics: ['bandana-navy', 'gingham-red'], photo: '0734', stock: 1 },
+  { sku: 'ST-144', category: 'bows', name: 'Border Town',      size: 'mega-double', fabrics: ['border-indigo', 'buffalo-red'], photo: '0736', stock: 1 },
+  { sku: 'ST-145', category: 'bows', name: 'Old Glory',        size: 'mega-double', fabrics: ['star-plaid', 'gingham-red'],   photo: '0740', stock: 1 },
 ];
 
 /* One representative photo per size, for the door sequence in Sizes.
@@ -89,5 +108,5 @@ const SIZE_SHOTS = {
   'mega': '0728', 'mega-double': '0722',
 };
 
-window.FABRICS = FABRICS; window.SIZES = SIZES; window.PRODUCTS = PRODUCTS;
+window.FABRICS = FABRICS; window.CATEGORIES = CATEGORIES; window.SIZES = SIZES; window.PRODUCTS = PRODUCTS;
 window.SIZE_SHOTS = SIZE_SHOTS;
