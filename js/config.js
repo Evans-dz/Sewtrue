@@ -67,7 +67,7 @@ const SEASONS = {
        variety: two on the pumpkin wreath, one on boxwood, one on cream.
        Shop cards use the tighter crop of the same shots. */
     reel: [
-      { name: 'Trick or Treat', tag: 'Halloween', meta: 'One of one',
+      { name: 'Jester',         tag: 'Halloween', meta: 'One of one',
         photo: 'assets/photos/halloween/hw-09.jpg', href: '#shop' },
       { name: 'Candy Corn',     tag: 'Halloween', meta: 'One of one',
         photo: 'assets/photos/halloween/hw-11.jpg', href: '#shop' },
