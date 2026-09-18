@@ -5,6 +5,9 @@
    draws each bow from its own cloth; add a `photo` to any row and the picture
    takes over with nothing else to change.
 
+   Every bow carries its own name and its number within its size — "Cobweb,
+   No. 2 of 8". The name is the bow; the number says how few there were.
+
    ONE OF ONE. Every bow is a different bow — no two are the same, and when one
    sells it is finished for good. That is why each has its own SKU and a stock
    of 1 rather than a quantity. Sweatshirts are the exception: two of every
@@ -58,69 +61,69 @@ const CATEGORIES = [
 const PRODUCTS = [
   /* ---------- Halloween · Mini · $35 ---------- */
   { sku: 'HW-MIN-1', category: 'bows', size: 'mini', half: 'halloween',
-    name: 'Halloween Mini', edition: '1 of 1', price: 35, stock: 1 },
+    name: 'Little Haunt', edition: '1 of 1', price: 35, stock: 1 },
 
   /* ---------- Halloween · Regular · $50 ---------- */
   { sku: 'HW-REG-1', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '1 of 8', price: 50, stock: 1 },
+    name: 'Harlequin', edition: '1 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-2', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '2 of 8', price: 50, stock: 1 },
+    name: 'Cobweb', edition: '2 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-3', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '3 of 8', price: 50, stock: 1 },
+    name: 'Candy Corn', edition: '3 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-4', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '4 of 8', price: 50, stock: 1 },
+    name: 'Black Cat', edition: '4 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-5', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '5 of 8', price: 50, stock: 1 },
+    name: 'Goblin', edition: '5 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-6', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '6 of 8', price: 50, stock: 1 },
+    name: 'Jester', edition: '6 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-7', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '7 of 8', price: 50, stock: 1 },
+    name: 'Nightshade', edition: '7 of 8', price: 50, stock: 1 },
   { sku: 'HW-REG-8', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Halloween Regular', edition: '8 of 8', price: 50, stock: 1 },
+    name: 'Hallow\'s Eve', edition: '8 of 8', price: 50, stock: 1 },
 
   /* ---------- Halloween · Mega · $75 ---------- */
   { sku: 'HW-MEG-1', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Halloween Mega', edition: '1 of 6', price: 75, stock: 1 },
+    name: 'Midnight', edition: '1 of 6', price: 75, stock: 1 },
   { sku: 'HW-MEG-2', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Halloween Mega', edition: '2 of 6', price: 75, stock: 1 },
+    name: 'Witching Hour', edition: '2 of 6', price: 75, stock: 1 },
   { sku: 'HW-MEG-3', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Halloween Mega', edition: '3 of 6', price: 75, stock: 1 },
+    name: 'Raven', edition: '3 of 6', price: 75, stock: 1 },
   { sku: 'HW-MEG-4', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Halloween Mega', edition: '4 of 6', price: 75, stock: 1 },
+    name: 'Beetle Stripe', edition: '4 of 6', price: 75, stock: 1 },
   { sku: 'HW-MEG-5', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Halloween Mega', edition: '5 of 6', price: 75, stock: 1 },
+    name: 'Sugar Skull', edition: '5 of 6', price: 75, stock: 1 },
   { sku: 'HW-MEG-6', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Halloween Mega', edition: '6 of 6', price: 75, stock: 1 },
+    name: 'Trick or Treat', edition: '6 of 6', price: 75, stock: 1 },
 
   /* ---------- Halloween · Mega Bound · $90 ---------- */
   { sku: 'HW-MBD-1', category: 'bows', size: 'mega-bound', half: 'halloween',
-    name: 'Halloween Mega Bound', edition: '1 of 2', price: 90, stock: 1 },
+    name: 'Toil & Trouble', edition: '1 of 2', price: 90, stock: 1 },
   { sku: 'HW-MBD-2', category: 'bows', size: 'mega-bound', half: 'halloween',
-    name: 'Halloween Mega Bound', edition: '2 of 2', price: 90, stock: 1 },
+    name: 'Spellbound', edition: '2 of 2', price: 90, stock: 1 },
 
   /* ---------- Fall · Regular · $75 ---------- */
   { sku: 'FA-REG-1', category: 'bows', size: 'regular', half: 'fall',
-    name: 'Fall Regular', edition: '1 of 3', price: 75, stock: 1 },
+    name: 'Harvest Moon', edition: '1 of 3', price: 75, stock: 1 },
   { sku: 'FA-REG-2', category: 'bows', size: 'regular', half: 'fall',
-    name: 'Fall Regular', edition: '2 of 3', price: 75, stock: 1 },
+    name: 'Cider House', edition: '2 of 3', price: 75, stock: 1 },
   { sku: 'FA-REG-3', category: 'bows', size: 'regular', half: 'fall',
-    name: 'Fall Regular', edition: '3 of 3', price: 75, stock: 1 },
+    name: 'First Frost', edition: '3 of 3', price: 75, stock: 1 },
 
   /* ---------- Fall · Mega · $90 ---------- */
   { sku: 'FA-MEG-1', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Fall Mega', edition: '1 of 5', price: 90, stock: 1 },
+    name: 'Wheat Field', edition: '1 of 5', price: 90, stock: 1 },
   { sku: 'FA-MEG-2', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Fall Mega', edition: '2 of 5', price: 90, stock: 1 },
+    name: 'Bonfire', edition: '2 of 5', price: 90, stock: 1 },
   { sku: 'FA-MEG-3', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Fall Mega', edition: '3 of 5', price: 90, stock: 1 },
+    name: 'Golden Hour', edition: '3 of 5', price: 90, stock: 1 },
   { sku: 'FA-MEG-4', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Fall Mega', edition: '4 of 5', price: 90, stock: 1 },
+    name: 'Windfall', edition: '4 of 5', price: 90, stock: 1 },
   { sku: 'FA-MEG-5', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Fall Mega', edition: '5 of 5', price: 90, stock: 1 },
+    name: 'Chimney Smoke', edition: '5 of 5', price: 90, stock: 1 },
 
   /* ---------- Fall · Mega Double · $80 ---------- */
   { sku: 'FA-MDB-1', category: 'bows', size: 'mega-double', half: 'fall',
-    name: 'Fall Mega Double', edition: '1 of 1', price: 80, stock: 1 },
+    name: 'Orchard', edition: '1 of 1', price: 80, stock: 1 },
 
   /* ---------- Halloween · Sweatshirts · $45 ----------
      Two of every size in every colour. Not one-of-one — these restock

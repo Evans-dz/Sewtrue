@@ -17,14 +17,15 @@ const { PRODUCTS, SIZES, APPAREL } = require('../js/catalog.js');
 const { readInventory } = require('./stock.js');
 const { DROPS, CHECKOUT } = require('../js/config.js');
 
-/* When the till opens. Reads the same row of config the page does, so the
-   button and the server can never disagree about the hour. */
-function opensAt() {
+/* When a given half opens. Reads the same rows of config the page does, so
+   the button and the till can never disagree about the hour. Halloween and
+   Fall open on different nights, so this is per piece, not per shop. */
+function opensForHalf(half) {
   if (!CHECKOUT.holdUntilDrop) return null;
-  const times = DROPS.map((d) => new Date(d.opens).getTime()).filter((t) => !isNaN(t));
-  if (!times.length) return null;
-  const next = Math.min.apply(null, times.filter((t) => t > Date.now()));
-  return isFinite(next) ? next : null;
+  const d = DROPS.find((x) => x.half === half);
+  if (!d) return null;
+  const t = new Date(d.opens).getTime();
+  return isNaN(t) ? null : t;
 }
 
 const CURRENCY = 'usd';
@@ -89,17 +90,6 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Checkout is not configured yet.' });
   }
 
-  /* ---- is the shop even open? -------------------------------------------
-     A disabled button is a suggestion. This is the rule: nothing is sold
-     before the drop opens, however the request got here. */
-  const opens = opensAt();
-  if (opens && Date.now() < opens) {
-    return res.status(423).json({
-      error: 'The drop has not opened yet.',
-      opensAt: new Date(opens).toISOString(),
-    });
-  }
-
   /* ---- read the basket ------------------------------------------------- */
   const body = await readJson(req);
   const lines = body && Array.isArray(body.lines) ? body.lines : null;
@@ -124,6 +114,20 @@ module.exports = async function handler(req, res) {
     /* One SKU cannot appear twice, or the stock check below is meaningless. */
     if (seen.has(product.sku)) return res.status(400).json({ error: 'Duplicate item in the basket.' });
     seen.add(product.sku);
+
+    /* ---- is this piece's drop open yet? --------------------------------
+       A disabled button is a suggestion. This is the rule, however the
+       request got here — and it is per piece, because Halloween opens four
+       nights before Fall. */
+    const opens = opensForHalf(product.half);
+    if (opens && Date.now() < opens) {
+      const d = DROPS.find((x) => x.half === product.half);
+      return res.status(423).json({
+        error: 'The ' + (d ? d.name : product.half) + ' drop has not opened yet.',
+        opensAt: new Date(opens).toISOString(),
+        sku: product.sku,
+      });
+    }
 
     /* One of one means one of one. */
     const qty = Math.floor(Number(line.qty));
