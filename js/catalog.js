@@ -129,15 +129,6 @@ const PRODUCTS = [
   { sku: 'HW-SW-GH-PDCHK-XL', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'xl', half: 'halloween',
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
 
-  /* ---------- TEST LISTING — DELETE AFTER ----------
-     Not a real piece. Put here to run one live card through checkout and
-     confirm the $6 shipping and the customer details come back. It is named
-     so that no passer-by could mistake it for stock, and it has no
-     photograph, so it draws as an outline rather than borrowing a real bow.
-     REMOVE THIS ROW once the test is done. */
-  { sku: 'TEST-1', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'TEST LISTING — not a real bow', price: 5, stock: 1 },
-
   /* ---------- Halloween garland ----------
      Three made, all the same, so this is one listing with a count of three
      rather than three one-of-ones. */

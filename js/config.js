@@ -183,11 +183,7 @@ const SHOP = { halves: ['halloween'] };
    Both times carry an offset so they mean the same instant on the server as
    in the browser. Set to null to remove it.
 -------------------------------------------------------------------------- */
-const EARLY_ACCESS = {
-  /* Ten minutes to buy the TEST LISTING and check the receipt. Closes itself. */
-  from: '2026-09-17T22:07:00-06:00',
-  to:   '2026-09-17T22:17:00-06:00',
-};
+const EARLY_ACCESS = null;
 
 const CHECKOUT = {
   mode: 'stripe',             // 'request' | 'stripe'
