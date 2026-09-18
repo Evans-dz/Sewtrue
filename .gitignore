@@ -1,3 +1,7 @@
 node_modules/
 .DS_Store
 .vercel
+
+# 28MB of camera PNGs — the site ships the JPEGs beside them.
+# Originals stay on disk; keep your own backup of these.
+assets/photos/halloween/*.png

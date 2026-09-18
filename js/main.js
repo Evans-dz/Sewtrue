@@ -26,11 +26,15 @@
      honest; the cloth is named when the piece is shot. */
   window.bowMarkup = function (p, height, opts) {
     const o = opts || {};
+    /* `photo` is a path stem under assets/photos, e.g. 'halloween/hw-04'.
+       Cards get the crop that fills the frame with the bow; quick view and
+       the reel get the whole door, which is how she photographs them. */
     if (p.photo && !o.drawn) {
-      const b = 'assets/photos/bow-' + p.photo;
-      return `<img src="${b}-560.jpg" srcset="${b}-560.jpg 420w, ${b}.jpg 900w"
-        sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}" width="900" height="1200"
-        alt="${p.name}" loading="lazy" decoding="async"
+      const b = 'assets/photos/' + p.photo;
+      const src = o.full ? b + '.jpg' : b + '-card.jpg';
+      return `<img src="${src}" width="${o.full ? 900 : 525}" height="${o.full ? 1200 : 700}"
+        sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}"
+        alt="${p.name} — ${topLabel(p)}" loading="lazy" decoding="async"
         onerror="window.bowFallback(this,'${p.sku}')">`;
     }
     if (p.category === 'sweatshirts') return sweatMarkup(p);
@@ -718,7 +722,7 @@
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
     const s = SIZES[p.size];
     qvLast = document.activeElement;
-    $('#qv-art').innerHTML = window.bowMarkup(p, null, { sizes: '(max-width:1000px) 88vw, 400px' });
+    $('#qv-art').innerHTML = window.bowMarkup(p, null, { full: true, sizes: '(max-width:1000px) 88vw, 400px' });
     $('#qv-no').textContent = p.sku + ' · ' + topLabel(p);
     $('#qv-name').textContent = p.name;
     $('#qv-price').textContent = money(p.price);

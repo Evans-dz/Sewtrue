@@ -62,15 +62,19 @@ const SEASONS = {
       '--noir-2':  '#1d1917',
     },
 
-    /* The hero reel. Order is the order it plays.
-       Nothing is photographed yet, so every entry renders as an honest
-       "still on the machine" card. Add a `photo` to any row and that frame
-       becomes a real picture with nothing else to change. */
+    /* The hero reel — four of her own photographs, whole door and all, so the
+       first thing anyone sees is a bow actually hanging on a door. Chosen for
+       variety: two on the pumpkin wreath, one on boxwood, one on cream.
+       Shop cards use the tighter crop of the same shots. */
     reel: [
-      { name: 'Halloween bows',     tag: 'Seventeen pieces', meta: '$35 to $90',  href: '#shop' },
-      { name: 'The Halloween hoodie', tag: 'Sweatshirt',     meta: '$45 · black or grey', href: '#shop' },
-      { name: 'Fall bows',          tag: 'Nine pieces',      meta: '$75 to $90',  href: '#shop' },
-      { name: 'Mega Bound',         tag: 'New this drop',    meta: 'Edge bound by hand', href: '#shop' },
+      { name: 'Trick or Treat', tag: 'Halloween', meta: 'One of one',
+        photo: 'assets/photos/halloween/hw-09.jpg', href: '#shop' },
+      { name: 'Candy Corn',     tag: 'Halloween', meta: 'One of one',
+        photo: 'assets/photos/halloween/hw-11.jpg', href: '#shop' },
+      { name: 'Beetle Stripe',  tag: 'Halloween', meta: 'One of one',
+        photo: 'assets/photos/halloween/hw-10.jpg', href: '#shop' },
+      { name: 'Harlequin',      tag: 'Halloween', meta: 'One of one',
+        photo: 'assets/photos/halloween/hw-04.jpg', href: '#shop' },
     ],
 
     /* Cloth on the fabric wall this season, in hanging order.
