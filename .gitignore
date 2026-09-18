@@ -5,3 +5,6 @@ node_modules/
 # 28MB of camera PNGs — the site ships the JPEGs beside them.
 # Originals stay on disk; keep your own backup of these.
 assets/photos/halloween/*.png
+
+# 48MB of camera originals for the hoodies — the site ships assets/photos/hoodies/
+assets/photos/halloween/Halloween Hoodies/

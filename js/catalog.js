@@ -133,21 +133,21 @@ const PRODUCTS = [
      Two of every size in every colour. Not one-of-one — these restock
      only if she cuts more, so stock is a real count. */
   { sku: 'HW-SW-BLK-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Black', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
   { sku: 'HW-SW-BLK-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Black', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
   { sku: 'HW-SW-BLK-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Black', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
   { sku: 'HW-SW-BLK-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Black', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
   { sku: 'HW-SW-GRY-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Grey', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
   { sku: 'HW-SW-GRY-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Grey', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
   { sku: 'HW-SW-GRY-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Grey', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
   { sku: 'HW-SW-GRY-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
-    name: 'Halloween Sweatshirt', colour: 'Grey', price: 45, stock: 2 },
+    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
 ];
 
 /* Cloth in rotation, drawn as SVG patterns until the real photographs exist.
