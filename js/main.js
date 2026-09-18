@@ -425,11 +425,11 @@
     if (p.category === 'bows') return 'One of one';
     return p.stock > 1 ? p.stock + ' made' : 'One of one';
   }
-  /* Apparel says its size because that is what you are choosing. A bow does
-     not — she would rather show the bow than a measurement. */
+  /* Apparel says its size, because that is what you are choosing. A bow says
+     nothing here — the whole grid is already the Halloween drop, and on a
+     phone the word only collides with the count beside it. */
   function topLabel(p) {
-    if (p.category === 'sweatshirts') return APPAREL[p.apparel].label;
-    return 'Halloween';
+    return p.category === 'sweatshirts' ? APPAREL[p.apparel].label : '';
   }
 
   function cardMarkup(entry) {
@@ -582,8 +582,6 @@
       $('#cd-when').textContent = BETWEEN_DROPS.note;
       const chip = $('#hero-drop-chip');
       if (chip) chip.textContent = 'in progress';
-      const nl = $('#notify-form label');
-      if (nl) nl.textContent = 'Hear about the next one first';
       return;
     }
 
@@ -630,46 +628,6 @@
     lastTick[id] = val; el.textContent = val;
     if (REDUCED) return;
     el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick');
-  }
-
-  /* -- notify -------------------------------------------------------------- */
-  function wireNotify() {
-    const form = $('#notify-form'); if (!form) return;
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = $('#notify-email');
-      const msg = $('#notify-msg');
-      const email = input.value.trim();
-      msg.classList.remove('bad');
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        msg.textContent = 'That email looks off — check it once more.';
-        msg.classList.add('bad'); input.focus(); return;
-      }
-      const drop = nextDrop();
-      const btn = form.querySelector('button');
-      btn.disabled = true; btn.textContent = 'Adding…';
-
-      const done = (text) => { btn.disabled = false; btn.textContent = 'Notify me'; msg.textContent = text; form.reset(); };
-      const fail = (why) => {
-        btn.disabled = false; btn.textContent = 'Notify me';
-        msg.classList.add('bad');
-        msg.innerHTML = `That didn't go through (${why}). <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Add me to the drop list')}">Email us instead</a> and we'll add you by hand.`;
-      };
-
-      /* No list endpoint wired yet → hand it to the mail client instead of
-         pretending. TODO(client): set NOTIFY.endpoint. */
-      if (!NOTIFY.endpoint) {
-        const sub = encodeURIComponent('Notify me — ' + (drop ? drop.name + ' ' + drop.year + ' drop' : 'next drop'));
-        window.location.href = `mailto:${SITE.email}?subject=${sub}&body=${encodeURIComponent('Please add ' + email + ' to the drop list.')}`;
-        done('Opening your email — send that and you are on the list.');
-        return;
-      }
-      fetch(NOTIFY.endpoint, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ email, drop: drop ? drop.id : null }),
-      }).then((r) => r.ok ? done(NOTIFY.successNote) : Promise.reject(new Error('HTTP ' + r.status)))
-        .catch((err) => fail(err.message));
-    });
   }
 
   /* ======================================================================
@@ -886,7 +844,6 @@
     renderCats();
     renderShop();
     renderDrops();
-    wireNotify();
     buildReel();
     wireReel();
     syncStock();   /* Stripe has the last word on what is left */

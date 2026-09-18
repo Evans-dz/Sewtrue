@@ -57,14 +57,14 @@ button{font:inherit;color:inherit}
 
 /* -- type ----------------------------------------------------------------- */
 .display{font-family:var(--serif);font-weight:400;line-height:.98;letter-spacing:-.015em;
-  font-size:clamp(2.1rem,4.4vw,4rem)}
+  font-size:clamp(2.55rem,5.4vw,4.9rem)}
 .display em{font-style:italic;font-weight:400}
-.display.xl{font-size:clamp(2.5rem,6.6vw,6.1rem)}
+.display.xl{font-size:clamp(3.05rem,7.8vw,7.2rem)}
 h1.display{font-size:clamp(2.7rem,5.9vw,5.5rem)}
 .display span{display:block;padding-bottom:.06em}
-.eyebrow{font-size:.7rem;font-weight:500;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin:0 0 1.2em}
-.lede{font-size:clamp(1.02rem,1.32vw,1.22rem);line-height:1.55;max-width:52ch;color:var(--ink-2)}
-.note{font-size:.82rem;color:var(--muted);line-height:1.5}
+.eyebrow{font-size:clamp(.74rem,.9vw,.84rem);font-weight:500;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin:0 0 1.2em}
+.lede{font-size:clamp(1.14rem,1.6vw,1.44rem);line-height:1.5;max-width:52ch;color:var(--ink-2)}
+.note{font-size:clamp(.86rem,1vw,.95rem);color:var(--muted);line-height:1.5}
 .noir .note,.noir .eyebrow{color:var(--bone-dim)}
 .noir .lede{color:#cfc6b7}
 
@@ -77,8 +77,8 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 
 /* -- buttons -------------------------------------------------------------- */
 .btn{display:inline-flex;align-items:center;gap:.5em;border:0;border-radius:999px;cursor:pointer;
-  font-family:var(--sans);font-weight:500;font-size:.9rem;letter-spacing:.02em;
-  padding:.86em 1.5em;text-decoration:none;transition:transform .3s var(--ease),background .3s,color .3s}
+  font-family:var(--sans);font-weight:500;font-size:clamp(.95rem,1.15vw,1.06rem);letter-spacing:.02em;
+  padding:.92em 1.7em;text-decoration:none;transition:transform .3s var(--ease),background .3s,color .3s}
 .btn-solid{background:var(--ink);color:var(--paper)}
 .btn-quiet{background:var(--paper-3);color:var(--ink)}
 .noir .btn-solid{background:var(--bone);color:var(--ink)}
@@ -127,7 +127,7 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .hero-type h1{margin:.1em 0 .5em}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:2em}
 .hero-plate{margin:0;display:flex;flex-direction:column;align-items:center;gap:14px}
-.plate{position:relative;background:var(--paper-2);padding:22px 22px 16px;width:min(100%,430px);
+.plate{position:relative;background:var(--paper-2);padding:24px 24px 18px;width:min(100%,520px);
   box-shadow:0 1px 0 var(--rule),0 26px 60px -34px rgba(20,17,15,.6);transform:rotate(-1.1deg)}
 .plate::before{content:'';position:absolute;inset:8px;border:1px solid var(--rule);pointer-events:none}
 .plate::after{content:'';position:absolute;inset:13px;border:1px solid var(--rule);opacity:.55;pointer-events:none}
@@ -160,14 +160,14 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
   color:rgba(236,228,214,.34);white-space:nowrap}
 .beats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,3.4vw,52px);margin-top:clamp(34px,5vw,64px)}
 .beat-no{font-family:var(--serif);font-size:2.4rem;line-height:1;color:rgba(236,228,214,.32);margin:0 0 .3em}
-.beat h3{font-family:var(--serif);font-size:1.34rem;line-height:1.18;margin:0 0 .6em}
-.beat p{color:#c3baac;font-size:.94rem;margin:0}
+.beat h3{font-family:var(--serif);font-size:clamp(1.42rem,1.9vw,1.7rem);line-height:1.18;margin:0 0 .6em}
+.beat p{color:#c3baac;font-size:clamp(1rem,1.15vw,1.08rem);margin:0}
 .seam-line{position:absolute;left:0;right:0;bottom:-6px;height:120px;color:rgba(236,228,214,.3);pointer-events:none}
 .seam-line.flip{top:-6px;bottom:auto}
 
 /* -- shop grid ------------------------------------------------------------ */
 .filters{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
-.shop-count{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 22px}
+.shop-count{font-size:clamp(.82rem,.95vw,.9rem);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 22px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:clamp(16px,2vw,26px)}
 .card{position:relative;background:var(--paper-2);padding:14px 14px 16px;text-align:left;border:0;
   cursor:pointer;display:flex;flex-direction:column;transition:transform .45s var(--ease),box-shadow .45s var(--ease),background .3s;
@@ -175,16 +175,16 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .card::before{content:'';position:absolute;inset:7px;border:1px solid var(--rule);pointer-events:none;transition:border-color .3s}
 .card:hover{transform:translateY(-5px);box-shadow:0 24px 46px -30px rgba(20,17,15,.62);background:var(--paper)}
 .card:hover::before{border-color:var(--rule-2)}
-.card-top{display:flex;justify-content:space-between;font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;
+.card-top{display:flex;justify-content:space-between;gap:8px;font-size:clamp(.68rem,.82vw,.76rem);letter-spacing:.2em;text-transform:uppercase;
   color:var(--muted);position:relative;z-index:1}
 .card-art{position:relative;padding:6px 0 2px;display:grid;place-items:end center;min-height:210px}
 .card-art img{height:200px;width:100%;object-fit:cover}
 .card-door{display:none}
 .card-bot{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
   border-top:1px solid var(--rule);padding-top:10px;margin-top:8px;position:relative;z-index:1}
-.card-name{font-family:var(--serif);font-size:1.16rem;line-height:1.1}
-.card-price{font-size:.95rem;font-weight:400;white-space:nowrap}
-.card-meta{font-size:.74rem;color:var(--muted);letter-spacing:.03em;margin:.35em 0 0;position:relative;z-index:1}
+.card-name{font-family:var(--serif);font-size:clamp(1.24rem,1.5vw,1.46rem);line-height:1.1}
+.card-price{font-size:clamp(1.02rem,1.2vw,1.14rem);font-weight:400;white-space:nowrap}
+.card-meta{font-size:clamp(.8rem,.95vw,.88rem);color:var(--muted);letter-spacing:.03em;margin:.35em 0 0;position:relative;z-index:1}
 .tag{position:absolute;top:42px;left:14px;z-index:2;background:var(--ink);color:var(--paper);
   font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;padding:5px 9px;border-radius:999px}
 .card.sold{opacity:.62}
@@ -380,7 +380,7 @@ body.drawer-open .basket{transform:none}
 @media (max-width:1000px){
   .hero-inner{grid-template-columns:1fr;gap:34px;padding-top:14px}
   .hero-plate{order:-1}
-  .plate{width:min(100%,340px)}
+  .plate{width:min(100%,430px)}
   .beats{grid-template-columns:1fr;gap:26px}
   .split{grid-template-columns:1fr}
   .split-art{order:-1}
@@ -399,7 +399,11 @@ body.drawer-open .basket{transform:none}
   .card-art{min-height:150px}
   .cd-clock{grid-template-columns:repeat(4,1fr);gap:4px}
   .spec th,.spec td{padding:11px 6px;font-size:.9rem}
-  .tape span{padding:0 12px}
+  /* Wrapped onto three lines, a left border on the first phrase of each row
+     reads as a mistake. Drop the rules and let the gaps do the separating. */
+  .tape{row-gap:2px;column-gap:4px}
+  .tape span{padding:0 10px}
+  .tape span+span{border-left:none}
   .basket{padding-inline:18px}
 }
 @media (max-width:420px){
@@ -585,7 +589,7 @@ body.drawer-open .basket{transform:none}
 /* -- shop: the whole line, not just bows ---------------------------------- */
 .cats{display:flex;flex-wrap:wrap;gap:clamp(14px,2.4vw,32px);margin:0 0 22px;
   border-bottom:1px solid var(--rule)}
-.cat{background:none;border:0;padding:0 0 12px;cursor:pointer;font:inherit;font-size:.95rem;
+.cat{background:none;border:0;padding:0 0 14px;cursor:pointer;font:inherit;font-size:clamp(1rem,1.3vw,1.18rem);
   letter-spacing:.03em;color:var(--muted);position:relative;transition:color .25s}
 .cat::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
   background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
@@ -650,13 +654,13 @@ body.drawer-open .basket{transform:none}
 .foot-bow-art{color:var(--ink)}
 
 /* The shop no longer filters by size — it just says which drop this is. */
-.drop-tag{font-family:var(--serif);font-size:clamp(1.1rem,2vw,1.45rem);letter-spacing:.01em;
+.drop-tag{font-family:var(--serif);font-size:clamp(1.3rem,2.5vw,1.8rem);letter-spacing:.01em;
   color:var(--ink);margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
 
 /* Sizes on a grouped sweatshirt card. A size that has gone stays visible and
    struck through — the gaps in the run are part of what is being sold. */
 .sizes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
-.size{font:inherit;font-size:.78rem;letter-spacing:.04em;padding:.42em .78em;cursor:pointer;
+.size{font:inherit;font-size:clamp(.84rem,1vw,.92rem);letter-spacing:.04em;padding:.42em .78em;cursor:pointer;
   background:var(--paper-3);color:var(--ink);border:0;border-radius:999px;
   transition:background .2s,color .2s,opacity .2s}
 .size:hover:not(.gone){background:var(--ink);color:var(--paper)}
