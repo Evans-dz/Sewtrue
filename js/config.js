@@ -64,19 +64,25 @@ const SEASONS = {
       '--noir-2':  '#1d1917',
     },
 
-    /* The hero reel — four of her own photographs, whole door and all, so the
-       first thing anyone sees is a bow actually hanging on a door. Chosen for
-       variety: two on the pumpkin wreath, one on boxwood, one on cream.
-       Shop cards use the tighter crop of the same shots. */
+    /* The hero reel — her own photographs, bows and sweatshirts alternating.
+       Whole door for the bows, whole garment for the sweatshirts.
+
+       KEEP THIS IN STEP WITH WHAT IS UNSOLD. The reel does not know what has
+       sold, so a piece that goes should be swapped out for one that has not,
+       or the hero advertises something nobody can buy. */
     reel: [
-      { name: 'Jester',         tag: 'Bow', meta: 'One of one',
-        photo: 'assets/photos/halloween/hw-09.jpg', href: '#shop' },
-      { name: 'Candy Corn',     tag: 'Bow', meta: 'One of one',
+      { name: 'Candy Corn',     tag: 'Bow',        meta: '$120',
         photo: 'assets/photos/halloween/hw-11.jpg', href: '#shop' },
-      { name: 'Beetle Stripe',  tag: 'Bow', meta: 'One of one',
+      { name: 'BOO Sweatshirt', tag: 'Sweatshirt', meta: '$60',
+        photo: 'assets/photos/hoodies/boo-black.jpg', href: '#shop' },
+      { name: 'Cobweb',         tag: 'Bow',        meta: '$120',
+        photo: 'assets/photos/halloween/hw-13.jpg', href: '#shop' },
+      { name: 'Ghost Sweatshirt', tag: 'Sweatshirt', meta: '$50',
+        photo: 'assets/photos/hoodies/ghost-pd-chk.jpg', href: '#shop' },
+      { name: 'Beetle Stripe',  tag: 'Bow',        meta: '$100',
         photo: 'assets/photos/halloween/hw-10.jpg', href: '#shop' },
-      { name: 'Harlequin',      tag: 'Bow', meta: 'One of one',
-        photo: 'assets/photos/halloween/hw-04.jpg', href: '#shop' },
+      { name: 'Midnight',       tag: 'Bow',        meta: '$100',
+        photo: 'assets/photos/halloween/hw-03.jpg', href: '#shop' },
     ],
 
     /* Cloth on the fabric wall this season, in hanging order.
