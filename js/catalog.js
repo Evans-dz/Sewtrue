@@ -8,6 +8,10 @@
    Every bow carries its own name and its number within its size — "Cobweb,
    No. 2 of 8". The name is the bow; the number says how few there were.
 
+   `listed: false` keeps a piece out of the shop without deleting it. Used for
+   bows that have not been photographed — the shop shows what exists, not what
+   was planned. Give it a photo and drop the flag to list it.
+
    ONE OF ONE. Every bow is a different bow — no two are the same, and when one
    sells it is finished for good. That is why each has its own SKU and a stock
    of 1 rather than a quantity. Sweatshirts are the exception: two of every
@@ -61,7 +65,7 @@ const CATEGORIES = [
 const PRODUCTS = [
   /* ---------- Halloween · Mini · $35 ---------- */
   { sku: 'HW-MIN-1', category: 'bows', size: 'mini', half: 'halloween',
-    name: 'Little Haunt', edition: '1 of 1', price: 35, stock: 1 },
+    name: 'Little Haunt', edition: '1 of 1', listed: false, price: 35, stock: 1 },
 
   /* ---------- Halloween · Regular · $50 ---------- */
   { sku: 'HW-REG-1', category: 'bows', size: 'regular', half: 'halloween',
@@ -87,17 +91,17 @@ const PRODUCTS = [
   { sku: 'HW-MEG-2', category: 'bows', size: 'mega', half: 'halloween',
     name: 'Witching Hour', edition: '2 of 6', photo: 'halloween/hw-05', price: 75, stock: 1 },
   { sku: 'HW-MEG-3', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Raven', edition: '3 of 6', price: 75, stock: 1 },
+    name: 'Raven', edition: '3 of 6', listed: false, price: 75, stock: 1 },
   { sku: 'HW-MEG-4', category: 'bows', size: 'mega', half: 'halloween',
     name: 'Beetle Stripe', edition: '4 of 6', photo: 'halloween/hw-10', price: 75, stock: 1 },
   { sku: 'HW-MEG-5', category: 'bows', size: 'mega', half: 'halloween',
     name: 'Sugar Skull', edition: '5 of 6', photo: 'halloween/hw-02', price: 75, stock: 1 },
   { sku: 'HW-MEG-6', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Trick or Treat', edition: '6 of 6', price: 75, stock: 1 },
+    name: 'Trick or Treat', edition: '6 of 6', listed: false, price: 75, stock: 1 },
 
   /* ---------- Halloween · Mega Bound · $90 ---------- */
   { sku: 'HW-MBD-1', category: 'bows', size: 'mega-bound', half: 'halloween',
-    name: 'Toil & Trouble', edition: '1 of 2', price: 90, stock: 1 },
+    name: 'Toil & Trouble', edition: '1 of 2', listed: false, price: 90, stock: 1 },
   { sku: 'HW-MBD-2', category: 'bows', size: 'mega-bound', half: 'halloween',
     name: 'Spellbound', edition: '2 of 2', photo: 'halloween/hw-12', price: 90, stock: 1 },
 

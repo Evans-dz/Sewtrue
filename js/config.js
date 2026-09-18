@@ -159,6 +159,18 @@ const BETWEEN_DROPS = {
    Formspree, Netlify Forms, a Vercel function, whatever. Leave it null and the
    cart falls back to opening a pre-filled email. It never fails silently.
 ------------------------------------------------------------------------------ */
+/* --------------------------------------------------------------------------
+   WHAT THE SHOP LISTS
+
+   Only these halves appear. Fall is cut, priced and ready in the catalogue,
+   but it belongs to its own drop on the 22nd and is not shown before then —
+   add 'fall' here when you want it on the page.
+
+   Enforced in api/checkout.js too, so an unlisted piece cannot be bought by
+   posting straight at the endpoint.
+-------------------------------------------------------------------------- */
+const SHOP = { halves: ['halloween'] };
+
 const CHECKOUT = {
   mode: 'stripe',             // 'request' | 'stripe'
 
@@ -189,9 +201,9 @@ const NOTIFY = {
    requires this same file, so the page and the till open at the same instant. */
 if (typeof window !== 'undefined') {
   window.SITE = SITE; window.SEASONS = SEASONS; window.SEASON_BETWEEN = SEASON_BETWEEN;
-  window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS;
+  window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS; window.SHOP = SHOP;
   window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;
 }
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { SITE, SEASONS, SEASON_BETWEEN, DROPS, BETWEEN_DROPS, CHECKOUT, NOTIFY };
+  module.exports = { SITE, SEASONS, SEASON_BETWEEN, DROPS, BETWEEN_DROPS, SHOP, CHECKOUT, NOTIFY };
 }

@@ -15,7 +15,7 @@
 
 const { PRODUCTS, SIZES, APPAREL } = require('../js/catalog.js');
 const { readInventory } = require('./stock.js');
-const { DROPS, CHECKOUT } = require('../js/config.js');
+const { DROPS, CHECKOUT, SHOP } = require('../js/config.js');
 
 /* When a given half opens. Reads the same rows of config the page does, so
    the button and the till can never disagree about the hour. Halloween and
@@ -114,6 +114,14 @@ module.exports = async function handler(req, res) {
     /* One SKU cannot appear twice, or the stock check below is meaningless. */
     if (seen.has(product.sku)) return res.status(400).json({ error: 'Duplicate item in the basket.' });
     seen.add(product.sku);
+
+    /* A piece the shop does not list cannot be bought by posting at the
+       endpoint either — unphotographed bows and halves held for a later drop
+       are not for sale just because their SKU is guessable. */
+    const halves = (SHOP && SHOP.halves) || null;
+    if (product.listed === false || (halves && product.half && halves.indexOf(product.half) === -1)) {
+      return res.status(404).json({ error: 'That piece is not in this drop.', sku: product.sku });
+    }
 
     /* ---- is this piece's drop open yet? --------------------------------
        A disabled button is a suggestion. This is the rule, however the

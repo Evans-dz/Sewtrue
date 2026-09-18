@@ -349,7 +349,21 @@
      ====================================================================== */
   const state = { cat: 'bows', size: 'all', fab: null };
 
+  /* The shop shows what exists and what belongs to this drop. Everything
+     else stays in the catalogue, out of sight, until its turn. */
+  function listed(p) {
+    if (p.listed === false) return false;
+    const halves = (typeof SHOP !== 'undefined' && SHOP.halves) || null;
+    if (halves && p.half && halves.indexOf(p.half) === -1) return false;
+    return true;
+  }
+  window.SewTrueListed = (sku) => {
+    const p = PRODUCTS.find((x) => x.sku === sku);
+    return !!p && listed(p);
+  };
+
   function matches(p) {
+    if (!listed(p)) return false;
     if (p.category !== state.cat) return false;
     if (state.size !== 'all' && p.size !== state.size) return false;
     return true;
@@ -357,7 +371,7 @@
 
   /* Sizes that actually have something in them, in order. */
   const sizesInStock = () => Object.keys(SIZES)
-    .filter((k) => PRODUCTS.some((p) => p.size === k && p.stock > 0))
+    .filter((k) => PRODUCTS.some((p) => listed(p) && p.size === k && p.stock > 0))
     .sort((a, b) => SIZES[a].order - SIZES[b].order);
 
   /* The size pills follow the drop rather than a hard-coded list, so a size
@@ -370,7 +384,7 @@
   }
 
   const catOf = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[0];
-  const inStock = (id) => PRODUCTS.filter((p) => p.category === id && p.stock > 0).length;
+  const inStock = (id) => PRODUCTS.filter((p) => listed(p) && p.category === id && p.stock > 0).length;
 
   /* The whole line is on show from day one. A category with nothing in it yet
      says so plainly instead of rendering an empty grid. */
@@ -381,7 +395,7 @@
       const on = c.id === state.cat;
       /* "Coming soon" means not made yet. A line that sold out has to say so,
          or the customer is told the opposite of what happened. */
-      const made = PRODUCTS.some((p) => p.category === c.id);
+      const made = PRODUCTS.some((p) => listed(p) && p.category === c.id);
       const label = n ? n + ' ready' : (c.live && made ? 'All gone' : 'Coming soon');
       return `<button class="cat${on ? ' is-on' : ''}" type="button" role="tab"
         aria-selected="${on}" data-cat="${c.id}">${c.label}
@@ -433,7 +447,7 @@
     const sizes = $('#size-filters');
     const count = $('#shop-count');
     const live = cat.live && inStock(cat.id) > 0;
-    const soldOut = cat.live && !inStock(cat.id) && PRODUCTS.some((p) => p.category === cat.id);
+    const soldOut = cat.live && !inStock(cat.id) && PRODUCTS.some((p) => listed(p) && p.category === cat.id);
 
     /* Announced but not stocked — a shelf, not an empty grid. */
     if (!live) {
@@ -464,7 +478,7 @@
     if (lede) {
       const parts = DROPS.map((d) => {
         const shut = opensForHalf(d.half);
-        if (!PRODUCTS.some((p) => p.half === d.half)) return null;
+        if (!PRODUCTS.some((p) => listed(p) && p.half === d.half)) return null;
         return shut ? d.name + ' opens ' + opensLabel(d.half) + '.' : d.name + ' is open.';
       }).filter(Boolean);
       lede.textContent = parts.length
@@ -540,7 +554,7 @@
   /* The same size costs different money in the two halves of this drop, so
      the table shows what it actually ranges between rather than one number. */
   function priceRange(sizeKey) {
-    const ps = PRODUCTS.filter((p) => p.size === sizeKey && p.stock > 0).map((p) => p.price);
+    const ps = PRODUCTS.filter((p) => listed(p) && p.size === sizeKey && p.stock > 0).map((p) => p.price);
     if (!ps.length) return '&mdash;';
     const lo = Math.min.apply(null, ps), hi = Math.max.apply(null, ps);
     return lo === hi ? money(lo) : money(lo) + '&ndash;' + money(hi);
@@ -634,7 +648,7 @@
     $('#cd-label').textContent = 'Next drop';
     $('#cd-name').textContent = next.name + ' ' + next.year;
     $('#cd-when').textContent = fmtDate(dt) + ' at ' + fmtTime(dt);
-    const made = PRODUCTS.reduce((n, p) => n + (p.made || p.stock || 0), 0);
+    const made = PRODUCTS.filter(listed).reduce((n, p) => n + (p.made || p.stock || 0), 0);
     const count = next.pieces || made;
     $('#cd-blurb').textContent = next.blurb +
       (count ? '  ' + count + ' pieces, and that is the whole run.' : '');
