@@ -652,3 +652,17 @@ body.drawer-open .basket{transform:none}
 /* The shop no longer filters by size — it just says which drop this is. */
 .drop-tag{font-family:var(--serif);font-size:clamp(1.1rem,2vw,1.45rem);letter-spacing:.01em;
   color:var(--ink);margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+
+/* Sizes on a grouped sweatshirt card. A size that has gone stays visible and
+   struck through — the gaps in the run are part of what is being sold. */
+.sizes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.size{font:inherit;font-size:.78rem;letter-spacing:.04em;padding:.42em .78em;cursor:pointer;
+  background:var(--paper-3);color:var(--ink);border:0;border-radius:999px;
+  transition:background .2s,color .2s,opacity .2s}
+.size:hover:not(.gone){background:var(--ink);color:var(--paper)}
+.size.is-on{background:var(--ink);color:var(--paper)}
+.size.gone{opacity:.36;cursor:not-allowed;text-decoration:line-through;
+  background:transparent;box-shadow:inset 0 0 0 1px var(--rule)}
+
+/* Sold is the loudest word on a sold card. */
+.tag{font-weight:600;letter-spacing:.18em}

@@ -52,8 +52,6 @@ const CATEGORIES = [
     note: 'Five sizes, cut on the grain and sewn, never glued.' },
   { id: 'sweatshirts', label: 'Sweatshirts', live: true,
     note: 'Two of every size in every colour.' },
-  { id: 'blankets',    label: 'Blankets',    live: false,
-    note: 'Pieced and quilted. First ones land with a later drop.' },
   { id: 'small-goods', label: 'Small goods', live: true,
     note: 'Garland, keyrings and ornaments, made from the offcuts.' },
 ];
@@ -93,6 +91,9 @@ const PRODUCTS = [
     name: 'Spellbound', edition: '2 of 2', photo: 'halloween/hw-12', price: 120, stock: 0 },
 
   /* ---------- Halloween sweatshirts ----------
+     `group` makes several SKUs share one card: one photograph, one price,
+     and a size to choose. A size that has gone greys out and cannot be
+     picked, which is also how the scarcity shows.
      Two designs: the appliqued BOO and the appliqued Ghost. Colour and hat
      tell one Ghost from the next, so the name carries them. */
   { sku: 'HW-SW-BOO-CHAR-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
@@ -111,23 +112,21 @@ const PRODUCTS = [
     name: 'Ghost, Checkered with Purple Hat', colour: 'Charcoal', photo: 'hoodies/ghost-chk-purp', price: 50, stock: 1 },
   { sku: 'HW-SW-GH-STRPPD-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
     name: 'Ghost, Striped with Purple Polka Dot Hat', colour: 'Charcoal', photo: 'hoodies/ghost-str-ppd', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-STRSPD-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
-    name: 'Ghost, Striped with Spotted Hat', colour: 'Charcoal', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-PSTR-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
+  { sku: 'HW-SW-GH-PSTR-S', category: 'sweatshirts', group: 'gh-pstripe', apparel: 's', half: 'halloween',
     name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-PSTR-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
+  { sku: 'HW-SW-GH-PSTR-M', category: 'sweatshirts', group: 'gh-pstripe', apparel: 'm', half: 'halloween',
     name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 0 },
-  { sku: 'HW-SW-GH-PSTR-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+  { sku: 'HW-SW-GH-PSTR-L', category: 'sweatshirts', group: 'gh-pstripe', apparel: 'l', half: 'halloween',
     name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-PSTR-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
+  { sku: 'HW-SW-GH-PSTR-XL', category: 'sweatshirts', group: 'gh-pstripe', apparel: 'xl', half: 'halloween',
     name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-PSTR-2XL', category: 'sweatshirts', apparel: '2xl', half: 'halloween',
+  { sku: 'HW-SW-GH-PSTR-2XL', category: 'sweatshirts', group: 'gh-pstripe', apparel: '2xl', half: 'halloween',
     name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-PDCHK-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
+  { sku: 'HW-SW-GH-PDCHK-M', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'm', half: 'halloween',
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
-  { sku: 'HW-SW-GH-PDCHK-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+  { sku: 'HW-SW-GH-PDCHK-L', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'l', half: 'halloween',
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 1 },
-  { sku: 'HW-SW-GH-PDCHK-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
+  { sku: 'HW-SW-GH-PDCHK-XL', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'xl', half: 'halloween',
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
 
   /* ---------- Halloween garland ----------

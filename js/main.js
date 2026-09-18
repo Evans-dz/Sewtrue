@@ -366,6 +366,27 @@
     return listed(p) && p.category === state.cat;
   }
 
+  /* Which size is showing on each grouped card. */
+  const picked = {};
+
+  /* A card is either one piece, or one sweatshirt in several sizes. */
+  function entries() {
+    const out = [];
+    const seen = new Set();
+    for (const p of PRODUCTS.filter(matches)) {
+      if (!p.group) { out.push({ lead: p, sizes: null }); continue; }
+      if (seen.has(p.group)) continue;
+      seen.add(p.group);
+      const sizes = PRODUCTS
+        .filter((x) => x.group === p.group && listed(x))
+        .sort((a, b) => APPAREL[a.apparel].order - APPAREL[b.apparel].order);
+      const chosen = sizes.find((x) => x.sku === picked[p.group] && x.stock > 0)
+        || sizes.find((x) => x.stock > 0) || sizes[0];
+      out.push({ lead: chosen, sizes });
+    }
+    return out;
+  }
+
   const catOf = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[0];
   const inStock = (id) => PRODUCTS.filter((p) => listed(p) && p.category === id && p.stock > 0).length;
 
@@ -388,7 +409,9 @@
 
   /* What the little line under the title says about this piece. */
   function subtitleOf(p) {
-    if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
+    if (p.category === 'sweatshirts') {
+      return p.group ? p.colour : p.colour + ' · ' + APPAREL[p.apparel].label;
+    }
     if (p.category === 'bows') return 'One of one';
     return p.stock > 1 ? p.stock + ' made' : 'One of one';
   }
@@ -399,26 +422,36 @@
     return 'Halloween';
   }
 
-  function cardMarkup(p) {
+  function cardMarkup(entry) {
+    const p = entry.lead;
+    const sizes = entry.sizes;
     const sold = p.stock < 1;
-    /* Gone for good and "someone is at the till with it" are different
-       things, and a customer deserves to know which. */
-    const held = sold && !p.sold;
-    const stockNote = sold ? (held ? 'In a basket' : 'Sold')
-      : (p.edition ? 'No. ' + p.edition : p.stock + ' left');
-    return `<article class="card${sold ? ' sold' : ''}" data-sku="${p.sku}" data-size="${p.size}">
-      ${sold ? `<span class="tag">${held ? 'Held' : 'Sold'}</span>` : ''}
+    const stockNote = sold ? 'Sold' : (p.edition ? 'No. ' + p.edition : p.stock + ' left');
+
+    /* Sizes for a grouped sweatshirt. A size that has gone is shown and
+       disabled rather than hidden — the gaps are the scarcity. */
+    const sizeRow = sizes ? `<div class="sizes" role="group" aria-label="Choose a size">` +
+      sizes.map((v) => {
+        const gone = v.stock < 1;
+        return `<button type="button" class="size${v.sku === p.sku ? ' is-on' : ''}${gone ? ' gone' : ''}"
+          data-pick="${v.sku}"${gone ? ' disabled aria-disabled="true"' : ''}
+          aria-label="${APPAREL[v.apparel].label}${gone ? ', sold' : ''}">${APPAREL[v.apparel].label}</button>`;
+      }).join('') + `</div>` : '';
+
+    return `<article class="card${sold ? ' sold' : ''}" data-sku="${p.sku}">
+      ${sold ? '<span class="tag">Sold</span>' : ''}
       <div class="card-top"><span>${topLabel(p)}</span><span>${stockNote}</span></div>
       <button class="card-open" type="button" data-qv="${p.sku}" aria-label="Look closer at ${p.name}">
-        <span class="card-art"><span class="card-door" aria-hidden="true"></span>${window.bowMarkup(p, null, { strap: false })}</span>
+        <span class="card-art">${window.bowMarkup(p, null, { strap: false })}</span>
         <span class="card-bot">
           <span class="card-name">${p.name}</span>
           <span class="card-price">${money(p.price)}</span>
         </span>
         <span class="card-meta">${subtitleOf(p)}</span>
       </button>
+      ${sizeRow}
       ${sold
-        ? `<p class="note card-add">${held ? 'Someone is paying for it. Check back in half an hour.' : 'Gone. There was only ever one.'}</p>`
+        ? `<p class="note card-add">Gone. There was only ever one.</p>`
         : (openFor(p)
           ? `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`
           : `<p class="note card-add">Opens ${opensLabel(p.half)}</p>`)}
@@ -454,7 +487,7 @@
     grid.hidden = false;
     if (sizes) sizes.hidden = cat.id !== 'bows';
 
-    const list = PRODUCTS.filter(matches);
+    const list = entries();
     grid.innerHTML = list.map(cardMarkup).join('');
 
     /* Two halves, two nights — say where each one stands rather than
@@ -650,7 +683,7 @@
         `<dt>Hanger</dt><dd>Leather strap, fits a standard wreath hook</dd>`;
     const stock = $('#qv-stock');
     stock.textContent = p.stock < 1
-      ? (p.sold ? 'Sold. That one is finished for good.' : 'In someone\'s basket right now.')
+      ? 'Sold. That one is finished for good.'
       : p.stock === 1 ? 'One of one. When it goes, it is gone.'
       : p.stock + ' left.';
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
@@ -658,7 +691,7 @@
     add.setAttribute('data-add', p.sku);
     const shut = !openFor(p);
     add.disabled = p.stock < 1 || shut;
-    add.textContent = p.stock < 1 ? (p.sold ? 'Sold' : 'In a basket')
+    add.textContent = p.stock < 1 ? 'Sold'
       : (shut ? 'Opens ' + opensLabel(p.half) : 'Add to basket');
 
     $('#qv').setAttribute('aria-hidden', 'false');
@@ -820,6 +853,12 @@
      WIRING
      ====================================================================== */
   document.addEventListener('click', (e) => {
+    const pick = e.target.closest('[data-pick]');
+    if (pick && !pick.disabled) {
+      const v = PRODUCTS.find((x) => x.sku === pick.getAttribute('data-pick'));
+      if (v && v.group) { picked[v.group] = v.sku; renderShop(); }
+      return;
+    }
     const cat = e.target.closest('[data-cat]');
     if (cat) {
       state.cat = cat.getAttribute('data-cat');
