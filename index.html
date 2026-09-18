@@ -263,9 +263,7 @@
 
   <nav class="nav" aria-label="Primary">
     <a href="#shop">Shop</a>
-    <a href="#sizes">Sizes</a>
     <a href="#drops">Drops</a>
-    <a href="#fabrics">Cloth</a>
     <a href="#about">About</a>
   </nav>
 
@@ -404,48 +402,11 @@
        with no stock yet render a coming-soon shelf instead of an empty grid. -->
   <div class="cats" id="cats" role="tablist" aria-label="Shop by line"></div>
 
-  <div class="filters" id="size-filters" role="group" aria-label="Filter bows by size">
-    <button type="button" class="pill is-on" data-filter="all">All bows</button>
-    <button type="button" class="pill" data-filter="mini">Mini</button>
-    <button type="button" class="pill" data-filter="regular">Regular</button>
-    <button type="button" class="pill" data-filter="regular-double">Regular double</button>
-    <button type="button" class="pill" data-filter="mega">Mega</button>
-    <button type="button" class="pill" data-filter="mega-double">Mega double</button>
-  </div>
+  <p class="drop-tag" id="drop-tag">Halloween drop</p>
 
   <p class="shop-count" id="shop-count" aria-live="polite"></p>
   <div class="grid" id="shop-grid"></div>
   <div class="soon" id="shop-soon" hidden></div>
-</section>
-
-<!-- ===================== FABRICS ===================== -->
-<section class="section tight" id="fabrics">
-  <header class="sec-head">
-    <p class="eyebrow reveal">The cloth</p>
-    <h2 class="display"><span class="wipe">The cloth in this drop.</span></h2>
-    <p class="lede reveal">Tap one to see every bow cut from it.</p>
-  </header>
-  <div class="quilt" id="quilt"></div>
-</section>
-
-<!-- ===================== SIZES ===================== -->
-<section class="section" id="sizes">
-  <header class="sec-head">
-    <p class="eyebrow reveal">Five sizes</p>
-    <h2 class="display xl"><span class="wipe">How big is a mega,</span> <span class="wipe"><em>really.</em></span></h2>
-    <p class="lede reveal">Measured across the loops, with the tails hanging. A standard front door is 36&#8243; wide.</p>
-  </header>
-
-  <div class="scale-row" id="scale-row" aria-hidden="true"></div>
-
-  <table class="spec">
-    <caption class="sr-only">Bow sizes, measurements and prices</caption>
-    <thead>
-      <tr><th scope="col">Size</th><th scope="col">Across</th><th scope="col">Drop</th><th scope="col">Layers</th><th scope="col">Price</th></tr>
-    </thead>
-    <tbody id="spec-body"></tbody>
-  </table>
-  <p class="note">Measurements are approximate — every bow is cut by hand, so expect half an inch either way.</p>
 </section>
 
 <!-- ===================== DROPS ===================== -->
@@ -558,8 +519,7 @@
       <p class="note" data-site="tagline"></p>
     </div>
     <nav aria-label="Footer">
-      <a href="#shop">Shop</a><a href="#sizes">Sizes</a><a href="#drops">Drops</a>
-      <a href="#fabrics">Cloth</a><a href="#about">About</a>
+      <a href="#shop">Shop</a><a href="#drops">Drops</a><a href="#about">About</a>
     </nav>
     <div>
       <a class="foot-link" data-site="ig-link" href="#">Instagram</a>

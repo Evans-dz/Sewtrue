@@ -347,7 +347,7 @@
   /* ======================================================================
      SHOP
      ====================================================================== */
-  const state = { cat: 'bows', size: 'all', fab: null };
+  const state = { cat: 'bows' };
 
   /* The shop shows what exists and what belongs to this drop. Everything
      else stays in the catalogue, out of sight, until its turn. */
@@ -363,24 +363,7 @@
   };
 
   function matches(p) {
-    if (!listed(p)) return false;
-    if (p.category !== state.cat) return false;
-    if (state.size !== 'all' && p.size !== state.size) return false;
-    return true;
-  }
-
-  /* Sizes that actually have something in them, in order. */
-  const sizesInStock = () => Object.keys(SIZES)
-    .filter((k) => PRODUCTS.some((p) => listed(p) && p.size === k && p.stock > 0))
-    .sort((a, b) => SIZES[a].order - SIZES[b].order);
-
-  /* The size pills follow the drop rather than a hard-coded list, so a size
-     with nothing in it never offers an empty filter. */
-  function renderSizeFilters() {
-    const el = $('#size-filters'); if (!el) return;
-    el.innerHTML = '<button type="button" class="pill is-on" data-filter="all">All bows</button>' +
-      sizesInStock().map((k) =>
-        `<button type="button" class="pill" data-filter="${k}">${SIZES[k].label}</button>`).join('');
+    return listed(p) && p.category === state.cat;
   }
 
   const catOf = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[0];
@@ -406,12 +389,14 @@
   /* What the little line under the title says about this piece. */
   function subtitleOf(p) {
     if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
-    const s = SIZES[p.size];
-    return s.w + '\u2033 across, ' + s.drop + '\u2033 drop' + (s.bound ? ', bound edge' : '');
+    if (p.category === 'bows') return 'One of one';
+    return p.stock > 1 ? p.stock + ' made' : 'One of one';
   }
+  /* Apparel says its size because that is what you are choosing. A bow does
+     not — she would rather show the bow than a measurement. */
   function topLabel(p) {
     if (p.category === 'sweatshirts') return APPAREL[p.apparel].label;
-    return SIZES[p.size].label;
+    return 'Halloween';
   }
 
   function cardMarkup(p) {
@@ -420,7 +405,7 @@
        things, and a customer deserves to know which. */
     const held = sold && !p.sold;
     const stockNote = sold ? (held ? 'In a basket' : 'Sold')
-      : (p.category === 'bows' ? 'No. ' + p.edition : p.stock + ' left');
+      : (p.edition ? 'No. ' + p.edition : p.stock + ' left');
     return `<article class="card${sold ? ' sold' : ''}" data-sku="${p.sku}" data-size="${p.size}">
       ${sold ? `<span class="tag">${held ? 'Held' : 'Sold'}</span>` : ''}
       <div class="card-top"><span>${topLabel(p)}</span><span>${stockNote}</span></div>
@@ -489,11 +474,7 @@
     const n = list.length;
     const unit = cat.id === 'bows' ? (n === 1 ? ' bow' : ' bows')
                                    : ' ' + cat.label.toLowerCase();
-    let label = n + unit;
-    if (state.fab) label += ' in ' + fabric(state.fab).name;
-    else if (state.size !== 'all') label += ' · ' + SIZES[state.size].label;
-    count.innerHTML = label + ((state.fab || state.size !== 'all')
-      ? ' &nbsp;·&nbsp; <button type="button" class="linkish" data-clear>Show everything</button>' : '');
+    count.textContent = n + unit;
 
     if (!REDUCED && window.gsap) {
       gsap.fromTo(grid.children, { opacity: 0, y: 16 },
@@ -503,89 +484,6 @@
 
   const NUMBER = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight',
     'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen'];
-
-  /* ------------------------------------------------------------------------
-     THE CLOTH WALL
-
-     No bow in this drop has a named fabric yet, so the wall cannot honestly
-     claim "three bows in this cloth" or filter by it. Until the pieces are
-     photographed and their cloth recorded, it shows the prints in rotation
-     and nothing more. Give products a `fabrics` array and it becomes a filter
-     again on its own.
-  ------------------------------------------------------------------------- */
-  const clothIsAssigned = () => PRODUCTS.some((p) => Array.isArray(p.fabrics) && p.fabrics.length);
-
-  function renderQuilt() {
-    const q = $('#quilt'); if (!q) return;
-
-    let ids = FABRICS.map((f) => f.id);
-    if (SEASON && SEASON.cloth && SEASON.cloth.length) {
-      const known = (id) => FABRICS.some((f) => f.id === id);
-      if (LOCAL) SEASON.cloth.filter((id) => !known(id)).forEach((id) =>
-        console.warn('[Sew True] season cloth "' + id + '" is not in FABRICS (catalog.js) — tile skipped.'));
-      ids = SEASON.cloth.filter(known);
-    }
-
-    const head = document.querySelector('#fabrics .wipe');
-    if (head) head.textContent = (NUMBER[ids.length] || ids.length) + ' fabrics in rotation.';
-    const lede = document.querySelector('#fabrics .lede');
-    const live = clothIsAssigned();
-    if (lede) lede.textContent = live
-      ? 'Tap one to see every bow cut from it.'
-      : 'The prints on the machine for this drop. Each bow is named for its cloth once it is photographed.';
-
-    q.innerHTML = ids.map((id) => {
-      const f = fabric(id);
-      const art = `<svg viewBox="0 0 210 210" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <rect width="210" height="210" fill="url(#${f.pattern})"/></svg>`;
-      if (!live) {
-        return `<div class="swatch still" role="img" aria-label="${f.name}">${art}
-          <span>${f.name}</span></div>`;
-      }
-      const n = PRODUCTS.filter((p) => (p.fabrics || []).indexOf(id) > -1 && p.stock > 0).length;
-      return `<button class="swatch" type="button" data-fab="${id}"
-        aria-label="${f.name} — ${n} in the shop">${art}<span>${f.name}</span></button>`;
-    }).join('');
-  }
-
-  /* ======================================================================
-     SIZES
-     ====================================================================== */
-  /* The same size costs different money in the two halves of this drop, so
-     the table shows what it actually ranges between rather than one number. */
-  function priceRange(sizeKey) {
-    const ps = PRODUCTS.filter((p) => listed(p) && p.size === sizeKey && p.stock > 0).map((p) => p.price);
-    if (!ps.length) return '&mdash;';
-    const lo = Math.min.apply(null, ps), hi = Math.max.apply(null, ps);
-    return lo === hi ? money(lo) : money(lo) + '&ndash;' + money(hi);
-  }
-
-  function renderSizes() {
-    const order = Object.keys(SIZES).sort((a, b) => SIZES[a].order - SIZES[b].order);
-
-    /* The eyebrow counts the sizes rather than asserting a number that was
-       true when it was typed. */
-    const eyebrow = document.querySelector('#sizes .eyebrow');
-    if (eyebrow) eyebrow.textContent = (NUMBER[order.length] || order.length) + ' sizes';
-    const body = $('#spec-body');
-    if (body) body.innerHTML = order.map((k) => {
-      const s = SIZES[k];
-      return `<tr><td>${s.label}</td><td>${s.w}&#8243;</td><td>${s.drop}&#8243;</td>
-        <td>${s.bound ? 'Bound edge' : (s.layers === 2 ? 'Two fabrics' : 'One fabric')}</td>
-        <td>${priceRange(k)}</td></tr>`;
-    }).join('');
-
-    /* Each bow is drawn exactly as wide as it really is next to the others.
-       Line art rather than a photograph until the drop is shot — it still
-       answers the size question honestly, which is the whole job here. */
-    const row = $('#scale-row');
-    if (row) row.innerHTML = order.map((k) => {
-      const s = SIZES[k];
-      return `<div class="scale-item" style="--w:calc(var(--u) * ${s.w})">
-        <svg class="scale-bow" viewBox="0 0 400 470" aria-hidden="true"><use href="#bow-line"/></svg>
-        <b>${s.label}</b><i>${s.w}&#8243;</i></div>`;
-    }).join('');
-  }
 
   /* ======================================================================
      THE DOOR — five real bows on one door, crossfaded by scroll
@@ -737,7 +635,7 @@
     const s = SIZES[p.size];
     qvLast = document.activeElement;
     $('#qv-art').innerHTML = window.bowMarkup(p, null, { full: true, sizes: '(max-width:1000px) 88vw, 400px' });
-    $('#qv-no').textContent = p.sku + ' · ' + topLabel(p);
+    $('#qv-no').textContent = p.sku;
     $('#qv-name').textContent = p.name;
     $('#qv-price').textContent = money(p.price);
     $('#qv-fab').textContent = p.category === 'sweatshirts'
@@ -746,11 +644,9 @@
     $('#qv-spec').innerHTML = p.category === 'sweatshirts'
       ? `<dt>Size</dt><dd>${APPAREL[p.apparel].label}</dd>` +
         `<dt>Colour</dt><dd>${p.colour}</dd>` +
-        `<dt>Made</dt><dd>Two of this size in this colour, and no more</dd>`
-      : `<dt>Size</dt><dd>${s.label}</dd>` +
-        `<dt>Across</dt><dd>${s.w}&#8243;</dd>` +
-        `<dt>Drop</dt><dd>${s.drop}&#8243; with tails</dd>` +
-        `<dt>Make</dt><dd>${s.bound ? 'Single layer, edge bound by hand' : (s.layers === 2 ? 'Two fabrics, sewn back to back' : 'Single fabric')}</dd>` +
+        `<dt>Made</dt><dd>${p.stock > 1 ? p.stock + ' of this size' : 'One of this size, and no more'}</dd>`
+      : `<dt>Made</dt><dd>${p.edition ? 'No. ' + p.edition + ', and never again' : 'One of one'}</dd>` +
+        `<dt>Cloth</dt><dd>Cut and sewn by hand, never glued</dd>` +
         `<dt>Hanger</dt><dd>Leather strap, fits a standard wreath hook</dd>`;
     const stock = $('#qv-stock');
     stock.textContent = p.stock < 1
@@ -927,41 +823,7 @@
     const cat = e.target.closest('[data-cat]');
     if (cat) {
       state.cat = cat.getAttribute('data-cat');
-      state.size = 'all'; state.fab = null;
-      $$('.pill').forEach((b) => b.classList.toggle('is-on', b.getAttribute('data-filter') === 'all'));
-      $$('.swatch').forEach((sw) => sw.classList.remove('is-on'));
       renderCats();
-      renderShop();
-      return;
-    }
-    const pill = e.target.closest('.pill');
-    if (pill) {
-      state.size = pill.getAttribute('data-filter');
-      state.fab = null;
-      $$('.pill').forEach((b) => b.classList.toggle('is-on', b === pill));
-      $$('.swatch').forEach((s) => s.classList.remove('is-on'));
-      renderShop();
-      return;
-    }
-    const sw = e.target.closest('.swatch[data-fab]');
-    if (sw) {
-      const id = sw.getAttribute('data-fab');
-      state.fab = state.fab === id ? null : id;
-      state.size = 'all';
-      state.cat = 'bows';
-      renderCats();
-      $$('.pill').forEach((b) => b.classList.toggle('is-on', b.getAttribute('data-filter') === 'all'));
-      $$('.swatch').forEach((s) => s.classList.toggle('is-on', s === sw && state.fab));
-      renderShop();
-      const shop = $('#shop');
-      if (window.lenisInstance) window.lenisInstance.scrollTo(shop, { offset: -70 });
-      else shop.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
-      return;
-    }
-    if (e.target.closest('[data-clear]')) {
-      state.size = 'all'; state.fab = null;
-      $$('.pill').forEach((b) => b.classList.toggle('is-on', b.getAttribute('data-filter') === 'all'));
-      $$('.swatch').forEach((s) => s.classList.remove('is-on'));
       renderShop();
       return;
     }
@@ -978,10 +840,7 @@
     fillSite();
     applySeason();      /* must run first — the shop and the wall read from it */
     renderCats();
-    renderSizeFilters();
     renderShop();
-    renderQuilt();
-    renderSizes();
     renderDrops();
     wireNotify();
     buildReel();

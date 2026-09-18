@@ -648,3 +648,7 @@ body.drawer-open .basket{transform:none}
 
 /* The footer bow is drawn and left alone — no tween, no scroll trigger. */
 .foot-bow-art{color:var(--ink)}
+
+/* The shop no longer filters by size — it just says which drop this is. */
+.drop-tag{font-family:var(--serif);font-size:clamp(1.1rem,2vw,1.45rem);letter-spacing:.01em;
+  color:var(--ink);margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--rule)}

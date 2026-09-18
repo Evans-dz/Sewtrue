@@ -40,6 +40,7 @@ const APPAREL = {
   'm':  { label: 'Medium', order: 2 },
   'l':  { label: 'Large',  order: 3 },
   'xl': { label: 'XL',     order: 4 },
+  '2xl':{ label: '2XL',    order: 5 },
 };
 
 /* -- Categories -----------------------------------------------------------
@@ -53,8 +54,8 @@ const CATEGORIES = [
     note: 'Two of every size in every colour.' },
   { id: 'blankets',    label: 'Blankets',    live: false,
     note: 'Pieced and quilted. First ones land with a later drop.' },
-  { id: 'small-goods', label: 'Small goods', live: false,
-    note: 'Keyrings, scrunchies and ornaments, made from the offcuts.' },
+  { id: 'small-goods', label: 'Small goods', live: true,
+    note: 'Garland, keyrings and ornaments, made from the offcuts.' },
 ];
 
 /* -- The drop -------------------------------------------------------------
@@ -63,91 +64,77 @@ const CATEGORIES = [
    genuinely individual — "No. 3 of 8" is a fact, not decoration.
 -------------------------------------------------------------------------- */
 const PRODUCTS = [
-  /* ---------- Halloween · Mini · $35 ---------- */
-  { sku: 'HW-MIN-1', category: 'bows', size: 'mini', half: 'halloween',
-    name: 'Little Haunt', edition: '1 of 1', listed: false, price: 35, stock: 1 },
-
-  /* ---------- Halloween · Regular · $50 ---------- */
+  /* ---------- Halloween bows ---------- */
   { sku: 'HW-REG-1', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Harlequin', edition: '1 of 8', photo: 'halloween/hw-04', price: 50, stock: 1 },
+    name: 'Harlequin', edition: '1 of 8', photo: 'halloween/hw-04', price: 80, stock: 1 },
   { sku: 'HW-REG-2', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Cobweb', edition: '2 of 8', photo: 'halloween/hw-13', price: 50, stock: 1 },
+    name: 'Cobweb', edition: '2 of 8', photo: 'halloween/hw-13', price: 120, stock: 1 },
   { sku: 'HW-REG-3', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Candy Corn', edition: '3 of 8', photo: 'halloween/hw-11', price: 50, stock: 1 },
+    name: 'Candy Corn', edition: '3 of 8', photo: 'halloween/hw-11', price: 120, stock: 1 },
   { sku: 'HW-REG-4', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Black Cat', edition: '4 of 8', photo: 'halloween/hw-07', price: 50, stock: 1 },
+    name: 'Black Cat', edition: '4 of 8', photo: 'halloween/hw-07', price: 60, stock: 1 },
   { sku: 'HW-REG-5', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Goblin', edition: '5 of 8', photo: 'halloween/hw-06', price: 50, stock: 1 },
+    name: 'Goblin', edition: '5 of 8', photo: 'halloween/hw-06', price: 60, stock: 1 },
   { sku: 'HW-REG-6', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Jester', edition: '6 of 8', photo: 'halloween/hw-09', price: 50, stock: 1 },
+    name: 'Jester', edition: '6 of 8', photo: 'halloween/hw-09', price: 100, stock: 1 },
   { sku: 'HW-REG-7', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Nightshade', edition: '7 of 8', photo: 'halloween/hw-01', price: 50, stock: 1 },
+    name: 'Nightshade', edition: '7 of 8', photo: 'halloween/hw-01', price: 80, stock: 1 },
   { sku: 'HW-REG-8', category: 'bows', size: 'regular', half: 'halloween',
-    name: 'Hallow\'s Eve', edition: '8 of 8', photo: 'halloween/hw-08', price: 50, stock: 1 },
-
-  /* ---------- Halloween · Mega · $75 ---------- */
+    name: 'Hallow\'s Eve', edition: '8 of 8', photo: 'halloween/hw-08', price: 60, stock: 1 },
   { sku: 'HW-MEG-1', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Midnight', edition: '1 of 6', photo: 'halloween/hw-03', price: 75, stock: 1 },
+    name: 'Midnight', edition: '1 of 6', photo: 'halloween/hw-03', price: 100, stock: 1 },
   { sku: 'HW-MEG-2', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Witching Hour', edition: '2 of 6', photo: 'halloween/hw-05', price: 75, stock: 1 },
-  { sku: 'HW-MEG-3', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Raven', edition: '3 of 6', listed: false, price: 75, stock: 1 },
+    name: 'Witching Hour', edition: '2 of 6', photo: 'halloween/hw-05', price: 60, stock: 0 },
   { sku: 'HW-MEG-4', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Beetle Stripe', edition: '4 of 6', photo: 'halloween/hw-10', price: 75, stock: 1 },
+    name: 'Beetle Stripe', edition: '4 of 6', photo: 'halloween/hw-10', price: 100, stock: 1 },
   { sku: 'HW-MEG-5', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Sugar Skull', edition: '5 of 6', photo: 'halloween/hw-02', price: 75, stock: 1 },
-  { sku: 'HW-MEG-6', category: 'bows', size: 'mega', half: 'halloween',
-    name: 'Trick or Treat', edition: '6 of 6', listed: false, price: 75, stock: 1 },
-
-  /* ---------- Halloween · Mega Bound · $90 ---------- */
-  { sku: 'HW-MBD-1', category: 'bows', size: 'mega-bound', half: 'halloween',
-    name: 'Toil & Trouble', edition: '1 of 2', listed: false, price: 90, stock: 1 },
+    name: 'Sugar Skull', edition: '5 of 6', photo: 'halloween/hw-02', price: 80, stock: 1 },
   { sku: 'HW-MBD-2', category: 'bows', size: 'mega-bound', half: 'halloween',
-    name: 'Spellbound', edition: '2 of 2', photo: 'halloween/hw-12', price: 90, stock: 1 },
+    name: 'Spellbound', edition: '2 of 2', photo: 'halloween/hw-12', price: 120, stock: 0 },
 
-  /* ---------- Fall · Regular · $75 ---------- */
-  { sku: 'FA-REG-1', category: 'bows', size: 'regular', half: 'fall',
-    name: 'Harvest Moon', edition: '1 of 3', price: 75, stock: 1 },
-  { sku: 'FA-REG-2', category: 'bows', size: 'regular', half: 'fall',
-    name: 'Cider House', edition: '2 of 3', price: 75, stock: 1 },
-  { sku: 'FA-REG-3', category: 'bows', size: 'regular', half: 'fall',
-    name: 'First Frost', edition: '3 of 3', price: 75, stock: 1 },
+  /* ---------- Halloween sweatshirts ----------
+     Two designs: the appliqued BOO and the appliqued Ghost. Colour and hat
+     tell one Ghost from the next, so the name carries them. */
+  { sku: 'HW-SW-BOO-CHAR-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
+    name: 'BOO Sweatshirt', colour: 'Charcoal', photo: 'hoodies/boo-charcoal', price: 60, stock: 1 },
+  { sku: 'HW-SW-BOO-GREY-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
+    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 60, stock: 1 },
+  { sku: 'HW-SW-BOO-PURP-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
+    name: 'BOO Sweatshirt', colour: 'Charcoal, purple O', photo: 'hoodies/boo-black', price: 60, stock: 1 },
+  { sku: 'HW-SW-BOO-HOOD-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
+    name: 'BOO Hoodie', colour: 'Grey', photo: 'hoodies/boo-hoodie', price: 65, stock: 1 },
+  { sku: 'HW-SW-GH-STR-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
+    name: 'Ghost, Striped', colour: 'Charcoal', photo: 'hoodies/ghost-stripe', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-STRPD-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+    name: 'Ghost, Striped with Polka Dot Hat', colour: 'Charcoal', photo: 'hoodies/ghost-str-pd', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-CHKP-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
+    name: 'Ghost, Checkered with Purple Hat', colour: 'Charcoal', photo: 'hoodies/ghost-chk-purp', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-STRPPD-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+    name: 'Ghost, Striped with Purple Polka Dot Hat', colour: 'Charcoal', photo: 'hoodies/ghost-str-ppd', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-STRSPD-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+    name: 'Ghost, Striped with Spotted Hat', colour: 'Charcoal', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-PSTR-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
+    name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-PSTR-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
+    name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 0 },
+  { sku: 'HW-SW-GH-PSTR-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+    name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-PSTR-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
+    name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-PSTR-2XL', category: 'sweatshirts', apparel: '2xl', half: 'halloween',
+    name: 'Ghost, Purple Striped Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pstripe', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-PDCHK-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
+    name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
+  { sku: 'HW-SW-GH-PDCHK-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
+    name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 1 },
+  { sku: 'HW-SW-GH-PDCHK-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
+    name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
 
-  /* ---------- Fall · Mega · $90 ---------- */
-  { sku: 'FA-MEG-1', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Wheat Field', edition: '1 of 5', price: 90, stock: 1 },
-  { sku: 'FA-MEG-2', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Bonfire', edition: '2 of 5', price: 90, stock: 1 },
-  { sku: 'FA-MEG-3', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Golden Hour', edition: '3 of 5', price: 90, stock: 1 },
-  { sku: 'FA-MEG-4', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Windfall', edition: '4 of 5', price: 90, stock: 1 },
-  { sku: 'FA-MEG-5', category: 'bows', size: 'mega', half: 'fall',
-    name: 'Chimney Smoke', edition: '5 of 5', price: 90, stock: 1 },
-
-  /* ---------- Fall · Mega Double · $80 ---------- */
-  { sku: 'FA-MDB-1', category: 'bows', size: 'mega-double', half: 'fall',
-    name: 'Orchard', edition: '1 of 1', price: 80, stock: 1 },
-
-  /* ---------- Halloween · Sweatshirts · $45 ----------
-     Two of every size in every colour. Not one-of-one — these restock
-     only if she cuts more, so stock is a real count. */
-  { sku: 'HW-SW-BLK-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
-  { sku: 'HW-SW-BLK-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
-  { sku: 'HW-SW-BLK-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
-  { sku: 'HW-SW-BLK-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Black', photo: 'hoodies/boo-black', price: 45, stock: 2 },
-  { sku: 'HW-SW-GRY-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
-  { sku: 'HW-SW-GRY-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
-  { sku: 'HW-SW-GRY-L', category: 'sweatshirts', apparel: 'l', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
-  { sku: 'HW-SW-GRY-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 45, stock: 2 },
+  /* ---------- Halloween garland ----------
+     Three made, all the same, so this is one listing with a count of three
+     rather than three one-of-ones. */
+  { sku: 'HW-GAR-1', category: 'small-goods', half: 'halloween',
+    name: 'Halloween Garland', photo: 'garland/garland', price: 25, stock: 3 },
 ];
 
 /* Cloth in rotation, drawn as SVG patterns until the real photographs exist.
