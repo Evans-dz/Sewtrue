@@ -119,7 +119,7 @@ const DROPS = [
        the code happens to run — the shop would open at 1pm Utah because Vercel
        runs on UTC. -06:00 is Mountain Daylight Time, which is what Utah is on
        in September. */
-    opens: '2026-09-18T19:00:00-06:00',
+    opens: '2026-09-18T12:00:00-06:00',
     season: 'fall-halloween',
     blurb: 'Checks, cobwebs and candy corn. Every bow one of one, and no second run.',
     pieces: null,
@@ -171,6 +171,21 @@ const BETWEEN_DROPS = {
 -------------------------------------------------------------------------- */
 const SHOP = { halves: ['halloween'] };
 
+/* --------------------------------------------------------------------------
+   EARLY ACCESS
+
+   A short window when the shop opens BEFORE the drop — for a friend, a test,
+   a photograph. It closes itself at `to`; nobody has to remember to shut it,
+   and if this session ends the site still locks on time.
+
+   Both times carry an offset so they mean the same instant on the server as
+   in the browser. Set to null to remove it.
+-------------------------------------------------------------------------- */
+const EARLY_ACCESS = {
+  from: '2026-09-17T21:00:00-06:00',
+  to:   '2026-09-17T21:30:00-06:00',
+};
+
 const CHECKOUT = {
   mode: 'stripe',             // 'request' | 'stripe'
 
@@ -202,8 +217,9 @@ const NOTIFY = {
 if (typeof window !== 'undefined') {
   window.SITE = SITE; window.SEASONS = SEASONS; window.SEASON_BETWEEN = SEASON_BETWEEN;
   window.DROPS = DROPS; window.BETWEEN_DROPS = BETWEEN_DROPS; window.SHOP = SHOP;
+  window.EARLY_ACCESS = EARLY_ACCESS;
   window.CHECKOUT = CHECKOUT; window.NOTIFY = NOTIFY;
 }
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { SITE, SEASONS, SEASON_BETWEEN, DROPS, BETWEEN_DROPS, SHOP, CHECKOUT, NOTIFY };
+  module.exports = { SITE, SEASONS, SEASON_BETWEEN, DROPS, BETWEEN_DROPS, SHOP, EARLY_ACCESS, CHECKOUT, NOTIFY };
 }

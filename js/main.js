@@ -267,8 +267,18 @@
      The server enforces the same hour from the same line of config — this is
      only what the customer sees, not what stops them.
      ====================================================================== */
+  /* Matches api/checkout.js — a short window before the drop, self-closing. */
+  function earlyOpen() {
+    const w = (typeof EARLY_ACCESS !== 'undefined') ? EARLY_ACCESS : null;
+    if (!w || !w.from || !w.to) return false;
+    const now = Date.now();
+    const a = new Date(w.from).getTime(), b = new Date(w.to).getTime();
+    return !isNaN(a) && !isNaN(b) && now >= a && now < b;
+  }
+
   function opensForHalf(half) {
     if (!CHECKOUT.holdUntilDrop) return null;
+    if (earlyOpen()) return null;
     const d = DROPS.find((x) => x.half === half);
     if (!d) return null;
     const t = new Date(d.opens).getTime();
@@ -499,9 +509,11 @@
         if (!PRODUCTS.some((p) => listed(p) && p.half === d.half)) return null;
         return shut ? d.name + ' opens ' + opensLabel(d.half) + '.' : d.name + ' is open.';
       }).filter(Boolean);
-      lede.textContent = parts.length
-        ? parts.join(' ') + ' Every piece is one of one.'
-        : 'What is here is what exists. Nothing is reprinted, nothing is backordered.';
+      lede.textContent = earlyOpen()
+        ? 'Open early, and only for a few minutes. Every piece is one of one.'
+        : (parts.length
+          ? parts.join(' ') + ' Every piece is one of one.'
+          : 'What is here is what exists. Nothing is reprinted, nothing is backordered.');
     }
 
     const n = list.length;
@@ -885,6 +897,15 @@
     buildReel();
     wireReel();
     syncStock();   /* Stripe has the last word on what is left */
+
+    /* The early window ends by the clock. Re-render across the boundary so a
+       tab left open locks itself instead of offering a button that 423s. */
+    if (typeof EARLY_ACCESS !== 'undefined' && EARLY_ACCESS && EARLY_ACCESS.to) {
+      const ends = new Date(EARLY_ACCESS.to).getTime() - Date.now();
+      if (ends > 0 && ends < 86400000) {
+        setTimeout(() => { renderCats(); renderShop(); }, ends + 1000);
+      }
+    }
     window.__doorShots = buildDoor();
     motion();
   });

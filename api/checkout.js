@@ -15,13 +15,24 @@
 
 const { PRODUCTS, SIZES, APPAREL } = require('../js/catalog.js');
 const { readInventory } = require('./stock.js');
-const { DROPS, CHECKOUT, SHOP } = require('../js/config.js');
+const { DROPS, CHECKOUT, SHOP, EARLY_ACCESS } = require('../js/config.js');
 
 /* When a given half opens. Reads the same rows of config the page does, so
    the button and the till can never disagree about the hour. Halloween and
    Fall open on different nights, so this is per piece, not per shop. */
+/* A short window before the drop when the shop is open anyway. It ends by
+   the clock, so nothing has to be switched back off. */
+function earlyOpen() {
+  if (!EARLY_ACCESS || !EARLY_ACCESS.from || !EARLY_ACCESS.to) return false;
+  const now = Date.now();
+  const a = new Date(EARLY_ACCESS.from).getTime();
+  const b = new Date(EARLY_ACCESS.to).getTime();
+  return !isNaN(a) && !isNaN(b) && now >= a && now < b;
+}
+
 function opensForHalf(half) {
   if (!CHECKOUT.holdUntilDrop) return null;
+  if (earlyOpen()) return null;
   const d = DROPS.find((x) => x.half === half);
   if (!d) return null;
   const t = new Date(d.opens).getTime();
