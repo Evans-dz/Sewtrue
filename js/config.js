@@ -110,19 +110,32 @@ const SEASON_BETWEEN = 'fall-halloween';
 ------------------------------------------------------------------------------ */
 const DROPS = [
   {
-    id: 'fall-halloween-26', name: 'Fall & Halloween', year: 2026,
+    id: 'halloween-26', half: 'halloween', name: 'Halloween', year: 2026,
     /* ALWAYS carry the offset. A bare '2026-09-18T19:00' means 19:00 wherever
        the code happens to run — the shop would open at 1pm Utah because Vercel
        runs on UTC. -06:00 is Mountain Daylight Time, which is what Utah is on
        in September. */
     opens: '2026-09-18T19:00:00-06:00',
     season: 'fall-halloween',
-    blurb: 'Rust, wheat and flannel, and a spooky half for the porch. Bows and the first sweatshirts.',
-    /* Left null so the site counts what is actually in the catalogue rather
-       than stating a number that can drift out of step with it. */
+    blurb: 'Checks, cobwebs and candy corn. Every bow one of one, and no second run.',
+    pieces: null,
+  },
+  {
+    id: 'fall-26', half: 'fall', name: 'Fall', year: 2026,
+    /* TODO(client): you said Tuesday the 22nd but not the hour — this assumes
+       7pm like Halloween. Say the word if it should be different. */
+    opens: '2026-09-22T19:00:00-06:00',
+    season: 'fall-halloween',
+    blurb: 'Rust, wheat and flannel. Warm checks for a cooling porch.',
     pieces: null,
   },
 ];
+
+/* --------------------------------------------------------------------------
+   Each piece belongs to a half, and each half opens on its own night. A bow
+   is not for sale until ITS drop opens, so Halloween can be selling while
+   Fall is still shut. Enforced in api/checkout.js, not just on the page.
+-------------------------------------------------------------------------- */
 
 /* Copy for the between-drops state. */
 const BETWEEN_DROPS = {

@@ -263,21 +263,27 @@
      The server enforces the same hour from the same line of config — this is
      only what the customer sees, not what stops them.
      ====================================================================== */
-  function dropOpensAt() {
+  function opensForHalf(half) {
     if (!CHECKOUT.holdUntilDrop) return null;
-    const now = Date.now();
-    const ts = DROPS.map((d) => new Date(d.opens).getTime())
-      .filter((t) => !isNaN(t) && t > now);
-    return ts.length ? Math.min.apply(null, ts) : null;
+    const d = DROPS.find((x) => x.half === half);
+    if (!d) return null;
+    const t = new Date(d.opens).getTime();
+    return (isNaN(t) || t <= Date.now()) ? null : t;
   }
-  const shopOpen = () => !dropOpensAt();
-  function opensLabel() {
-    const t = dropOpensAt(); if (!t) return '';
+  /* Per piece, not per shop — Halloween opens four nights before Fall. */
+  const openFor = (p) => !opensForHalf(p.half);
+  function opensLabel(half) {
+    const t = opensForHalf(half); if (!t) return '';
     const d = new Date(t);
     return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) +
            ' at ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase();
   }
-  window.SewTrueShopOpen = shopOpen;
+  /* The basket asks by SKU so it does not need the catalogue itself. */
+  window.SewTrueOpenFor = function (sku) {
+    const p = PRODUCTS.find((x) => x.sku === sku);
+    return !p || openFor(p);
+  };
+  window.SewTrueOpensLabel = opensLabel;
 
   /* ======================================================================
      WHAT IS LEFT
@@ -410,9 +416,9 @@
       </button>
       ${sold
         ? `<p class="note card-add">${held ? 'Someone is paying for it. Check back in half an hour.' : 'Gone. There was only ever one.'}</p>`
-        : (shopOpen()
+        : (openFor(p)
           ? `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`
-          : `<p class="note card-add">Opens ${opensLabel()}</p>`)}
+          : `<p class="note card-add">Opens ${opensLabel(p.half)}</p>`)}
     </article>`;
   }
 
@@ -448,11 +454,19 @@
     const list = PRODUCTS.filter(matches);
     grid.innerHTML = list.map(cardMarkup).join('');
 
+    /* Two halves, two nights — say where each one stands rather than
+       pretending the shop is one switch. */
     const lede = document.querySelector('#shop .lede');
-    if (lede) lede.textContent = shopOpen()
-      ? 'What is here is what exists. Nothing is reprinted, nothing is backordered.'
-      : 'This is the whole drop, laid out before it opens. Nothing can be bought until '
-        + opensLabel() + '.';
+    if (lede) {
+      const parts = DROPS.map((d) => {
+        const shut = opensForHalf(d.half);
+        if (!PRODUCTS.some((p) => p.half === d.half)) return null;
+        return shut ? d.name + ' opens ' + opensLabel(d.half) + '.' : d.name + ' is open.';
+      }).filter(Boolean);
+      lede.textContent = parts.length
+        ? parts.join(' ') + ' Every piece is one of one.'
+        : 'What is here is what exists. Nothing is reprinted, nothing is backordered.';
+    }
 
     const n = list.length;
     const unit = cat.id === 'bows' ? (n === 1 ? ' bow' : ' bows')
@@ -728,10 +742,10 @@
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
     const add = $('#qv-add');
     add.setAttribute('data-add', p.sku);
-    const shut = !shopOpen();
+    const shut = !openFor(p);
     add.disabled = p.stock < 1 || shut;
     add.textContent = p.stock < 1 ? (p.sold ? 'Sold' : 'In a basket')
-      : (shut ? 'Opens ' + opensLabel() : 'Add to basket');
+      : (shut ? 'Opens ' + opensLabel(p.half) : 'Add to basket');
 
     $('#qv').setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';

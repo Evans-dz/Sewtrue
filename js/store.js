@@ -139,15 +139,20 @@
 
   function startCheckout() {
     if (!lines.length) return;
-    /* The server refuses this too — this is only so the reason is legible. */
-    if (window.SewTrueShopOpen && !window.SewTrueShopOpen()) {
-      const err = $('#checkout-error');
-      if (err) {
-        err.hidden = false;
-        err.innerHTML = '<p>The drop has not opened yet.</p>' +
-          '<p>Your basket is saved. Come back when the countdown runs out and it will be waiting.</p>';
+    /* The server refuses this too — this is only so the reason is legible.
+       Checked per line, because Halloween opens before Fall. */
+    if (window.SewTrueOpenFor) {
+      const shut = lines.filter((l) => !window.SewTrueOpenFor(l.sku));
+      if (shut.length) {
+        const err = $('#checkout-error');
+        if (err) {
+          const names = shut.map((l) => product(l.sku).name).join(', ');
+          err.hidden = false;
+          err.innerHTML = '<p>Not open yet: ' + names + '.</p>' +
+            '<p>Your basket is saved. Come back when the countdown runs out and it will be waiting.</p>';
+        }
+        return;
       }
-      return;
     }
     if (CHECKOUT.mode === 'stripe' && CHECKOUT.stripeEndpoint) return stripeCheckout();
     $('#basket-main').hidden = true;
