@@ -436,7 +436,8 @@
     const p = entry.lead;
     const sizes = entry.sizes;
     const sold = p.stock < 1;
-    const stockNote = sold ? 'Sold' : (p.edition ? 'No. ' + p.edition : p.stock + ' left');
+    const stockNote = sold ? 'Sold'
+      : (p.category === 'bows' ? 'One of one' : p.stock + ' left');
 
     /* Sizes for a grouped sweatshirt. A size that has gone is shown and
        disabled rather than hidden — the gaps are the scarcity. */
@@ -680,24 +681,16 @@
     const s = SIZES[p.size];
     qvLast = document.activeElement;
     $('#qv-art').innerHTML = window.bowMarkup(p, null, { full: true, sizes: '(max-width:1000px) 88vw, 400px' });
-    $('#qv-no').textContent = p.sku;
     $('#qv-name').textContent = p.name;
     $('#qv-price').textContent = money(p.price);
-    $('#qv-fab').textContent = p.category === 'sweatshirts'
-      ? p.colour + ' · ' + APPAREL[p.apparel].label
-      : 'Cloth is chosen as it is cut. This one is ' + p.edition + ' at this size.';
-    $('#qv-spec').innerHTML = p.category === 'sweatshirts'
-      ? `<dt>Size</dt><dd>${APPAREL[p.apparel].label}</dd>` +
-        `<dt>Colour</dt><dd>${p.colour}</dd>` +
-        `<dt>Made</dt><dd>${p.stock > 1 ? p.stock + ' of this size' : 'One of this size, and no more'}</dd>`
-      : `<dt>Made</dt><dd>${p.edition ? 'No. ' + p.edition + ', and never again' : 'One of one'}</dd>` +
-        `<dt>Cloth</dt><dd>Cut and sewn by hand, never glued</dd>` +
-        `<dt>Hanger</dt><dd>Leather strap, fits a standard wreath hook</dd>`;
+
+    /* Name, price, and how few there are. Nothing else — she would rather
+       the photograph did the describing. */
     const stock = $('#qv-stock');
-    stock.textContent = p.stock < 1
-      ? 'Sold. That one is finished for good.'
-      : p.stock === 1 ? 'One of one. When it goes, it is gone.'
-      : p.stock + ' left.';
+    stock.textContent = p.stock < 1 ? 'Sold'
+      : (p.category === 'sweatshirts'
+        ? (p.colour + ' \u00b7 ' + APPAREL[p.apparel].label + (p.stock > 1 ? ' \u00b7 ' + p.stock + ' made' : ' \u00b7 one of one'))
+        : 'One of one');
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
     const add = $('#qv-add');
     add.setAttribute('data-add', p.sku);

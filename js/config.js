@@ -49,7 +49,9 @@ const SITE = {
 const SEASONS = {
 
   'fall-halloween': {
-    name: 'Fall & Halloween',
+    /* The label on the hero plate and in the reel caption. Only Halloween is
+       showing, so that is what it says. */
+    name: 'Halloween',
     /* Harvest first, spooky second. The season warms the paper and swaps the
        accent to ember; the bones of the site stay black, bone and grain. */
     tint: {

@@ -140,9 +140,9 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .hero-thread{position:absolute;left:0;right:0;top:min(46vh,420px);height:340px;color:var(--rule-2);
   z-index:-1;pointer-events:none}
 
-.tape{display:flex;flex-wrap:wrap;gap:0;margin:clamp(40px,6vw,80px) 0 0;padding:14px 0;
+.tape{display:flex;flex-wrap:wrap;row-gap:4px;justify-content:center;text-align:center;margin:clamp(40px,6vw,80px) auto 0;padding:20px 0;
   border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
-.tape span{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);padding:0 clamp(10px,2.2vw,26px)}
+.tape span{font-size:clamp(.78rem,1.05vw,.92rem);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:0 clamp(9px,1.5vw,20px)}
 .tape span+span{border-left:1px solid var(--rule)}
 
 /* -- noir sections -------------------------------------------------------- */
