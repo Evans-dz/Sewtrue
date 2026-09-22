@@ -134,9 +134,10 @@ const DROPS = [
   },
   {
     id: 'fall-26', half: 'fall', name: 'Fall', year: 2026,
-    /* TODO(client): you said Tuesday the 22nd but not the hour — this assumes
-       7pm like Halloween. Say the word if it should be different. */
-    opens: '2026-09-22T19:00:00-06:00',
+    /* Confirmed by the client: noon on Friday 2 October. -06:00 is Mountain
+       Daylight Time, which is what Utah is still on in early October — DST
+       does not end until 1 November. */
+    opens: '2026-10-02T12:00:00-06:00',
     season: 'fall-halloween',
     blurb: 'Rust, wheat and flannel. Warm checks for a cooling porch.',
     pieces: null,
@@ -171,7 +172,7 @@ const BETWEEN_DROPS = {
    WHAT THE SHOP LISTS
 
    Only these halves appear. Fall is cut, priced and ready in the catalogue,
-   but it belongs to its own drop on the 22nd and is not shown before then —
+   but it belongs to its own drop on 2 October and is not shown before then —
    add 'fall' here when you want it on the page.
 
    Enforced in api/checkout.js too, so an unlisted piece cannot be bought by

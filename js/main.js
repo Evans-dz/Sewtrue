@@ -284,7 +284,7 @@
     const t = new Date(d.opens).getTime();
     return (isNaN(t) || t <= Date.now()) ? null : t;
   }
-  /* Per piece, not per shop — Halloween opens four nights before Fall. */
+  /* Per piece, not per shop — Halloween opens well before Fall. */
   const openFor = (p) => !opensForHalf(p.half);
   function opensLabel(half) {
     const t = opensForHalf(half); if (!t) return '';

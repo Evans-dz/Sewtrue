@@ -136,8 +136,8 @@ module.exports = async function handler(req, res) {
 
     /* ---- is this piece's drop open yet? --------------------------------
        A disabled button is a suggestion. This is the rule, however the
-       request got here — and it is per piece, because Halloween opens four
-       nights before Fall. */
+       request got here — and it is per piece, because Halloween opens
+       well before Fall. */
     const opens = opensForHalf(product.half);
     if (opens && Date.now() < opens) {
       const d = DROPS.find((x) => x.half === product.half);

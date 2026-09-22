@@ -140,9 +140,10 @@ the "new designs in progress" state — copy for it lives in `BETWEEN_DROPS`. To
 announce the next drop, add a row. To pull the countdown early, delete the row.
 
 Each drop also names its `season`, which is what dresses the rest of the site.
-The live one is **Fall & Halloween, 18 September 2026 at 7pm** — one combined
-drop, harvest and spooky together, covering bows, the first hoodie, blankets
-and small goods.
+The live one is **Fall & Halloween 2026** — one combined drop, harvest and
+spooky together, covering bows, the first hoodie, blankets and small goods.
+The two halves open on their own nights: Halloween on **18 September at noon**,
+Fall on **2 October at noon**. Both dates live in `DROPS` in `js/config.js`.
 
 The cadence is Spring, Summer and Fall plus Valentine's, Fourth of July,
 Halloween and Christmas — but they go in one at a time, when they are ready.
