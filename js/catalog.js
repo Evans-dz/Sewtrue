@@ -125,7 +125,7 @@ const PRODUCTS = [
   { sku: 'HW-SW-GH-PDCHK-M', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'm', half: 'halloween',
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
   { sku: 'HW-SW-GH-PDCHK-L', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'l', half: 'halloween',
-    name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 1 },
+    name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 0 },
   { sku: 'HW-SW-GH-PDCHK-XL', category: 'sweatshirts', group: 'gh-pdchk', apparel: 'xl', half: 'halloween',
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
 
