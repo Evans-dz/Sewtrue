@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node /Users/dylanevans/Projects/EZHD/ezhd-lab/verify/audit.mjs:*)",
+      "Bash(node /Users/dylanevans/Projects/EZHD/ezhd-lab/verify/pixel-diff.mjs:*)"
+    ]
+  }
+}

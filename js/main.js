@@ -34,13 +34,21 @@
       const src = o.full ? b + '.jpg' : b + '-card.jpg';
       return `<img src="${src}" width="${o.full ? 900 : 525}" height="${o.full ? 1200 : 700}"
         sizes="${o.sizes || '(max-width:760px) 46vw, 300px'}"
-        alt="${p.name} — ${topLabel(p)}" loading="lazy" decoding="async"
+        alt="${altOf(p)}" loading="lazy" decoding="async"
         onerror="window.bowFallback(this,'${p.sku}')">`;
     }
     if (p.category === 'sweatshirts') return sweatMarkup(p);
     return `<svg class="bow bow-outline" viewBox="0 0 400 470"${height ? ' height="' + height + '"' : ''}
       role="img" aria-label="${p.name}"><use href="#bow-line"/></svg>`;
   };
+  /* What the photograph shows, for someone who cannot see it. */
+  function altOf(p) {
+    if (p.category === 'bows' && SIZES[p.size]) {
+      return p.name + ', a ' + SIZES[p.size].label.toLowerCase() + ' fabric bow';
+    }
+    if (p.category === 'sweatshirts') return p.name + ' (' + p.colour + ', ' + APPAREL[p.apparel].label + ')';
+    return p.name;
+  }
   window.bowFallback = function (img, sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
     img.outerHTML = window.bowMarkup(p, null, { drawn: true });
@@ -95,7 +103,7 @@
     const note = $('#basket-mode-note');
     if (note) note.textContent = CHECKOUT.mode === 'stripe'
       ? 'Card payment, secured by Stripe.'
-      : 'No card needed here — the order comes straight to the shop.';
+      : 'No card needed here. The order comes straight to the shop.';
   }
 
   /* ======================================================================
@@ -124,6 +132,12 @@
     }));
   }
 
+  /* "Candy Corn bow", but never "BOO Sweatshirt sweatshirt". */
+  function reelAlt(it) {
+    const tag = (it.tag || '').toLowerCase();
+    return tag && it.name.toLowerCase().indexOf(tag) === -1 ? it.name + ' ' + tag : it.name;
+  }
+
   function buildReel() {
     const stage = $('#reel-stage'); if (!stage) return;
     const items = REEL.items = reelItems();
@@ -131,7 +145,7 @@
 
     stage.innerHTML = items.map((it, i) => {
       const body = it.photo
-        ? `<img src="${it.photo}" alt="${it.name} — ${it.tag || ''}" width="900" height="1200"
+        ? `<img src="${it.photo}" alt="${reelAlt(it)}" width="900" height="1200"
              ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">` +
           (it.standin && LOCAL ? '<span class="reel-standin">Stand-in photo</span>' : '')
         : `<div class="reel-blank"><span>${it.tag || ''}</span><b>${it.name}</b>
@@ -142,7 +156,7 @@
     const track = $('#reel-track');
     track.innerHTML = items.map((it, i) =>
       `<button class="reel-tick" type="button" data-reel="${i}"
-        aria-label="${it.name}${it.meta ? ' — ' + it.meta : ''}"><i></i></button>`).join('');
+        aria-label="${it.name}${it.meta ? ', ' + it.meta : ''}"><i></i></button>`).join('');
     track.style.setProperty('--dwell', (REEL.dwell / 1000) + 's');
 
     const season = $('#reel-season');
@@ -181,7 +195,7 @@
     const cap = $('#reel-cap');
     if (cap) cap.textContent = it.photo
       ? (SEASON ? 'In the ' + SEASON.name + ' drop.' : 'In the shop now.')
-      : 'Not photographed yet — it goes up with the drop.';
+      : 'Not photographed yet. It goes up with the drop.';
   }
 
   function play() {
@@ -254,7 +268,7 @@
       const it = REEL.items[REEL.i];
       if (it && it.href) {
         const el = document.querySelector(it.href);
-        if (el && window.lenisInstance) window.lenisInstance.scrollTo(el, { offset: -70 });
+        if (el && window.lenisInstance) window.lenisInstance.scrollTo(el);
         else if (el) el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
       }
     });
@@ -330,6 +344,7 @@
         p.sold = sold >= p.made;          /* gone for good, not just held */
       });
       stockReady = true;
+      writeSchema();
       if (!opts || !opts.quiet) {
         renderCats(); renderShop();
         /* The open drawer is looking at the same stock — redraw it too, or a
@@ -631,6 +646,63 @@
   }
 
   /* ======================================================================
+     STRUCTURED DATA
+
+     The products search engines read, written from the same catalogue the
+     grid is drawn from, so a price or a sale is never edited in two places.
+     The shop itself is described statically in <head>; this fills in the
+     catalogue it points at (#catalog).
+     ====================================================================== */
+  function writeSchema() {
+    const origin = SITE.url;
+    const items = PRODUCTS.filter(listed).map((p) => {
+      const shut = opensForHalf(p.half);
+      const offer = {
+        '@type': 'Offer',
+        url: origin + '/#shop',
+        price: p.price,
+        priceCurrency: CHECKOUT.currency,
+        availability: 'https://schema.org/' + (p.stock < 1 ? 'SoldOut' : (shut ? 'OutOfStock' : 'InStock')),
+        itemCondition: 'https://schema.org/NewCondition',
+        seller: { '@id': origin + '/#store' },
+        hasMerchantReturnPolicy: { '@id': origin + '/#returns' },
+      };
+      if (shut && p.stock > 0) offer.availabilityStarts = new Date(shut).toISOString();
+      const size = p.category === 'sweatshirts' ? APPAREL[p.apparel].label : null;
+      const item = {
+        '@type': 'Product',
+        name: size ? p.name + ' (' + size + ')' : p.name,
+        sku: p.sku,
+        brand: { '@type': 'Brand', name: SITE.name },
+        category: catOf(p.category).label,
+        offers: offer,
+      };
+      if (p.photo) item.image = origin + '/assets/photos/' + p.photo + '.jpg';
+      if (p.category === 'bows' && SIZES[p.size]) {
+        item.description = 'Handmade ' + SIZES[p.size].label.toLowerCase() + ' fabric door bow. One of one.';
+      } else if (size) {
+        item.description = p.name + ' in ' + p.colour + ', size ' + size + '.';
+      }
+      return item;
+    });
+
+    let tag = document.getElementById('ld-catalog');
+    if (!tag) {
+      tag = document.createElement('script');
+      tag.type = 'application/ld+json';
+      tag.id = 'ld-catalog';
+      document.head.appendChild(tag);
+    }
+    tag.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'OfferCatalog',
+      '@id': origin + '/#catalog',
+      name: SITE.name + ' shop',
+      itemListElement: items,
+    });
+  }
+
+  /* ======================================================================
      QUICK VIEW
      ====================================================================== */
   let qvLast = null;
@@ -719,7 +791,9 @@
         const el = document.querySelector(id);
         if (!el) return;
         e.preventDefault();
-        lenis.scrollTo(el, { offset: -70 });
+        /* Lenis honours scroll-margin-top, so the header offset lives in
+           the CSS (--head-h) and a jump without Lenis lands in the same place. */
+        lenis.scrollTo(el);
       });
     }
 
@@ -844,6 +918,7 @@
     renderCats();
     renderShop();
     renderDrops();
+    writeSchema();
     buildReel();
     wireReel();
     syncStock();   /* Stripe has the last word on what is left */

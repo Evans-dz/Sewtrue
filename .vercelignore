@@ -1,0 +1,10 @@
+# Working files for whoever maintains the site. None of these are pages,
+# and the whole repo root is the output directory, so without this they
+# would be public at sewtrue.shop/<name>.
+README.md
+DESIGN.md
+CLAUDE.md
+verify-baseline.txt
+server.js
+.claude
+st

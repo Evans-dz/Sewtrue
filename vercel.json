@@ -4,6 +4,16 @@
   "installCommand": "",
   "buildCommand": "",
   "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    }
+  ],
   "headers": [
     {
       "source": "/assets/photos/(.*)",

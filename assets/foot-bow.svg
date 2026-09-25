@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 268" width="400" height="268">
+  <!-- The footer bow from the home page, standing still, for the small pages.
+       Same threads, same line-art bow (index.html #bow-line). -->
+  <g fill="none" stroke="#14110f" stroke-linecap="round">
+    <path d="M0 30 C84 24, 112 76, 126 124" stroke-width="2" stroke-dasharray="8 7"/>
+    <path d="M400 30 C316 24, 288 76, 274 124" stroke-width="2" stroke-dasharray="8 7"/>
+  </g>
+  <g transform="translate(200 134) scale(.42) translate(-200 -190)" fill="none" stroke="#14110f"
+     stroke-width="7" stroke-linejoin="round">
+    <path d="M182 205 C176 260, 160 330, 128 400 L118 444 L156 416 L186 448 C192 366, 200 275, 206 205 Z"/>
+    <path d="M218 205 C224 260, 240 330, 272 400 L282 444 L244 416 L214 448 C208 366, 200 275, 194 205 Z"/>
+    <path d="M186 144 C158 130, 112 112, 70 110 C46 109, 33 122, 35 142 C37 172, 41 200, 49 222 C56 240, 76 244, 98 236 C132 222, 168 212, 186 204 Z"/>
+    <path d="M214 144 C242 130, 288 112, 330 110 C354 109, 367 122, 365 142 C363 172, 359 200, 351 222 C344 240, 324 244, 302 236 C268 222, 232 212, 214 204 Z"/>
+    <path d="M178 122 C192 132, 208 132, 222 122 C226 152, 226 200, 222 230 C208 220, 192 220, 178 230 C174 200, 174 152, 178 122 Z"/>
+  </g>
+</svg>

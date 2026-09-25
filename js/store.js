@@ -127,7 +127,7 @@
   function orderSummary() {
     return lines.map((l) => {
       const p = product(l.sku); const s = SIZES[p.size];
-      return `${l.qty} × ${p.name} — ${lineMeta(p)} — ${p.sku} — ${money(p.price * l.qty)}`;
+      return `${l.qty} × ${p.name} · ${lineMeta(p)} · ${p.sku} · ${money(p.price * l.qty)}`;
     }).join('\n');
   }
   function resetCheckout() {
@@ -193,7 +193,7 @@
           if (err) {
             err.hidden = false;
             err.innerHTML = '<p>' + ((d && d.error) || 'The drop has not opened yet.') + '</p>' +
-              '<p>Your basket is saved — nothing was lost.</p>';
+              '<p>Your basket is saved. Nothing was lost.</p>';
           }
           return;
         }
@@ -220,7 +220,7 @@
     const err = $('#checkout-error'); if (!err) return;
     const body = encodeURIComponent(`Order ${orderCode()}\n\n${orderSummary()}\n\nSubtotal ${money(subtotal())}`);
     err.hidden = false;
-    err.innerHTML = `<p>${msg}</p><p>Nothing was lost — <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Bow order')}&body=${body}">send this basket by email instead</a> and we'll pick it up from there.</p>`;
+    err.innerHTML = `<p>${msg}</p><p>Nothing was lost. <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Bow order')}&body=${body}">send this basket by email instead</a> and we'll pick it up from there.</p>`;
   }
 
   function submitOrder(e) {
@@ -263,7 +263,7 @@
       const body = encodeURIComponent(
         `Order ${data.code}\n\n${data.summary}\n\nSubtotal ${money(data.subtotal)}\n\n` +
         `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n` +
-        `Fulfilment: ${data.fulfilment}\nNotes: ${data.note || '—'}`
+        `Fulfilment: ${data.fulfilment}\nNotes: ${data.note || 'none'}`
       );
       window.location.href = `mailto:${SITE.email}?subject=${encodeURIComponent('Bow order ' + data.code)}&body=${body}`;
       finish();

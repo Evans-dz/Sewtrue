@@ -3,12 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sew True — handmade bows, sewn one at a time</title>
-<meta name="description" content="Handmade fabric door bows in five sizes, sewn in small batches. Ready-to-ship shop and seasonal drops.">
+<title>Sew True · Handmade bows, sewn one at a time</title>
+<meta name="description" content="Handmade fabric door bows, sweatshirts and small goods, sewn one at a time and sold in seasonal drops. Every piece is one of one. Flat $6 US shipping.">
 <meta name="theme-color" content="#14110f">
-<meta property="og:title" content="Sew True — handmade bows">
-<meta property="og:description" content="Handmade fabric door bows, sewn one at a time. Ready to ship, plus seasonal drops.">
+<link rel="canonical" href="https://sewtrue.shop/">
+<meta property="og:title" content="Sew True · Handmade fabric door bows">
+<meta property="og:description" content="Fabric door bows cut from real cloth and finished by hand. Sold in seasonal drops, one of each.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://sewtrue.shop/">
+<meta property="og:site_name" content="Sew True">
+<meta property="og:image" content="https://sewtrue.shop/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Three Sew True fabric bows hanging on front doors, beside the Sew True sewing-machine logo">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/bodoni-moda-latin-400-normal.woff2" crossorigin>
@@ -22,12 +30,47 @@
     gtag('js', new Date());
     gtag('config', 'G-HELSXRL091');
   </script>
+<!-- The shop itself. The products are written in by js/main.js from
+     js/catalog.js, so a price or a sale never has to be edited here. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://sewtrue.shop/#website",
+      "url": "https://sewtrue.shop/",
+      "name": "Sew True",
+      "publisher": { "@id": "https://sewtrue.shop/#store" }
+    },
+    {
+      "@type": "OnlineStore",
+      "@id": "https://sewtrue.shop/#store",
+      "name": "Sew True",
+      "url": "https://sewtrue.shop/",
+      "logo": "https://sewtrue.shop/assets/logo@2x.png",
+      "image": "https://sewtrue.shop/assets/og.jpg",
+      "description": "Handmade fabric door bows, sweatshirts and small goods, sewn one at a time and sold in seasonal drops. Every piece is one of one.",
+      "email": "sewtrue26@gmail.com",
+      "areaServed": { "@type": "Country", "name": "United States" },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "@id": "https://sewtrue.shop/#returns",
+        "applicableCountry": "US",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+        "merchantReturnLink": "https://sewtrue.shop/terms#returns"
+      },
+      "hasOfferCatalog": { "@id": "https://sewtrue.shop/#catalog" }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <a class="skip" href="#shop">Skip to the shop</a>
 
 <!-- ===================================================================== -->
-<!-- FABRIC LIBRARY — every print the shop can render, as an SVG pattern.   -->
+<!-- FABRIC LIBRARY: every print the shop can render, as an SVG pattern.   -->
 <!-- Swap these for photographs any time; nothing else has to change.       -->
 <!-- ===================================================================== -->
 <svg class="fabric-defs" aria-hidden="true" focusable="false" width="0" height="0">
@@ -240,7 +283,7 @@
   <!-- Her own logo, un-matted from the supplied JPEG to a transparent PNG and
        trimmed to the artwork. Nothing about the mark itself was altered. The
        stand-in only appears if the file is missing. -->
-  <a class="brand" href="#top" aria-label="Sew True — home">
+  <a class="brand" href="#top" aria-label="Sew True, home">
     <img class="brand-logo" src="assets/logo.png" srcset="assets/logo.png 373w, assets/logo@2x.png 746w"
          sizes="90px" alt="Sew True" width="373" height="286"
          onerror="this.remove();document.getElementById('brand-standin').hidden=false;">
@@ -303,13 +346,13 @@
         Small batches. When a bolt runs out, that bow is finished for good.</p>
       <div class="hero-cta reveal">
         <a class="btn btn-solid" href="#shop">Shop the drop</a>
-        <a class="btn btn-quiet" href="#drops">Next drop <span id="hero-drop-chip">—</span></a>
+        <a class="btn btn-quiet" href="#drops">Next drop <span id="hero-drop-chip">soon</span></a>
       </div>
     </div>
 
     <!-- ---------------------------------------------------------------
          THE SEASON REEL. Everything in it comes from SEASONS[...].reel in
-         config.js — bows, hoodies, blankets, small goods, whatever the drop
+         config.js: bows, hoodies, blankets, small goods, whatever the drop
          holds. It plays on a slow loop, and the thread track under it can be
          dragged, tapped or arrowed through by hand. Nothing here is drawn.
          --------------------------------------------------------------- -->
@@ -422,8 +465,8 @@
     <div class="countdown-card" id="countdown-card">
       <div class="cd-left">
         <p class="cd-label" id="cd-label">Next drop</p>
-        <h3 class="cd-name display" id="cd-name">—</h3>
-        <p class="cd-when" id="cd-when">—</p>
+        <h3 class="cd-name display" id="cd-name">The next drop</h3>
+        <p class="cd-when" id="cd-when"></p>
         <p class="cd-blurb" id="cd-blurb"></p>
       </div>
       <div class="cd-right">
@@ -446,7 +489,7 @@
 </section>
 
 <!-- ===================== ABOUT ===================== -->
-<!-- TODO(client): this block wants one real photograph — her machine, her table,
+<!-- TODO(client): this block wants one real photograph: her machine, her table,
      her hands working. Deliberately no illustration here: the only mark on this
      site should be her own logo. -->
 <section class="section" id="about">
@@ -472,8 +515,9 @@
       Each bow is one of one, cut and sewn by hand for this drop, so there is no
       second one to swap it for and nothing to put back on the shelf.</p>
       <p>If a piece turns up damaged or is not what the listing said it was,
-      that is a different matter — <a data-site="mail-link" href="#">email us</a>
-      within 7 days with a photograph and we will put it right.</p></details>
+      that is a different matter: <a data-site="mail-link" href="mailto:sewtrue26@gmail.com">email us</a>
+      within 7 days with a photograph and we will put it right.
+      <a href="/terms#returns">The full terms</a>.</p></details>
     <details class="q"><summary>Shipping and pickup</summary>
       <p data-site="shipping"></p></details>
     <details class="q"><summary>How fast does it ship</summary>
@@ -520,6 +564,7 @@
   </div>
   <p class="foot-fine">
     <span>&copy; <span id="year"></span> Sew True. All bows sewn by hand.</span>
+    <span class="foot-legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a></span>
     <a data-site="credit" href="https://ez-hd.co" rel="noopener">Created and designed by EZHD</a>
   </p>
 </footer>
@@ -559,7 +604,7 @@
         <button class="btn btn-quiet" type="button" id="co-back">Back</button>
         <button class="btn btn-solid" type="submit" id="co-submit">Send order</button>
       </div>
-      <p class="note">No card is taken here — the order comes straight to the shop and you get an invoice back.</p>
+      <p class="note">No card is taken here. The order comes straight to the shop and you get an invoice back.</p>
     </form>
   </div>
 

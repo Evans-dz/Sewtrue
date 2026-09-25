@@ -229,5 +229,9 @@ real photograph — her machine, her table, her hands working.
 **No location anywhere.** These sell everywhere, so no city or state appears on
 the site by design. Don't reintroduce one.
 
-**Not built yet** — an `og.png` for link previews, and separate `/shop` and
-`/drops` routes if SEO wants them (it is one page with anchors today).
+**Site files (2026-09-25).** `404.html`, `privacy.html`, `terms.html` (served
+at `/privacy` and `/terms` by the `vercel.json` rewrites), `llms.txt`, and the
+share image `assets/og.jpg`. The small pages load only `js/config.js` and
+`js/page.js`. Product schema is written by `writeSchema()` in `js/main.js` from
+the catalogue. Not built: separate `/shop` and `/drops` routes (it is one page
+with anchors today).

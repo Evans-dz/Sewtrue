@@ -1,0 +1,140 @@
+Sew True audit baseline, 2026-09-25, commit 9fbd074
+Local: node ezhd-lab/verify/audit.mjs --url http://localhost:4178 --skip-site
+
+═══ http://localhost:4178 @ 1440x900 (desktop) ═══
+
+— document —
+  ✓ <html lang> set ("en")
+  ✓ <title> present and ≤65 chars (44)
+  ✓ meta viewport present
+  ✓ <main> landmark present
+  ✓ exactly one <h1> (found 1)
+  ✓ no skipped heading levels
+  ✓ skip link to main content
+
+— accessibility —
+  ✓ every <img> has alt (0 missing)
+  ✓ every button/link has an accessible name (0 unnamed)
+  ✓ every form control is labelled (0 unlabelled)
+
+— layout —
+  ✓ no horizontal scroll (0px overflow)
+  ✓ CLS under 0.1 (0.0014)
+  ✗ all targets ≥24px tappable (46 probed, 7 under)
+      button.reel-tick.on  74x17 tappable
+      button.reel-tick  75x17 tappable
+      button.reel-tick  75x17 tappable
+      button.reel-tick  75x17 tappable
+      button.reel-tick  75x17 tappable
+      button.reel-tick  75x17 tappable
+  ! sticky header + 9 anchor targets with no scroll-margin-top
+      section#hero.hero
+      section#why.noir
+      section#door-seq.door-seq
+      section#shop.section
+      section#drops.noir
+      h3#cd-name.cd-name.display
+
+— motion —
+  ✓ transitions stay off layout properties (0 rendered offenders)
+  ✓ prefers-reduced-motion honoured (2 sheets read)
+
+— forms —
+  ✓ input types match their purpose (0 wrong)
+
+— polish —
+  ✗ no em dashes in copy, titles, alt or schema (22 found)
+      …t was, that is a different matter —…
+      …No card is taken here — the order comes straight to…
+      …Sew True — handmade bows, sewn one at a…
+      …Candy Corn — Bow…
+      …BOO Sweatshirt — Sweatshirt…
+      …Cobweb — Bow…
+  ✓ no "made with AI/builder" tag
+  ✓ no emoji icons
+  ✓ no placeholder copy
+  ! missing: canonical, og:image share image, structured data
+  ! 15 pill-shaped buttons (read as template/AI-built)
+      a.btn  "Shop the drop"
+      a.btn  "Next drop in 6 days"
+      button.btn  "Add to basket"
+      button.btn  "Add to basket"
+      button.btn  "Add to basket"
+      button.btn  "Add to basket"
+
+— focus —
+  ✓ visible focus ring on all 59 tab stops checked (0 without)
+
+═══ http://localhost:4178 @ 390x844 (mobile) ═══
+
+— document —
+  ✓ <html lang> set ("en")
+  ✓ <title> present and ≤65 chars (44)
+  ✓ meta viewport present
+  ✓ <main> landmark present
+  ✓ exactly one <h1> (found 1)
+  ✓ no skipped heading levels
+  ✓ skip link to main content
+
+— accessibility —
+  ✓ every <img> has alt (0 missing)
+  ✓ every button/link has an accessible name (0 unnamed)
+  ✓ every form control is labelled (0 unlabelled)
+
+— layout —
+  ✓ no horizontal scroll (0px overflow)
+  ✓ CLS under 0.1 (0.0015)
+  ✗ all targets ≥24px tappable (45 probed, 1 under)
+      a  161x20 tappable
+  ! 15 targets between 24 and 44px tappable
+      a  31x31 tappable
+      a  37x31 tappable
+      a  37x31 tappable
+      button.basket-btn  50x33 tappable
+      button.reel-tick.on  47x31 tappable
+      button.reel-tick  48x31 tappable
+  ! sticky header + 9 anchor targets with no scroll-margin-top
+      section#hero.hero
+      section#why.noir
+      section#door-seq.door-seq
+      section#shop.section
+      section#drops.noir
+      h3#cd-name.cd-name.display
+
+— motion —
+  ✓ transitions stay off layout properties (0 rendered offenders)
+  ✓ prefers-reduced-motion honoured (2 sheets read)
+
+— forms —
+  ✓ input types match their purpose (0 wrong)
+
+— polish —
+  ! 15 pill-shaped buttons (read as template/AI-built)
+      a.btn  "Shop the drop"
+      a.btn  "Next drop in 6 days"
+      button.btn  "Add to basket"
+      button.btn  "Add to basket"
+      button.btn  "Add to basket"
+      button.btn  "Add to basket"
+
+— focus —
+  ✓ visible focus ring on all 59 tab stops checked (0 without)
+
+────────────────────────────────────────────────────────────
+  3 failing, 6 warnings
+
+
+Live site-level checks (https://sewtrue.shop, same day):
+═══ https://sewtrue.shop (site) ═══
+
+— polish —
+  ! no custom 404 page (status 404, host default)
+  ! no privacy policy page
+  ! no terms page
+  ✓ /robots.txt
+  ✓ /sitemap.xml
+  ! missing /llms.txt
+
+────────────────────────────────────────────────────────────
+  3 failing, 10 warnings
+

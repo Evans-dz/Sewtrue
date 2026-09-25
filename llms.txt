@@ -1,0 +1,28 @@
+# Sew True
+
+> Handmade fabric door bows, plus sweatshirts and small goods, cut from real cloth and sewn one at a time by a one-person shop. Sold online in dated seasonal drops. Most pieces are one of one and are never remade. Ships anywhere in the US for a flat $6.
+
+## What it sells
+
+- Fabric door bows in several sizes, single and double layer, each one of one
+- Appliqued sweatshirts and hoodies, a few of each size
+- Small goods made from the offcuts, such as garland
+
+## How buying works
+
+- Each drop is announced with a date and time; nothing can be bought before it opens
+- Checkout is by card through Stripe
+- Flat $6 shipping, US addresses only
+- Every piece is final sale; a piece that arrives damaged or not as described is put right if reported within 7 days with a photo
+
+## Pages
+
+- [Shop and current drop](https://sewtrue.shop/#shop)
+- [Next drop and countdown](https://sewtrue.shop/#drops)
+- [About the shop](https://sewtrue.shop/#about)
+- [Terms of sale](https://sewtrue.shop/terms)
+- [Privacy](https://sewtrue.shop/privacy)
+
+## Contact
+
+- Email: sewtrue26@gmail.com

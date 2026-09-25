@@ -6,6 +6,7 @@
 
 const SITE = {
   name: 'Sew True',
+  url: 'https://sewtrue.shop',     // the canonical domain: schema, share links
   tagline: 'Bows sewn true, one at a time.',
 
   /* No location anywhere on this site by design — these ship everywhere. */

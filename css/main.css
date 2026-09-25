@@ -24,6 +24,9 @@
   --gap:clamp(20px,4vw,44px);
   --pad:clamp(20px,5vw,72px);
   --ease:cubic-bezier(.22,.61,.36,1);
+  /* The sticky header's height. Anchor jumps land below it, with or without
+     Lenis (which reads scroll-margin-top itself). */
+  --head-h:98px;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -46,6 +49,7 @@ button{font:inherit;color:inherit}
 .skip{position:absolute;left:-999px;top:0;z-index:200;background:var(--ink);color:var(--paper);padding:12px 18px}
 .skip:focus{left:12px;top:12px}
 :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+section[id],h1[id],h2[id],h3[id]{scroll-margin-top:var(--head-h)}
 .noir :focus-visible{outline-color:var(--bone)}
 
 /* -- grain + paper -------------------------------------------------------- */
@@ -76,7 +80,7 @@ html.js .wipe{clip-path:inset(-.28em 102% -.3em 0)}
 html.js .reveal{opacity:0;transform:translateY(14px)}
 
 /* -- buttons -------------------------------------------------------------- */
-.btn{display:inline-flex;align-items:center;gap:.5em;border:0;border-radius:999px;cursor:pointer;
+.btn{display:inline-flex;align-items:center;gap:.5em;border:0;border-radius:2px;cursor:pointer;
   font-family:var(--sans);font-weight:500;font-size:clamp(.95rem,1.15vw,1.06rem);letter-spacing:.02em;
   padding:.92em 1.7em;text-decoration:none;transition:transform .3s var(--ease),background .3s,color .3s}
 .btn-solid{background:var(--ink);color:var(--paper)}
@@ -88,7 +92,7 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .btn.wide{width:100%;justify-content:center}
 .btn[disabled]{opacity:.45;cursor:default;transform:none}
 
-.pill{background:var(--paper-2);border:0;border-radius:999px;padding:.6em 1.15em;cursor:pointer;
+.pill{background:var(--paper-2);border:0;border-radius:2px;padding:.6em 1.15em;cursor:pointer;
   font-weight:400;font-size:.87rem;color:var(--ink-2);transition:background .25s,color .25s,transform .25s var(--ease)}
 .pill:hover{background:var(--paper-3);transform:translateY(-1px)}
 .pill.is-on{background:var(--ink);color:var(--paper)}
@@ -105,8 +109,9 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .nav a::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--ink);
   transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
 .nav a:hover::after{transform:scaleX(1)}
-.basket-btn{display:flex;align-items:center;gap:7px;background:none;border:0;cursor:pointer;padding:6px 2px}
-.basket-count{font-size:.76rem;font-weight:500;min-width:20px;height:20px;border-radius:999px;
+.basket-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:none;border:0;cursor:pointer;
+  padding:6px 2px;min-width:44px;min-height:44px}
+.basket-count{font-size:.76rem;font-weight:500;min-width:20px;height:20px;border-radius:2px;
   background:var(--ink);color:var(--paper);display:grid;place-items:center;padding:0 6px;transition:transform .3s var(--ease)}
 .basket-count.is-empty{background:var(--paper-3);color:var(--muted)}
 .basket-count.bump{transform:scale(1.35)}
@@ -186,7 +191,7 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .card-price{font-size:clamp(1.02rem,1.2vw,1.14rem);font-weight:400;white-space:nowrap}
 .card-meta{font-size:clamp(.8rem,.95vw,.88rem);color:var(--muted);letter-spacing:.03em;margin:.35em 0 0;position:relative;z-index:1}
 .tag{position:absolute;top:42px;left:14px;z-index:2;background:var(--ink);color:var(--paper);
-  font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;padding:5px 9px;border-radius:999px}
+  font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;padding:5px 9px;border-radius:2px}
 .card.sold{opacity:.62}
 .card.sold .tag{background:var(--paper-3);color:var(--ink-2)}
 .card.sold:hover{transform:none;box-shadow:0 1px 0 var(--rule)}
@@ -236,7 +241,7 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .notify label{display:block;font-size:.82rem;color:#cfc6b7;margin-bottom:9px}
 .notify-row{display:flex;gap:8px;flex-wrap:wrap}
 .notify input{flex:1 1 200px;background:rgba(236,228,214,.08);border:1px solid rgba(236,228,214,.2);
-  color:var(--bone);border-radius:999px;padding:.82em 1.2em;font:inherit;font-size:.9rem}
+  color:var(--bone);border-radius:2px;padding:.82em 1.2em;font:inherit;font-size:.9rem}
 .notify input::placeholder{color:rgba(236,228,214,.42)}
 .notify-msg{font-size:.82rem;margin:.8em 0 0;min-height:1.2em;color:var(--bone-dim)}
 .notify-msg.bad{color:#e8b0a4}
@@ -286,11 +291,14 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 .foot-word{font-weight:500;font-size:1.3rem;margin:0 0 .3em}
 .foot-grid nav{display:flex;flex-wrap:wrap;gap:8px 20px}
 .foot-grid a{font-size:.88rem;text-decoration:none;color:var(--ink-2)}
+.foot-grid nav a{padding:12px 7px;margin:-12px -7px}
 .foot-grid a:hover{text-decoration:underline;text-underline-offset:4px}
-.foot-link{display:block;margin-bottom:8px}
-.foot-fine{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;max-width:1320px;
+.foot-link{display:block;padding:11px 0}
+.foot-link:first-child{margin-top:-11px}
+.foot-fine{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;max-width:1320px;
   margin:20px auto 0;font-size:.76rem;color:var(--muted)}
-.foot-fine a{text-decoration:none}
+.foot-fine a{text-decoration:none;padding:12px 8px;margin:-12px -8px}
+.foot-legal{display:flex;gap:20px}
 .foot-fine a:hover{text-decoration:underline;text-underline-offset:3px}
 
 /* -- basket --------------------------------------------------------------- */
@@ -307,6 +315,7 @@ body.drawer-open .basket{transform:none}
   border-bottom:1px solid var(--rule);margin-bottom:18px}
 .basket-head .display{font-size:1.9rem}
 #basket-close{background:none;border:0;cursor:pointer;font-size:.82rem;letter-spacing:.14em;
+  padding:12px 10px;margin:-12px -10px;
   text-transform:uppercase;color:var(--muted)}
 #basket-close:hover{color:var(--ink)}
 .basket-empty{color:var(--muted);font-size:.94rem}
@@ -317,14 +326,14 @@ body.drawer-open .basket{transform:none}
 .line h4{font-family:var(--serif);font-size:1.06rem;margin:0 0 .18em;font-weight:400}
 .line-meta{font-size:.76rem;color:var(--muted);margin:0 0 .7em}
 .line-controls{display:flex;align-items:center;gap:14px}
-.stepper{display:flex;align-items:center;gap:2px;background:var(--paper-2);border-radius:999px;padding:2px}
-.stepper button{width:26px;height:26px;border:0;background:none;cursor:pointer;border-radius:50%;line-height:1;
+.stepper{display:flex;align-items:center;gap:2px;background:var(--paper-2);border-radius:2px;padding:2px}
+.stepper button{width:32px;height:32px;border:0;background:none;cursor:pointer;border-radius:2px;line-height:1;
   font-size:1rem;color:var(--ink-2)}
 .stepper button:hover:not([disabled]){background:var(--paper-3)}
 .stepper button[disabled]{opacity:.3;cursor:default}
 .stepper span{min-width:20px;text-align:center;font-size:.86rem;font-variant-numeric:tabular-nums}
 .line-remove{background:none;border:0;cursor:pointer;font-size:.76rem;color:var(--muted);text-decoration:underline;
-  text-underline-offset:3px;padding:0}
+  text-underline-offset:3px;padding:12px 4px;margin:-12px -4px}
 .line-remove:hover{color:var(--ink)}
 .line-price{font-size:.94rem;margin:0;font-variant-numeric:tabular-nums}
 .basket-foot{margin-top:auto;padding-top:20px}
@@ -335,7 +344,7 @@ body.drawer-open .basket{transform:none}
 .checkout h3,.basket-done h3{font-size:1.7rem;margin-bottom:.7em}
 .co-form label{display:block;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 .co-form input,.co-form textarea{display:block;width:100%;margin-top:7px;background:var(--paper-2);border:1px solid var(--rule);
-  border-radius:12px;padding:.78em .95em;font:inherit;font-size:.95rem;color:var(--ink);text-transform:none;letter-spacing:0}
+  border-radius:2px;padding:.78em .95em;font:inherit;font-size:.95rem;color:var(--ink);text-transform:none;letter-spacing:0}
 .co-form input:focus,.co-form textarea:focus{outline:2px solid var(--ink);outline-offset:1px}
 .co-fulfil{border:0;padding:0;margin:0 0 16px;display:flex;gap:18px}
 .co-fulfil legend{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0;margin-bottom:8px;float:left;width:100%}
@@ -359,6 +368,7 @@ body.drawer-open .basket{transform:none}
   transform:translateY(16px) scale(.985);transition:transform .45s var(--ease)}
 .qv[aria-hidden="false"] .qv-card{transform:none}
 .qv-close{position:absolute;top:14px;right:16px;background:none;border:0;cursor:pointer;font-size:.76rem;
+  padding:12px 10px;margin:-12px -10px;
   letter-spacing:.14em;text-transform:uppercase;color:var(--muted);z-index:2}
 .qv-art{background:var(--paper-2);display:grid;place-items:center;padding:18px;position:relative}
 .qv-art::before{content:'';position:absolute;inset:8px;border:1px solid var(--rule)}
@@ -448,10 +458,11 @@ body.drawer-open .basket{transform:none}
 /* mobile: the nav becomes a scrollable strip rather than a hidden menu */
 @media (max-width:760px){
   .head{flex-wrap:wrap;padding-bottom:0}
-  .nav{display:flex;order:3;width:100%;margin:10px -18px 0;padding:0 18px 10px;
+  .nav{display:flex;order:3;width:100%;margin:3px -18px 0;padding:0 18px 3px;
     overflow-x:auto;gap:20px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .nav::-webkit-scrollbar{display:none}
-  .nav a{white-space:nowrap;font-size:.84rem}
+  .nav a{white-space:nowrap;font-size:.84rem;padding:11px 8px;margin:0 -8px}
+  .nav a::after{left:8px;right:8px;bottom:8px}
   .basket-btn{margin-left:auto}
 }
 
@@ -468,6 +479,9 @@ body.drawer-open .basket{transform:none}
 
 @media (max-width:760px){
   .brand-logo{height:38px}
+  :root{--head-h:130px}
+  .stepper button{width:44px;height:44px}
+  .size{min-width:44px;min-height:44px}
 }
 .about-block{max-width:720px}
 .about-block .display{margin-bottom:.5em}
@@ -486,8 +500,6 @@ body.drawer-open .basket{transform:none}
   transform:translate(-50%,-50%);opacity:0;transition:opacity .4s}
 .head-progress.live .spool{opacity:1}
 .spool-spin{transform-box:fill-box;transform-origin:center}
-
-  opacity:0;mix-blend-mode:soft-light}
 
 /* -- Idea 2: the door ----------------------------------------------------- */
 .door-seq{height:440vh;position:relative;background:var(--noir)}
@@ -574,8 +586,8 @@ body.drawer-open .basket{transform:none}
   color:var(--paper);padding:4px 8px}
 
 /* the thread track — one stitch per piece, drag or tap to scrub */
-.reel-track{display:flex;gap:5px;margin:10px 2px 0;touch-action:pan-y;cursor:ew-resize}
-.reel-tick{flex:1 1 0;height:16px;background:none;border:0;padding:6px 0 0;cursor:pointer}
+.reel-track{display:flex;gap:5px;margin:4px 2px 0;touch-action:pan-y;cursor:ew-resize}
+.reel-tick{flex:1 1 0;height:26px;background:none;border:0;padding:12px 0 0;cursor:pointer}
 .reel-tick i{display:block;height:2px;background:var(--rule-2);position:relative;overflow:hidden}
 .reel-tick i::after{content:'';position:absolute;inset:0;width:0;background:var(--accent)}
 .reel-tick.on i::after{width:100%}
@@ -636,7 +648,7 @@ body.drawer-open .basket{transform:none}
   .scale-row::-webkit-scrollbar{display:none}
   /* a thumb needs more than a hairline to grab */
   .reel-track{gap:4px}
-  .reel-tick{height:30px;padding-top:14px}
+  .reel-tick{height:44px;padding-top:20px}
   /* four lines on one strip beats two ragged rows */
   .cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
     margin-inline:calc(var(--pad) * -1);padding-inline:var(--pad);gap:22px}
@@ -661,7 +673,7 @@ body.drawer-open .basket{transform:none}
    struck through — the gaps in the run are part of what is being sold. */
 .sizes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
 .size{font:inherit;font-size:clamp(.84rem,1vw,.92rem);letter-spacing:.04em;padding:.42em .78em;cursor:pointer;
-  background:var(--paper-3);color:var(--ink);border:0;border-radius:999px;
+  background:var(--paper-3);color:var(--ink);border:0;border-radius:2px;
   transition:background .2s,color .2s,opacity .2s}
 .size:hover:not(.gone){background:var(--ink);color:var(--paper)}
 .size.is-on{background:var(--ink);color:var(--paper)}
@@ -670,3 +682,34 @@ body.drawer-open .basket{transform:none}
 
 /* Sold is the loudest word on a sold card. */
 .tag{font-weight:600;letter-spacing:.18em}
+
+/* ===================== the small pages: privacy, terms, 404 ============== */
+/* The back of the pattern envelope: a heading down the left, the
+   instructions on the right, a hairline between every step. */
+img.foot-bow{height:auto}
+.page{padding-top:clamp(48px,7vw,96px)}
+.page .sec-head{max-width:62ch}
+.page-date{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);margin:1.6em 0 0}
+.legal{border-top:1px solid var(--rule);max-width:1040px}
+.legal section{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,62ch);gap:10px clamp(24px,4vw,64px);
+  padding:clamp(22px,3vw,34px) 0;border-bottom:1px solid var(--rule)}
+.page h1,.lost h1,.legal h2{text-wrap:balance}
+.legal h2{font-family:var(--serif);font-size:clamp(1.3rem,1.8vw,1.6rem);line-height:1.15}
+.legal p,.legal li{color:var(--ink-2);font-size:clamp(1rem,1.1vw,1.08rem)}
+.legal ul{margin:0 0 1em;padding-left:1.1em}
+.legal li{margin-bottom:.45em}
+.legal section > div > :last-child{margin-bottom:0}
+.legal a{text-underline-offset:3px}
+
+.lost{position:relative;isolation:isolate;min-height:min(72vh,680px);display:flex;flex-direction:column;
+  justify-content:center}
+.lost h1{margin:0 0 .45em}
+.lost .hero-cta{margin-top:1.4em}
+.lost .note{margin-top:2.2em}
+.lost-thread{position:absolute;right:0;top:18%;width:min(52vw,560px);height:auto;color:var(--rule-2);
+  pointer-events:none;z-index:-1}
+
+@media (max-width:760px){
+  .legal section{grid-template-columns:1fr}
+  .lost-thread{position:static;width:78%;margin:40px 0 0 auto}
+}
