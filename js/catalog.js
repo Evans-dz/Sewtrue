@@ -130,10 +130,11 @@ const PRODUCTS = [
     name: 'Ghost, Polka Dot with Checkered Hat', colour: 'Charcoal', photo: 'hoodies/ghost-pd-chk', price: 50, stock: 2 },
 
   /* ---------- Halloween garland ----------
-     Three made, all the same, so this is one listing with a count of three
-     rather than three one-of-ones. */
+     All the same, so this is one listing with a count rather than a row each.
+     The count is what is left: three were made, one has sold away from the
+     site, so Stripe has no record of it and this number carries it instead. */
   { sku: 'HW-GAR-1', category: 'small-goods', half: 'halloween',
-    name: 'Halloween Garland', photo: 'garland/garland', price: 25, stock: 3 },
+    name: 'Halloween Garland', photo: 'garland/garland', price: 25, stock: 2 },
 ];
 
 /* Cloth in rotation, drawn as SVG patterns until the real photographs exist.
