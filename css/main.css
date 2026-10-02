@@ -340,6 +340,10 @@ body.drawer-open .basket{transform:none}
 .basket-total{display:flex;justify-content:space-between;font-family:var(--serif);font-size:1.3rem;margin-bottom:6px}
 .basket-foot .btn{margin-top:14px}
 .basket-foot .note{margin-top:12px;text-align:center}
+.basket-code{display:block;margin-top:16px;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.basket-code input{display:block;width:100%;margin-top:7px;background:var(--paper-2);border:1px solid var(--rule);
+  border-radius:2px;padding:.7em .95em;font:inherit;font-size:.95rem;color:var(--ink);letter-spacing:.06em}
+.basket-code input:focus{outline:2px solid var(--ink);outline-offset:1px}
 
 .checkout h3,.basket-done h3{font-size:1.7rem;margin-bottom:.7em}
 .co-form label{display:block;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
@@ -417,7 +421,9 @@ body.drawer-open .basket{transform:none}
   .basket{padding-inline:18px}
 }
 @media (max-width:420px){
-  .grid{grid-template-columns:1fr 1fr}
+  /* minmax(0,…) so a long name cannot widen its column past the screen. */
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card-bot{flex-wrap:wrap;row-gap:2px}
   .quilt{grid-template-columns:repeat(3,1fr)}
 }
 

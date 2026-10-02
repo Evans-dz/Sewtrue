@@ -50,9 +50,10 @@ const SITE = {
 const SEASONS = {
 
   'fall-halloween': {
-    /* The label on the hero plate and in the reel caption. Only Halloween is
-       showing, so that is what it says. */
-    name: 'Halloween',
+    /* The label on the hero plate and in the reel caption. Fall is the drop
+       being launched and the reel is all Fall, so that is what it says.
+       Halloween is still in the shop below it. */
+    name: 'Fall',
     /* Harvest first, spooky second. The season warms the paper and swaps the
        accent to ember; the bones of the site stay black, bone and grain. */
     tint: {
@@ -65,25 +66,27 @@ const SEASONS = {
       '--noir-2':  '#1d1917',
     },
 
-    /* The hero reel — her own photographs, bows and sweatshirts alternating.
-       Whole door for the bows, whole garment for the sweatshirts.
+    /* The hero reel — her own photographs, whole door for every bow. All
+       Fall for the launch; Halloween stays in the shop grid.
 
        KEEP THIS IN STEP WITH WHAT IS UNSOLD. The reel does not know what has
        sold, so a piece that goes should be swapped out for one that has not,
-       or the hero advertises something nobody can buy. */
+       or the hero advertises something nobody can buy.
+
+       `meta` is the price, copied from catalog.js. Change both together. */
     reel: [
-      { name: 'Candy Corn',     tag: 'Bow',        meta: '$120',
-        photo: 'assets/photos/halloween/hw-11.jpg', href: '#shop' },
-      { name: 'BOO Sweatshirt', tag: 'Sweatshirt', meta: '$60',
-        photo: 'assets/photos/hoodies/boo-black.jpg', href: '#shop' },
-      { name: 'Cobweb',         tag: 'Bow',        meta: '$120',
-        photo: 'assets/photos/halloween/hw-13.jpg', href: '#shop' },
-      { name: 'Ghost Sweatshirt', tag: 'Sweatshirt', meta: '$50',
-        photo: 'assets/photos/hoodies/ghost-pd-chk.jpg', href: '#shop' },
-      { name: 'Beetle Stripe',  tag: 'Bow',        meta: '$100',
-        photo: 'assets/photos/halloween/hw-10.jpg', href: '#shop' },
-      { name: 'Midnight',       tag: 'Bow',        meta: '$100',
-        photo: 'assets/photos/halloween/hw-03.jpg', href: '#shop' },
+      { name: 'Hayride',     tag: 'Bow', meta: '$80',
+        photo: 'assets/photos/fall/fa-01.jpg', href: '#shop' },
+      { name: 'Goldenrod',   tag: 'Bow', meta: '$120',
+        photo: 'assets/photos/fall/fa-04.jpg', href: '#shop' },
+      { name: 'Prairie',     tag: 'Bow', meta: '$100',
+        photo: 'assets/photos/fall/fa-08.jpg', href: '#shop' },
+      { name: 'Doe',         tag: 'Bow', meta: '$100',
+        photo: 'assets/photos/fall/fa-11.jpg', href: '#shop' },
+      { name: 'Cobblestone', tag: 'Bow', meta: '$80',
+        photo: 'assets/photos/fall/fa-09.jpg', href: '#shop' },
+      { name: 'Fireside',    tag: 'Bow', meta: '$120',
+        photo: 'assets/photos/fall/fa-05.jpg', href: '#shop' },
     ],
 
     /* Cloth on the fabric wall this season, in hanging order.
@@ -121,7 +124,19 @@ const SEASON_BETWEEN = 'fall-halloween';
    Fourth of July, Halloween and Christmas. Do not paste them all in here;
    add each one only when it is ready to be announced.
 ------------------------------------------------------------------------------ */
+/* Fall is listed first because the shop lede reads these in order, and Fall
+   is the drop being launched. "Next drop" is worked out by date, not order. */
 const DROPS = [
+  {
+    id: 'fall-26', half: 'fall', name: 'Fall', year: 2026,
+    /* Confirmed by the client: noon on Friday 2 October. -06:00 is Mountain
+       Daylight Time, which is what Utah is still on in early October — DST
+       does not end until 1 November. */
+    opens: '2026-10-02T12:00:00-06:00',
+    season: 'fall-halloween',
+    blurb: 'Rust, wheat and flannel. Warm checks for a cooling porch.',
+    pieces: null,
+  },
   {
     id: 'halloween-26', half: 'halloween', name: 'Halloween', year: 2026,
     /* ALWAYS carry the offset. A bare '2026-09-18T19:00' means 19:00 wherever
@@ -131,16 +146,6 @@ const DROPS = [
     opens: '2026-09-18T12:00:00-06:00',
     season: 'fall-halloween',
     blurb: 'Checks, cobwebs and candy corn. Every bow one of one, and no second run.',
-    pieces: null,
-  },
-  {
-    id: 'fall-26', half: 'fall', name: 'Fall', year: 2026,
-    /* Confirmed by the client: noon on Friday 2 October. -06:00 is Mountain
-       Daylight Time, which is what Utah is still on in early October — DST
-       does not end until 1 November. */
-    opens: '2026-10-02T12:00:00-06:00',
-    season: 'fall-halloween',
-    blurb: 'Rust, wheat and flannel. Warm checks for a cooling porch.',
     pieces: null,
   },
 ];
@@ -172,14 +177,14 @@ const BETWEEN_DROPS = {
 /* --------------------------------------------------------------------------
    WHAT THE SHOP LISTS
 
-   Only these halves appear. Fall is cut, priced and ready in the catalogue,
-   but it belongs to its own drop on 2 October and is not shown before then —
-   add 'fall' here when you want it on the page.
+   Only these halves appear. Fall is on show ahead of its drop so people can
+   look; its buttons stay shut until noon on 2 October (CHECKOUT.holdUntilDrop
+   below). Halloween stays open and buyable alongside it.
 
    Enforced in api/checkout.js too, so an unlisted piece cannot be bought by
    posting straight at the endpoint.
 -------------------------------------------------------------------------- */
-const SHOP = { halves: ['halloween'] };
+const SHOP = { halves: ['fall', 'halloween'] };
 
 /* --------------------------------------------------------------------------
    EARLY ACCESS

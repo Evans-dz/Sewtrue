@@ -19,6 +19,10 @@
      a row in catalog.js gains a `photo`, the picture takes over instead.
      ====================================================================== */
   const priceOf = (p) => p.price;
+  /* A piece can be on show before it has a price. It says so, and it cannot
+     be added; api/checkout.js refuses it as well. */
+  const priced = (p) => Number.isFinite(p.price) && p.price > 0;
+  const priceText = (p) => (priced(p) ? money(p.price) : 'Price soon');
 
   /* Nothing is photographed yet. These are OUTLINES on purpose: a bow drawn
      in a named print tells the customer which cloth they are buying, and on a
@@ -127,7 +131,7 @@
     /* No season reel configured — never leave the hero empty. Fall back to
        whatever is actually in the shop. */
     return PRODUCTS.filter((p) => p.stock > 0 && p.photo).slice(0, 5).map((p) => ({
-      name: p.name, tag: topLabel(p), meta: money(p.price),
+      name: p.name, tag: topLabel(p), meta: priced(p) ? money(p.price) : '',
       photo: 'assets/photos/bow-' + p.photo + '.jpg', href: '#shop',
     }));
   }
@@ -347,6 +351,7 @@
       writeSchema();
       if (!opts || !opts.quiet) {
         renderCats(); renderShop();
+        renderDrops();   /* a drop that has sold out is no longer "open now" */
         /* The open drawer is looking at the same stock — redraw it too, or a
            stepper click works off numbers that are no longer true. */
         if (window.SewTrue && window.SewTrue.render) window.SewTrue.render();
@@ -372,7 +377,8 @@
   /* ======================================================================
      SHOP
      ====================================================================== */
-  const state = { cat: 'bows' };
+  /* The shop is split by drop, one tab per listed half, first one showing. */
+  const state = { half: ((typeof SHOP !== 'undefined' && SHOP.halves) || ['halloween'])[0] };
 
   /* The shop shows what exists and what belongs to this drop. Everything
      else stays in the catalogue, out of sight, until its turn. */
@@ -387,18 +393,14 @@
     return !!p && listed(p);
   };
 
-  function matches(p) {
-    return listed(p) && p.category === state.cat;
-  }
-
   /* Which size is showing on each grouped card. */
   const picked = {};
 
   /* A card is either one piece, or one sweatshirt in several sizes. */
-  function entries() {
+  function cardsFor(half) {
     const out = [];
     const seen = new Set();
-    for (const p of PRODUCTS.filter(matches)) {
+    for (const p of PRODUCTS.filter((x) => listed(x) && x.half === half)) {
       if (!p.group) { out.push({ lead: p, sizes: null }); continue; }
       if (seen.has(p.group)) continue;
       seen.add(p.group);
@@ -413,23 +415,37 @@
   }
 
   const catOf = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[0];
-  const inStock = (id) => PRODUCTS.filter((p) => listed(p) && p.category === id && p.stock > 0).length;
+  const dropOf = (half) => DROPS.find((d) => d.half === half) || { half, name: half, blurb: '' };
+  /* Halves that have something in them, in SHOP.halves order. */
+  const shopHalves = () => ((typeof SHOP !== 'undefined' && SHOP.halves) || DROPS.map((d) => d.half))
+    .filter((h) => PRODUCTS.some((p) => listed(p) && p.half === h));
+  /* Cards with anything left, so a sweatshirt counts once rather than once a size. */
+  const readyIn = (half) => cardsFor(half)
+    .filter((e) => (e.sizes || [e.lead]).some((x) => x.stock > 0)).length;
+  function opensShort(half) {
+    const t = opensForHalf(half); if (!t) return '';
+    const d = new Date(t);
+    return d.toLocaleDateString(undefined, { weekday: 'short' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+  }
 
-  /* The whole line is on show from day one. A category with nothing in it yet
-     says so plainly instead of rendering an empty grid. */
+  /* One tab per drop. A drop that has sold out says so, or the customer is
+     told the opposite of what happened. */
   function renderCats() {
     const el = $('#cats'); if (!el) return;
-    el.innerHTML = CATEGORIES.map((c) => {
-      const n = inStock(c.id);
-      const on = c.id === state.cat;
-      /* "Coming soon" means not made yet. A line that sold out has to say so,
-         or the customer is told the opposite of what happened. */
-      const made = PRODUCTS.some((p) => listed(p) && p.category === c.id);
-      const label = n ? n + ' ready' : (c.live && made ? 'All gone' : 'Coming soon');
+    if (shopHalves().indexOf(state.half) === -1) state.half = shopHalves()[0];
+    /* The buttons are redrawn on every switch and stock sync; keep a keyboard
+       user on the tab that is open rather than dropping them to the page. */
+    const hadFocus = el.contains(document.activeElement);
+    el.innerHTML = shopHalves().map((h) => {
+      const on = h === state.half;
+      const n = readyIn(h);
+      const label = opensForHalf(h) ? 'Opens ' + opensShort(h) : (n ? n + ' ready' : 'All gone');
       return `<button class="cat${on ? ' is-on' : ''}" type="button" role="tab"
-        aria-selected="${on}" data-cat="${c.id}">${c.label}
+        aria-selected="${on}" data-half="${h}">${dropOf(h).name} drop
         <small>${label}</small></button>`;
     }).join('');
+    if (hadFocus) { const t = el.querySelector('[data-half="' + state.half + '"]'); if (t) t.focus(); }
   }
 
   /* What the little line under the title says about this piece. */
@@ -437,12 +453,12 @@
     if (p.category === 'sweatshirts') {
       return p.group ? p.colour : p.colour + ' · ' + APPAREL[p.apparel].label;
     }
-    if (p.category === 'bows') return 'One of one';
-    return p.stock > 1 ? p.stock + ' made' : 'One of one';
+    /* `made` not `stock`: a garland with one left was still made twice. */
+    return p.made > 1 ? p.made + ' made' : 'One of one';
   }
   /* Apparel says its size, because that is what you are choosing. A bow says
-     nothing here — the whole grid is already the Halloween drop, and on a
-     phone the word only collides with the count beside it. */
+     nothing here — the whole grid is already the drop, and on a phone the
+     word only collides with the count beside it. */
   function topLabel(p) {
     return p.category === 'sweatshirts' ? APPAREL[p.apparel].label : '';
   }
@@ -452,7 +468,7 @@
     const sizes = entry.sizes;
     const sold = p.stock < 1;
     const stockNote = sold ? 'Sold'
-      : (p.category === 'bows' ? 'One of one' : p.stock + ' left');
+      : (p.category === 'bows' && !(p.made > 1) ? 'One of one' : p.stock + ' left');
 
     /* Sizes for a grouped sweatshirt. A size that has gone is shown and
        disabled rather than hidden — the gaps are the scarcity. */
@@ -471,39 +487,43 @@
         <span class="card-art">${window.bowMarkup(p, null, { strap: false })}</span>
         <span class="card-bot">
           <span class="card-name">${p.name}</span>
-          <span class="card-price">${money(p.price)}</span>
+          <span class="card-price">${priceText(p)}</span>
         </span>
         <span class="card-meta">${subtitleOf(p)}</span>
       </button>
       ${sizeRow}
       ${sold
-        ? `<p class="note card-add">Gone. There was only ever one.</p>`
-        : (openFor(p)
-          ? `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`
-          : `<p class="note card-add">Opens ${opensLabel(p.half)}</p>`)}
+        ? `<p class="note card-add">${p.made > 1 ? 'Gone. Every one has sold.' : 'Gone. There was only ever one.'}</p>`
+        : (!openFor(p)
+          ? `<p class="note card-add">Opens ${opensLabel(p.half)}</p>`
+          : (priced(p)
+            ? `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`
+            : `<p class="note card-add">Price coming soon</p>`))}
     </article>`;
   }
 
   function renderShop() {
     const grid = $('#shop-grid'); if (!grid) return;
-    const cat = catOf(state.cat);
+    const drop = dropOf(state.half);
     const soon = $('#shop-soon');
-    const sizes = $('#size-filters');
     const count = $('#shop-count');
-    const live = cat.live && inStock(cat.id) > 0;
-    const soldOut = cat.live && !inStock(cat.id) && PRODUCTS.some((p) => listed(p) && p.category === cat.id);
+    const list = cardsFor(state.half);
+    const live = readyIn(state.half) > 0;
+    const soldOut = !live && list.length > 0;
 
-    /* Announced but not stocked — a shelf, not an empty grid. */
+    const tag = $('#drop-tag');
+    if (tag) tag.textContent = drop.blurb || drop.name + ' drop';
+
+    /* Nothing left — a shelf, not an empty grid. */
     if (!live) {
       grid.innerHTML = '';
       grid.hidden = true;
-      if (sizes) sizes.hidden = true;
       if (count) count.textContent = '';
       if (soon) {
         soon.hidden = false;
-        soon.innerHTML = `<p class="eyebrow">${cat.label}</p>
+        soon.innerHTML = `<p class="eyebrow">${drop.name} drop</p>
           <h3>${soldOut ? 'All gone.' : 'Coming soon.'}</h3>
-          <p>${soldOut ? 'Every one of these has sold. There is never a second run.' : cat.note}</p>
+          <p>${soldOut ? 'Every one of these has sold. There is never a second run.' : drop.blurb}</p>
           <a class="btn btn-quiet" href="#drops">Tell me about the next drop</a>`;
       }
       return;
@@ -511,9 +531,6 @@
 
     if (soon) { soon.hidden = true; soon.innerHTML = ''; }
     grid.hidden = false;
-    if (sizes) sizes.hidden = cat.id !== 'bows';
-
-    const list = entries();
     grid.innerHTML = list.map(cardMarkup).join('');
 
     /* Two halves, two nights — say where each one stands rather than
@@ -525,17 +542,20 @@
         if (!PRODUCTS.some((p) => listed(p) && p.half === d.half)) return null;
         return shut ? d.name + ' opens ' + opensLabel(d.half) + '.' : d.name + ' is open.';
       }).filter(Boolean);
+      /* Not "one of one": Fawn, Doe, the garland and the sweatshirts each
+         have more than one made. */
       lede.textContent = earlyOpen()
-        ? 'Open early, and only for a few minutes. Every piece is one of one.'
+        ? 'Open early, and only for a few minutes. When it is gone, it is gone.'
         : (parts.length
-          ? parts.join(' ') + ' Every piece is one of one.'
+          ? parts.join(' ') + ' When it is gone, it is gone.'
           : 'What is here is what exists. Nothing is reprinted, nothing is backordered.');
     }
 
-    const n = list.length;
-    const unit = cat.id === 'bows' ? (n === 1 ? ' bow' : ' bows')
-                                   : ' ' + cat.label.toLowerCase();
-    count.textContent = n + unit;
+    /* Pieces made, not cards: Fawn is one card but two bows. A sweatshirt
+       card counts once whatever its sizes. */
+    const n = list.reduce((k, e) => k + (e.sizes ? 1 : Math.max(1, e.lead.made || 1)), 0);
+    const allBows = list.every((e) => e.lead.category === 'bows');
+    count.textContent = n + (allBows ? (n === 1 ? ' bow' : ' bows') : (n === 1 ? ' piece' : ' pieces'));
 
     if (!REDUCED && window.gsap) {
       gsap.fromTo(grid.children, { opacity: 0, y: 16 },
@@ -585,9 +605,40 @@
   const fmtDate = (d) => d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
   const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase();
 
+  /* A drop that opened in the last fortnight. On launch day the section should
+     say the drop is open, not that the next one is being sewn. */
+  const liveDrop = () => {
+    const now = Date.now();
+    return DROPS.filter((d) => { const t = toDate(d.opens).getTime(); return t <= now && now - t < 14 * 864e5; })
+                .sort((a, b) => toDate(b.opens) - toDate(a.opens))[0] || null;
+  };
+  let clockTimer = null;
+
   function renderDrops() {
     const next = nextDrop();
     const card = $('#countdown-card');
+    clearInterval(clockTimer);
+    const sr = $('#cd-sr'); if (sr) sr.textContent = '';
+    /* "Open now" only while there is something left to buy in it. */
+    const live = next ? null : liveDrop();
+    const hero = (html, href) => {
+      const chip = $('#hero-drop-chip');
+      if (chip && chip.parentElement) {
+        chip.parentElement.setAttribute('href', href);
+        chip.parentElement.innerHTML = html;
+      }
+    };
+
+    if (live && readyIn(live.half) > 0) {
+      const lt = toDate(live.opens);
+      card.classList.add('no-drop');
+      $('#cd-label').textContent = 'Open now';
+      $('#cd-name').textContent = live.name + ' ' + live.year;
+      $('#cd-when').textContent = live.blurb + ' Opened ' + fmtDate(lt) + ' at ' + fmtTime(lt) + '.';
+      if (sr) sr.textContent = live.name + ' drop is open now.';
+      hero(live.name + ' drop <span id="hero-drop-chip">open now</span>', '#shop');
+      return;
+    }
 
     /* Between drops: no date, no clock, just what is actually happening. */
     if (!next) {
@@ -595,8 +646,7 @@
       $('#cd-label').textContent = BETWEEN_DROPS.label;
       $('#cd-name').textContent = BETWEEN_DROPS.title;
       $('#cd-when').textContent = BETWEEN_DROPS.note;
-      const chip = $('#hero-drop-chip');
-      if (chip) chip.textContent = 'in progress';
+      hero('Next drop <span id="hero-drop-chip">in progress</span>', '#drops');
       return;
     }
 
@@ -605,12 +655,15 @@
     $('#cd-label').textContent = 'Next drop';
     $('#cd-name').textContent = next.name + ' ' + next.year;
     $('#cd-when').textContent = fmtDate(dt) + ' at ' + fmtTime(dt);
-    const made = PRODUCTS.filter(listed).reduce((n, p) => n + (p.made || p.stock || 0), 0);
+    /* Only this drop's pieces. With two halves listed, counting the whole
+       shop would roll the other half into this drop's total. */
+    const made = PRODUCTS.filter((p) => listed(p) && p.half === next.half)
+      .reduce((n, p) => n + (p.made || p.stock || 0), 0);
     const count = next.pieces || made;
     $('#cd-blurb').textContent = next.blurb +
       (count ? '  ' + count + ' pieces, and that is the whole run.' : '');
     tickClock(dt);
-    setInterval(() => tickClock(dt), 1000);
+    clockTimer = setInterval(() => tickClock(dt), 1000);
   }
 
   const pad = (n) => String(n).padStart(2, '0');
@@ -634,6 +687,13 @@
       openedLive = true;
       renderShop(); renderCats();
       if (window.SewTrue && window.SewTrue.render) window.SewTrue.render();
+      /* A quick view held open for the hour gets a live button too. */
+      if ($('#qv').getAttribute('aria-hidden') === 'false') {
+        const p = PRODUCTS.find((x) => x.sku === $('#qv-add').getAttribute('data-add'));
+        if (p) setQVAdd(p);
+      }
+      renderDrops();   /* also stops this clock */
+      return;
     }
     const sr = $('#cd-sr');
     if (sr && s === 0) sr.textContent = `${d} days, ${h} hours until the drop opens.`;
@@ -655,7 +715,8 @@
      ====================================================================== */
   function writeSchema() {
     const origin = SITE.url;
-    const items = PRODUCTS.filter(listed).map((p) => {
+    /* An offer with no price is not an offer; it joins once it is priced. */
+    const items = PRODUCTS.filter((p) => listed(p) && priced(p)).map((p) => {
       const shut = opensForHalf(p.half);
       const offer = {
         '@type': 'Offer',
@@ -679,7 +740,8 @@
       };
       if (p.photo) item.image = origin + '/assets/photos/' + p.photo + '.jpg';
       if (p.category === 'bows' && SIZES[p.size]) {
-        item.description = 'Handmade ' + SIZES[p.size].label.toLowerCase() + ' fabric door bow. One of one.';
+        item.description = 'Handmade ' + SIZES[p.size].label.toLowerCase() + ' fabric door bow. ' +
+          (p.made > 1 ? p.made + ' made.' : 'One of one.');
       } else if (size) {
         item.description = p.name + ' in ' + p.colour + ', size ' + size + '.';
       }
@@ -706,13 +768,24 @@
      QUICK VIEW
      ====================================================================== */
   let qvLast = null;
+  /* The quick view's button. Also called at the hour, so a quick view left
+     open across it does not keep a dead "Opens …" button. */
+  function setQVAdd(p) {
+    const add = $('#qv-add');
+    add.setAttribute('data-add', p.sku);
+    const shut = !openFor(p);
+    add.disabled = p.stock < 1 || shut || !priced(p);
+    add.textContent = p.stock < 1 ? 'Sold'
+      : (shut ? 'Opens ' + opensLabel(p.half)
+        : (priced(p) ? 'Add to basket' : 'Price coming soon'));
+  }
   function openQV(sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;
     const s = SIZES[p.size];
     qvLast = document.activeElement;
     $('#qv-art').innerHTML = window.bowMarkup(p, null, { full: true, sizes: '(max-width:1000px) 88vw, 400px' });
     $('#qv-name').textContent = p.name;
-    $('#qv-price').textContent = money(p.price);
+    $('#qv-price').textContent = priceText(p);
 
     /* Name, price, and how few there are. Nothing else — she would rather
        the photograph did the describing. */
@@ -720,14 +793,9 @@
     stock.textContent = p.stock < 1 ? 'Sold'
       : (p.category === 'sweatshirts'
         ? (p.colour + ' \u00b7 ' + APPAREL[p.apparel].label + (p.stock > 1 ? ' \u00b7 ' + p.stock + ' made' : ' \u00b7 one of one'))
-        : 'One of one');
+        : (p.made > 1 ? p.made + ' made \u00b7 ' + p.stock + ' left' : 'One of one'));
     stock.classList.toggle('low', p.stock > 0 && p.stock <= 2);
-    const add = $('#qv-add');
-    add.setAttribute('data-add', p.sku);
-    const shut = !openFor(p);
-    add.disabled = p.stock < 1 || shut;
-    add.textContent = p.stock < 1 ? 'Sold'
-      : (shut ? 'Opens ' + opensLabel(p.half) : 'Add to basket');
+    setQVAdd(p);
 
     $('#qv').setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -896,9 +964,9 @@
       if (v && v.group) { picked[v.group] = v.sku; renderShop(); }
       return;
     }
-    const cat = e.target.closest('[data-cat]');
-    if (cat) {
-      state.cat = cat.getAttribute('data-cat');
+    const tab = e.target.closest('[data-half]');
+    if (tab) {
+      state.half = tab.getAttribute('data-half');
       renderCats();
       renderShop();
       return;

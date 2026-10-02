@@ -41,6 +41,12 @@ function opensForHalf(half) {
 
 const CURRENCY = 'usd';
 const SHIPPING_CENTS = 600;   /* flat $6 anywhere in the US — SITE.shipping */
+
+/* Codes that take the shipping off. Checked here and only here, so the list
+   never reaches the browser. Matched ignoring case and spaces, so "Fall2026"
+   and "fall 2026" both work. Delete a code to end it. */
+const FREE_SHIPPING_CODES = ['FALL2026'];
+const cleanCode = (c) => (typeof c === 'string' ? c.replace(/\s+/g, '').toUpperCase().slice(0, 40) : '');
 /* A real basket is small. Keeping this tight also means one anonymous
    request cannot put a hold on the entire drop. */
 const MAX_LINES = 6;
@@ -85,7 +91,7 @@ function describe(p, size) {
   if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
   if (!size) return p.name;
   return size.label + (p.edition ? ' · No. ' + p.edition : '') +
-         ' · ' + size.w + '" across, ' + size.drop + '" drop';
+         (size.unconfirmed ? '' : ' · ' + size.w + '" across, ' + size.drop + '" drop');
 }
 
 module.exports = async function handler(req, res) {
@@ -106,6 +112,14 @@ module.exports = async function handler(req, res) {
   const lines = body && Array.isArray(body.lines) ? body.lines : null;
   if (!lines || !lines.length) return res.status(400).json({ error: 'The basket is empty.' });
   if (lines.length > MAX_LINES) return res.status(400).json({ error: 'That is too many items.' });
+
+  /* A code that is not ours is refused rather than ignored, so nobody pays
+     $6 they thought a code had taken off. */
+  const code = cleanCode(body.code);
+  const freeShipping = !!code && FREE_SHIPPING_CODES.indexOf(code) !== -1;
+  if (code && !freeShipping) {
+    return res.status(400).json({ error: 'That code is not one we have.', field: 'code' });
+  }
 
   /* ---- price it from our own catalogue, never from theirs -------------- */
   const items = [];
@@ -152,10 +166,13 @@ module.exports = async function handler(req, res) {
     const qty = Math.floor(Number(line.qty));
     if (!Number.isFinite(qty) || qty < 1) return res.status(400).json({ error: 'Bad quantity.' });
     if (qty > product.stock) {
+      /* sku and left so the basket can correct the line, not just complain. */
       return res.status(409).json({
         error: product.stock < 1
           ? product.name + ' has sold.'
           : 'Only ' + product.stock + ' of ' + product.name + ' exists.',
+        sku: product.sku,
+        left: Math.max(0, product.stock),
       });
     }
 
@@ -180,6 +197,7 @@ module.exports = async function handler(req, res) {
             ? i.product.name + ' has just gone.'
             : 'Only ' + left + ' of ' + i.product.name + ' is left.',
           sku: i.product.sku,
+          left: Math.max(0, left),
         });
       }
     }
@@ -205,8 +223,8 @@ module.exports = async function handler(req, res) {
     shipping_options: [{
       shipping_rate_data: {
         type: 'fixed_amount',
-        display_name: 'US shipping',
-        fixed_amount: { amount: SHIPPING_CENTS, currency: CURRENCY },
+        display_name: freeShipping ? 'Free US shipping (code ' + code + ')' : 'US shipping',
+        fixed_amount: { amount: freeShipping ? 0 : SHIPPING_CENTS, currency: CURRENCY },
       },
     }],
     phone_number_collection: { enabled: true },
@@ -220,6 +238,8 @@ module.exports = async function handler(req, res) {
          session does not block their retry. */
       client: client || '',
       basket: items.map((i) => i.product.sku + ' x' + i.qty).join(', '),
+      /* The code used, if any, so a $0 shipping line explains itself. */
+      code: freeShipping ? code : '',
     },
 
     line_items: items.map((i) => ({
@@ -230,8 +250,10 @@ module.exports = async function handler(req, res) {
         product_data: {
           name: i.product.name,
           description: describe(i.product, i.size),
+          /* The card crop exists for every photographed piece; the old
+             'bow-…-560' path was from the summer photos and 404s now. */
           images: i.product.photo
-            ? [PUBLIC_ORIGIN + '/assets/photos/bow-' + i.product.photo + '-560.jpg']
+            ? [PUBLIC_ORIGIN + '/assets/photos/' + i.product.photo + '-card.jpg']
             : undefined,
           metadata: { sku: i.product.sku },
         },
@@ -275,4 +297,4 @@ module.exports = async function handler(req, res) {
 
 /* Exposed so the pricing and validation can be exercised offline, with no
    key and no network call. */
-module.exports.__test = { form, describe, PRODUCTS, SIZES, SHIPPING_CENTS, MAX_LINES };
+module.exports.__test = { form, describe, PRODUCTS, SIZES, SHIPPING_CENTS, MAX_LINES, FREE_SHIPPING_CODES, cleanCode };

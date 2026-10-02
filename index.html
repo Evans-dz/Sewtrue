@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sew True · Handmade bows, sewn one at a time</title>
-<meta name="description" content="Handmade fabric door bows, sweatshirts and small goods, sewn one at a time and sold in seasonal drops. Every piece is one of one. Flat $6 US shipping.">
+<meta name="description" content="Handmade fabric door bows, sweatshirts and small goods, sewn one at a time and sold in seasonal drops. Most pieces are one of one. Flat $6 US shipping.">
 <meta name="theme-color" content="#14110f">
 <link rel="canonical" href="https://sewtrue.shop/">
 <meta property="og:title" content="Sew True · Handmade fabric door bows">
-<meta property="og:description" content="Fabric door bows cut from real cloth and finished by hand. Sold in seasonal drops, one of each.">
+<meta property="og:description" content="Fabric door bows cut from real cloth and finished by hand. Sold in seasonal drops, never remade.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sewtrue.shop/">
 <meta property="og:site_name" content="Sew True">
@@ -50,7 +50,7 @@
       "url": "https://sewtrue.shop/",
       "logo": "https://sewtrue.shop/assets/logo@2x.png",
       "image": "https://sewtrue.shop/assets/og.jpg",
-      "description": "Handmade fabric door bows, sweatshirts and small goods, sewn one at a time and sold in seasonal drops. Every piece is one of one.",
+      "description": "Handmade fabric door bows, sweatshirts and small goods, sewn one at a time and sold in seasonal drops. Most pieces are one of one.",
       "email": "sewtrue26@gmail.com",
       "areaServed": { "@type": "Country", "name": "United States" },
       "hasMerchantReturnPolicy": {
@@ -402,8 +402,8 @@
       </article>
       <article class="beat reveal">
         <p class="beat-no">02</p>
-        <h3>One of one, every piece</h3>
-        <p>No two are the same. Each is made once, from cloth there is no more of, and when it sells it is finished for good.</p>
+        <h3>Never made again</h3>
+        <p>Almost every piece is one of one. Each is cut from cloth there is no more of, and when it sells it is finished for good.</p>
       </article>
       <article class="beat reveal">
         <p class="beat-no">03</p>
@@ -436,16 +436,17 @@
 <!-- ===================== SHOP ===================== -->
 <section class="section" id="shop">
   <header class="sec-head">
-    <p class="eyebrow reveal">Halloween 2026</p>
+    <p class="eyebrow reveal">Fall 2026</p>
     <h2 class="display xl"><span class="wipe">The drop.</span></h2>
     <p class="lede reveal">What is here is what exists. Nothing is reprinted, nothing is backordered.</p>
   </header>
 
-  <!-- The whole line. Categories come from CATEGORIES in catalog.js; the ones
-       with no stock yet render a coming-soon shelf instead of an empty grid. -->
-  <div class="cats" id="cats" role="tablist" aria-label="Shop by line"></div>
+  <!-- One tab per drop, from SHOP.halves and DROPS in config.js. A drop that
+       has sold out renders an "all gone" shelf instead of an empty grid. -->
+  <div class="cats" id="cats" role="tablist" aria-label="Shop by drop"></div>
 
-  <p class="drop-tag" id="drop-tag">Halloween drop</p>
+  <!-- The open tab's blurb from DROPS; main.js rewrites this on every switch. -->
+  <p class="drop-tag" id="drop-tag">Rust, wheat and flannel. Warm checks for a cooling porch.</p>
 
   <p class="shop-count" id="shop-count" aria-live="polite"></p>
   <div class="grid" id="shop-grid"></div>
@@ -512,8 +513,8 @@
   <div class="qa">
     <details class="q"><summary>Returns</summary>
       <p><strong>Every piece is final sale.</strong> No returns and no exchanges.
-      Each bow is one of one, cut and sewn by hand for this drop, so there is no
-      second one to swap it for and nothing to put back on the shelf.</p>
+      Each bow is cut and sewn by hand for this drop and never remade, so there
+      is nothing to swap it for and nothing to put back on the shelf.</p>
       <p>If a piece turns up damaged or is not what the listing said it was,
       that is a different matter: <a data-site="mail-link" href="mailto:sewtrue26@gmail.com">email us</a>
       within 7 days with a photograph and we will put it right.
@@ -583,6 +584,10 @@
     <div class="basket-foot" id="basket-foot" hidden>
       <div class="basket-total"><span>Subtotal</span><span id="basket-subtotal">$0</span></div>
       <p class="note" data-site="taxnote"></p>
+      <!-- Checked by api/checkout.js, which holds the codes; the page never sees the list. -->
+      <label class="basket-code">Have a code?
+        <input id="basket-code" name="code" autocomplete="off" autocapitalize="characters"
+          spellcheck="false" maxlength="40" placeholder="Optional"></label>
       <button class="btn btn-solid wide" type="button" id="basket-checkout-btn">Checkout</button>
       <p class="note" id="basket-mode-note"></p>
     </div>

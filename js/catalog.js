@@ -15,7 +15,9 @@
    ONE OF ONE. Every bow is a different bow — no two are the same, and when one
    sells it is finished for good. That is why each has its own SKU and a stock
    of 1 rather than a quantity. Sweatshirts are the exception: two of every
-   size in every colour, so those carry a real count.
+   size in every colour, so those carry a real count. So are the two Fall bows
+   she made twice (Fawn, Doe); the shop says "2 made" for those, not "one of
+   one".
    ========================================================================= */
 
 /* -- Bow sizes ------------------------------------------------------------
@@ -29,8 +31,10 @@ const SIZES = {
   'mega':           { label: 'Mega',         w: 18, drop: 28, layers: 1, order: 4 },
   /* A bound edge rather than a second layer — a different make, not a double.
      TODO(client): confirm the width and drop. These two numbers are guesses
-     carried over from the Mega and are the only invented figures in here. */
-  'mega-bound':     { label: 'Mega Bound',   w: 18, drop: 28, layers: 1, bound: true, order: 5 },
+     carried over from the Mega and are the only invented figures in here.
+     `unconfirmed` keeps them off the Stripe page and receipt until they are
+     real; delete it once she has measured one. */
+  'mega-bound':     { label: 'Mega Bound',   w: 18, drop: 28, layers: 1, bound: true, order: 5, unconfirmed: true },
   'mega-double':    { label: 'Mega Double',  w: 20, drop: 30, layers: 2, order: 6 },
 };
 
@@ -62,6 +66,39 @@ const CATEGORIES = [
    genuinely individual — "No. 3 of 8" is a fact, not decoration.
 -------------------------------------------------------------------------- */
 const PRODUCTS = [
+  /* ---------- Fall bows ----------
+     First in the list, so first in the grid: Fall is the drop being launched.
+     Photographed on the same door and wreath as Halloween, cropped the same.
+     Names, sizes and prices confirmed by the shop on the review sheet,
+     2 October 2026.
+
+     Fawn and Doe were made twice each, identical, so like the garland they
+     are one listing with a count of 2 rather than two cards of the same bow.
+     No `edition` on these: she never numbered them, and "No. 2 of 2" on both
+     of Doe's receipts would not be true. The basket and receipt show the size. */
+  { sku: 'FA-REG-1', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Hayride', photo: 'fall/fa-01', price: 80, stock: 1 },
+  { sku: 'FA-REG-2', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Homespun', photo: 'fall/fa-02', price: 60, stock: 1 },
+  { sku: 'FA-REG-3', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Farmhouse', photo: 'fall/fa-03', price: 100, stock: 1 },
+  { sku: 'FA-REG-4', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Goldenrod', photo: 'fall/fa-04', price: 120, stock: 1 },
+  { sku: 'FA-MBD-1', category: 'bows', size: 'mega-bound', half: 'fall',
+    name: 'Fireside', photo: 'fall/fa-05', price: 120, stock: 1 },
+  { sku: 'FA-REG-5', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Fawn', photo: 'fall/fa-06', price: 80, stock: 2 },
+  { sku: 'FA-REG-6', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Flannel', photo: 'fall/fa-07', price: 100, stock: 1 },
+  { sku: 'FA-REG-7', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Prairie', photo: 'fall/fa-08', price: 100, stock: 1 },
+  { sku: 'FA-REG-8', category: 'bows', size: 'regular', half: 'fall',
+    name: 'Cobblestone', photo: 'fall/fa-09', price: 80, stock: 1 },
+  { sku: 'FA-MIN-1', category: 'bows', size: 'mini', half: 'fall',
+    name: 'Pebble', photo: 'fall/fa-10', price: 50, stock: 1 },
+  { sku: 'FA-MBD-2', category: 'bows', size: 'mega-bound', half: 'fall',
+    name: 'Doe', photo: 'fall/fa-11', price: 100, stock: 2 },
+
   /* ---------- Halloween bows ---------- */
   { sku: 'HW-REG-1', category: 'bows', size: 'regular', half: 'halloween',
     name: 'Harlequin', edition: '1 of 8', photo: 'halloween/hw-04', price: 80, stock: 1 },

@@ -21,9 +21,11 @@
     try {
       const raw = JSON.parse(localStorage.getItem(KEY) || '[]');
       if (!Array.isArray(raw)) return [];
-      // Drop anything that no longer exists in the catalog.
-      return raw.filter((l) => l && PRODUCTS.some((p) => p.sku === l.sku))
-                .map((l) => ({ sku: l.sku, qty: Math.max(1, Math.min(99, +l.qty || 1)) }));
+      // Drop anything that no longer exists or has been marked sold in the
+      // catalog, and never hold more than were made.
+      const of = (sku) => PRODUCTS.find((p) => p.sku === sku);
+      return raw.filter((l) => l && of(l.sku) && of(l.sku).stock > 0)
+                .map((l) => ({ sku: l.sku, qty: Math.max(1, Math.min(of(l.sku).stock, +l.qty || 1)) }));
     } catch (e) { return []; }
   }
   function save() {
@@ -38,12 +40,17 @@
   function lineMeta(p) {
     if (p.category === 'sweatshirts') return p.colour + ' · ' + APPAREL[p.apparel].label;
     const s = SIZES[p.size];
+    /* Small goods have no size. Reading `.label` off nothing threw here, which
+       left the drawer saying "empty" at $0 with the garland in it. */
+    if (!s) return (CATEGORIES.find((c) => c.id === p.category) || {}).label || '';
     return s.label + (p.edition ? ' · No. ' + p.edition : '');
   }
   const subtotal = () => lines.reduce((n, l) => n + product(l.sku).price * l.qty, 0);
 
   function add(sku, qty) {
-    const p = product(sku); if (!p || p.stock < 1) return false;
+    const p = product(sku);
+    /* No price yet means not for sale yet, whatever the button said. */
+    if (!p || p.stock < 1 || !(Number.isFinite(p.price) && p.price > 0)) return false;
     const line = lines.find((l) => l.sku === sku);
     const want = (line ? line.qty : 0) + (qty || 1);
     if (want > p.stock) {
@@ -174,11 +181,15 @@
   }
   window.SewTrueClient = clientId;
 
+  /* Whatever is in the code box. The server decides whether it is real. */
+  const typedCode = () => { const el = $('#basket-code'); return el ? el.value.trim() : ''; };
+
   function stripeCheckout() {
     const btn = $('#basket-checkout-btn'); btn.disabled = true; btn.textContent = 'Opening checkout…';
     fetch(CHECKOUT.stripeEndpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client: clientId(), lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })) }),
+      body: JSON.stringify({ client: clientId(), code: typedCode(),
+        lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })) }),
     })
       .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, status: r.status, d })))
       .then(({ ok, status, d }) => {
@@ -197,13 +208,33 @@
           }
           return;
         }
+        /* A code that is not real. Say so plainly; this is not a reason to
+           offer the email fallback. */
+        if (status === 400 && d && d.field === 'code') {
+          const err = $('#checkout-error');
+          if (err) {
+            err.hidden = false;
+            err.innerHTML = '<p>' + d.error + '</p>' +
+              '<p>Check the spelling, or clear the box to check out without it.</p>';
+          }
+          const el = $('#basket-code');
+          if (el) {
+            /* Tie the message to the box so a screen reader reads it on focus. */
+            el.setAttribute('aria-invalid', 'true');
+            el.setAttribute('aria-describedby', 'checkout-error');
+            el.focus();
+          }
+          return;
+        }
         if (status === 409) {
-          if (d && d.sku) remove(d.sku);
+          /* A bow made twice can have one left: keep that one in the basket. */
+          const keep = d && d.sku && d.left > 0;
+          if (d && d.sku) { if (keep) setQty(d.sku, d.left); else remove(d.sku); }
           const err = $('#checkout-error');
           if (err) {
             err.hidden = false;
             err.innerHTML = `<p>${(d && d.error) || 'One of those has just gone.'}</p>
-              <p>It has been taken out of your basket. Everything else is still yours.</p>`;
+              <p>${keep ? 'Your basket now has ' + d.left + '.' : 'It has been taken out of your basket.'} Everything else is still yours.</p>`;
           }
           if (window.SewTrueSyncStock) window.SewTrueSyncStock();
           return;
@@ -218,9 +249,11 @@
 
   function showError(msg) {
     const err = $('#checkout-error'); if (!err) return;
-    const body = encodeURIComponent(`Order ${orderCode()}\n\n${orderSummary()}\n\nSubtotal ${money(subtotal())}`);
+    const code = typedCode();
+    const body = encodeURIComponent(`Order ${orderCode()}\n\n${orderSummary()}\n\nSubtotal ${money(subtotal())}` +
+      (code ? `\nCode: ${code}` : ''));
     err.hidden = false;
-    err.innerHTML = `<p>${msg}</p><p>Nothing was lost. <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Bow order')}&body=${body}">send this basket by email instead</a> and we'll pick it up from there.</p>`;
+    err.innerHTML = `<p>${msg}</p><p>Nothing was lost. <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Bow order')}&body=${body}">Send this basket by email instead</a> and we'll pick it up from there.</p>`;
   }
 
   function submitOrder(e) {
@@ -283,6 +316,14 @@
   }
 
   /* -- wiring ------------------------------------------------------------- */
+  /* Typing a new code clears the complaint about the last one. */
+  document.addEventListener('input', (e) => {
+    if (e.target.id !== 'basket-code' || !e.target.hasAttribute('aria-invalid')) return;
+    e.target.removeAttribute('aria-invalid');
+    e.target.removeAttribute('aria-describedby');
+    const err = $('#checkout-error'); if (err) err.hidden = true;
+  });
+
   document.addEventListener('click', (e) => {
     const openBtn = e.target.closest('.basket-btn');
     if (openBtn) { e.preventDefault(); open(); return; }
