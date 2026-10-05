@@ -441,6 +441,9 @@
     <p class="lede reveal">What is here is what exists. Nothing is reprinted, nothing is backordered.</p>
   </header>
 
+  <!-- Shown while CHECKOUT.paused is true in config.js; main.js fills it. -->
+  <p class="paused" id="shop-paused" role="status" hidden></p>
+
   <!-- One tab per drop, from SHOP.halves and DROPS in config.js. A drop that
        has sold out renders an "all gone" shelf instead of an empty grid. -->
   <div class="cats" id="cats" role="tablist" aria-label="Shop by drop"></div>
@@ -632,6 +635,8 @@
       <p class="qv-price" id="qv-price"></p>
       <p class="qv-stock" id="qv-stock"></p>
       <button class="btn btn-solid wide" type="button" id="qv-add">Add to basket</button>
+      <!-- Takes the button's place while card checkout is paused. -->
+      <a class="btn btn-solid wide" id="qv-mail" hidden>Email to order</a>
     </div>
   </article>
 </div>

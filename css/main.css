@@ -172,6 +172,11 @@ html.js .reveal{opacity:0;transform:translateY(14px)}
 
 /* -- shop grid ------------------------------------------------------------ */
 .filters{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
+/* Card checkout paused (CHECKOUT.paused): a label strip between hairlines,
+   like .tape, so it reads as a notice and not an error. */
+.paused{max-width:62ch;margin:0 0 clamp(26px,3.4vw,40px);padding:14px 0;border-top:1px solid var(--rule-2);
+  border-bottom:1px solid var(--rule-2);font-size:clamp(.98rem,1.15vw,1.08rem);line-height:1.55;color:var(--ink)}
+.paused a{text-underline-offset:3px;overflow-wrap:anywhere}
 .shop-count{font-size:clamp(.82rem,.95vw,.9rem);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 22px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:clamp(16px,2vw,26px)}
 .card{position:relative;background:var(--paper-2);padding:14px 14px 16px;text-align:left;border:0;

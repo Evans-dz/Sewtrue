@@ -201,6 +201,14 @@ const EARLY_ACCESS = null;
 const CHECKOUT = {
   mode: 'stripe',             // 'request' | 'stripe'
 
+  /* CARD CHECKOUT PAUSED (5 Oct 2026, while Stripe reviews the account).
+     While true nothing is sent to Stripe: every buy button becomes an email
+     to SITE.email with the piece named in it, the basket sends its order by
+     email, and api/checkout.js refuses too. `{email}` in the note becomes a
+     link to SITE.email. Set paused back to false to sell by card again. */
+  paused: true,
+  pausedNote: 'Card checkout is paused for now. To order, email Sew True at {email} with the name of the bow you want.',
+
   /* NOTHING CAN BE BOUGHT until the drop opens. The shop is still on show —
      people can look at what is coming — but every buy button is shut and the
      server refuses a checkout before the hour.

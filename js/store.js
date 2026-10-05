@@ -103,6 +103,12 @@
       return;
     }
     $('#basket-foot').hidden = false;
+    /* Paused: no code to type and no card to take, so the button says what
+       it will actually do. */
+    if (CHECKOUT.paused) {
+      const code = $('.basket-code'); if (code) code.hidden = true;
+      const btn = $('#basket-checkout-btn'); if (btn) btn.textContent = 'Email this order';
+    }
     body.innerHTML = lines.map((l) => {
       const p = product(l.sku); const s = SIZES[p.size];
       return `<article class="line" data-sku="${p.sku}">
@@ -160,6 +166,14 @@
         }
         return;
       }
+    }
+    /* Card checkout paused: a basket saved before the pause still goes to
+       the shop, by email, with every piece in it named. */
+    if (CHECKOUT.paused) {
+      const body = encodeURIComponent('Hi Sew True,\n\nI would like to order:\n\n' +
+        `${orderSummary()}\n\nSubtotal ${money(subtotal())}\n\n`);
+      window.location.href = `mailto:${SITE.email}?subject=${encodeURIComponent('Order')}&body=${body}`;
+      return;
     }
     if (CHECKOUT.mode === 'stripe' && CHECKOUT.stripeEndpoint) return stripeCheckout();
     $('#basket-main').hidden = true;

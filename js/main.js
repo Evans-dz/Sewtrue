@@ -105,9 +105,34 @@
     $$('[data-site="credit"]').forEach((el) => { el.textContent = SITE.credit.label; el.href = SITE.credit.url; });
     const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
     const note = $('#basket-mode-note');
-    if (note) note.textContent = CHECKOUT.mode === 'stripe'
-      ? 'Card payment, secured by Stripe.'
-      : 'No card needed here. The order comes straight to the shop.';
+    if (note) note.textContent = CHECKOUT.paused
+      ? 'Card checkout is paused for now. This sends your order to the shop by email.'
+      : (CHECKOUT.mode === 'stripe'
+        ? 'Card payment, secured by Stripe.'
+        : 'No card needed here. The order comes straight to the shop.');
+    const paused = $('#shop-paused');
+    if (paused && CHECKOUT.paused) {
+      const parts = CHECKOUT.pausedNote.split('{email}');
+      paused.textContent = parts[0];
+      if (parts.length > 1) {
+        const a = document.createElement('a');
+        a.href = 'mailto:' + SITE.email;
+        a.textContent = SITE.email;
+        paused.append(a, parts.slice(1).join(SITE.email));
+      }
+      paused.hidden = false;
+    }
+  }
+
+  /* While card checkout is paused, a buy button is an email with the piece
+     already named, so she knows exactly which one is being asked for. A
+     sweatshirt carries its size, because several share a name. */
+  function orderMail(p) {
+    const what = p.name + (p.category === 'sweatshirts' ? ', ' + APPAREL[p.apparel].label : '');
+    return 'mailto:' + SITE.email +
+      '?subject=' + encodeURIComponent('Order: ' + what) +
+      '&body=' + encodeURIComponent('Hi Sew True,\n\nI would like to order ' + what +
+        ' (' + money(p.price) + ').\n\n');
   }
 
   /* ======================================================================
@@ -496,9 +521,11 @@
         ? `<p class="note card-add">${p.made > 1 ? 'Gone. Every one has sold.' : 'Gone. There was only ever one.'}</p>`
         : (!openFor(p)
           ? `<p class="note card-add">Opens ${opensLabel(p.half)}</p>`
-          : (priced(p)
-            ? `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`
-            : `<p class="note card-add">Price coming soon</p>`))}
+          : (!priced(p)
+            ? `<p class="note card-add">Price coming soon</p>`
+            : (CHECKOUT.paused
+              ? `<a class="btn btn-quiet card-add" href="${orderMail(p)}">Email to order</a>`
+              : `<button class="btn btn-quiet card-add" type="button" data-add="${p.sku}">Add to basket</button>`)))}
     </article>`;
   }
 
@@ -778,6 +805,14 @@
     add.textContent = p.stock < 1 ? 'Sold'
       : (shut ? 'Opens ' + opensLabel(p.half)
         : (priced(p) ? 'Add to basket' : 'Price coming soon'));
+    /* Paused: the email link stands in for a button that would sell. */
+    const mail = $('#qv-mail');
+    const byMail = !!CHECKOUT.paused && !add.disabled;
+    add.hidden = byMail;
+    if (mail) {
+      mail.hidden = !byMail;
+      if (byMail) mail.href = orderMail(p);
+    }
   }
   function openQV(sku) {
     const p = PRODUCTS.find((x) => x.sku === sku); if (!p) return;

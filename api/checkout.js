@@ -100,6 +100,12 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'POST only.' });
   }
 
+  /* Card checkout paused in config.js. The page already sends orders by
+     email; this stops anything posting here directly from reaching Stripe. */
+  if (CHECKOUT.paused) {
+    return res.status(503).json({ error: 'Card checkout is paused for now.' });
+  }
+
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
     /* Loud in the logs, vague to the customer. */
