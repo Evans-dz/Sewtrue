@@ -138,7 +138,7 @@ const PRODUCTS = [
   { sku: 'HW-SW-BOO-GREY-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
     name: 'BOO Sweatshirt', colour: 'Grey', photo: 'hoodies/boo-grey', price: 60, stock: 0 },
   { sku: 'HW-SW-BOO-PURP-M', category: 'sweatshirts', apparel: 'm', half: 'halloween',
-    name: 'BOO Sweatshirt', colour: 'Charcoal, purple O', photo: 'hoodies/boo-black', price: 60, stock: 1 },
+    name: 'BOO Sweatshirt', colour: 'Charcoal, purple O', photo: 'hoodies/boo-black', price: 60, stock: 0 },
   { sku: 'HW-SW-BOO-HOOD-S', category: 'sweatshirts', apparel: 's', half: 'halloween',
     name: 'BOO Hoodie', colour: 'Grey', photo: 'hoodies/boo-hoodie', price: 65, stock: 1 },
   { sku: 'HW-SW-GH-STR-XL', category: 'sweatshirts', apparel: 'xl', half: 'halloween',
